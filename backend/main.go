@@ -7,6 +7,12 @@ import (
 )
 
 func main() {
+
+	ws.InitDB()
+	for _, p := range ws.LoadPartiesFromSupabase() {
+		ws.AddParty(p)
+	}
+
 	http.HandleFunc("/ws", ws.HandleConnections)
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

@@ -24,12 +24,6 @@ func generateID() string {
 	return string(b)
 }
 
-func AddParty(p *Party) {
-	partyLock.Lock()
-	defer partyLock.Unlock()
-	parties[p.ID] = p
-}
-
 func GetParties() []*Party {
 	partyLock.Lock()
 	defer partyLock.Unlock()
@@ -40,10 +34,18 @@ func GetParties() []*Party {
 	return list
 }
 
+func AddParty(p *Party) {
+	partyLock.Lock()
+	defer partyLock.Unlock()
+	parties[p.ID] = p
+	go SavePartyToSupabase(p)
+}
+
 func RemoveParty(id string) {
 	partyLock.Lock()
 	defer partyLock.Unlock()
 	delete(parties, id)
+	go RemovePartyFromSupabase(id)
 }
 
 func UpdatePartyJoined(id string) {
