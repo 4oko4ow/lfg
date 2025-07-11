@@ -6,7 +6,8 @@ import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
 
-const gameOptions = ["Все", "Dota 2", "CS2", "Apex Legends", "LoL"];
+const gameOptions = ["Все","Dota 2", "CS2", "PEAK", "R.E.P.O"];
+
 
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
