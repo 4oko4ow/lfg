@@ -61,7 +61,7 @@ func StartPartyCleanupLoop() {
 		now := time.Now()
 		partyLock.Lock()
 		for id, p := range parties {
-			if now.Sub(p.CreatedAt) > 30*time.Minute {
+			if now.Sub(p.CreatedAt) > 5*time.Hour {
 				delete(parties, id)
 				Broadcast(Message{Type: "party_remove", Payload: map[string]string{"id": id}})
 			}
