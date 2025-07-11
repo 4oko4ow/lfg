@@ -2,7 +2,7 @@ import { useState } from "react";
 import { sendCreateParty } from "../ws/client";
 import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
 
-const games = ["Dota 2", "CS2", "Apex Legends", "LoL"];
+const games = ["Dota 2", "CS2", "PEAK", "R.E.P.O"];
 
 export default function CreatePartyForm() {
   const [game, setGame] = useState(games[0]);
