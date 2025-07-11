@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import PartyCard from "./components/PartyCard";
 import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
+import FeedbackButton from "./components/FeedbackButton";
 
 const gameOptions = ["Все", "Dota 2", "CS2", "Apex Legends", "LoL"];
 
@@ -73,7 +74,9 @@ function App() {
           </div>
         )}
       </div>
+      <FeedbackButton />
     </div>
+    
   );
 }
 
