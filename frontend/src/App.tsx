@@ -5,8 +5,10 @@ import PartyCard from "./components/PartyCard";
 import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
+import { Analytics } from "@vercel/analytics/next"
 
-const gameOptions = ["Все","Dota 2", "CS2", "PEAK", "R.E.P.O"];
+
+const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O"];
 
 
 function App() {
@@ -76,8 +78,9 @@ function App() {
         )}
       </div>
       <FeedbackButton />
+      <Analytics />
     </div>
-    
+
   );
 }
 
