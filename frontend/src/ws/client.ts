@@ -10,7 +10,7 @@ const listeners: ((msg: Message) => void)[] = [];
  * Устанавливает WebSocket-подключение и обрабатывает события
  */
 export function connectWS() {
-  socket = new WebSocket("ws://localhost:8080/ws");
+  socket = new WebSocket("ws://lfg.fly.dev/ws");
 
   socket.onmessage = (event) => {
     try {
