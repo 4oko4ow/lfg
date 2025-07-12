@@ -7,7 +7,7 @@ import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
 
 
-const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O","PUBG"];
+const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft"];
 
 
 function App() {
@@ -36,10 +36,11 @@ function App() {
     });
   }, []);
 
-  const filteredParties =
+  const filteredParties = (
     filter === "Все"
       ? parties
-      : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase());
+      : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
+  ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="p-6 max-w-3xl mx-auto text-white">
