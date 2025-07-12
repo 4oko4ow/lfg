@@ -10,7 +10,8 @@ func main() {
 
 	ws.InitDB()
 	for _, p := range ws.LoadPartiesFromSupabase() {
-		ws.AddParty(p)
+
+		ws.AddParty(p, false) // не сохраняем обратно
 	}
 
 	http.HandleFunc("/ws", ws.HandleConnections)

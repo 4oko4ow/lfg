@@ -34,11 +34,13 @@ func GetParties() []*Party {
 	return list
 }
 
-func AddParty(p *Party) {
+func AddParty(p *Party, save bool) {
 	partyLock.Lock()
 	defer partyLock.Unlock()
 	parties[p.ID] = p
-	go SavePartyToSupabase(p)
+	if save {
+		go SavePartyToSupabase(p)
+	}
 }
 
 func RemoveParty(id string) {

@@ -59,7 +59,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 				Contact:   payload.Contact,
 			}
 
-			AddParty(p)
+			AddParty(p, true)
 			Broadcast(Message{Type: "new_party", Payload: p})
 
 		case "join_party":
@@ -83,6 +83,7 @@ func parsePayload(payload interface{}, v interface{}) error {
 
 func sendInitialState(ws *websocket.Conn) {
 	initial := GetParties()
+
 	ws.WriteJSON(Message{
 		Type:    "initial_state",
 		Payload: initial,

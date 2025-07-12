@@ -11,6 +11,8 @@ const listeners: ((msg: Message) => void)[] = [];
  */
 export function connectWS() {
   socket = new WebSocket("wss://lfg.fly.dev/ws");
+    // socket = new WebSocket("ws://localhost:8080/ws");
+
 
   socket.onmessage = (event) => {
     try {
