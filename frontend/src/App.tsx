@@ -7,7 +7,7 @@ import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
 
 
-const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft","Tarkov"];
+const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft","Tarkov","7 Days to Die","Goose Goose Duck"];
 
 
 function App() {
