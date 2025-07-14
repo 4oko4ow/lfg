@@ -6,14 +6,18 @@ import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
 import { analytics } from "./utils/analytics";
+import ContactModal from "./components/ContactModal";
 
 
-const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft","Tarkov","7 Days to Die","Goose Goose Duck"];
+const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft", "Tarkov", "7 Days to Die", "Goose Goose Duck"];
 
 
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
+  const [contactModal, setContactModal] = useState<string | null>(null);
+
+  const handleCloseModal = () => setContactModal(null);
 
   useEffect(() => {
     connectWS();
@@ -35,6 +39,7 @@ function App() {
           break;
       }
     });
+    analytics.enableAutoPageviews();
   }, []);
 
   const filteredParties = (
@@ -72,7 +77,7 @@ function App() {
 
       <div className="space-y-4">
         {filteredParties.map((party) => (
-          <PartyCard key={party.id} party={party} />
+          <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
         ))}
 
         {filteredParties.length === 0 && (
@@ -82,6 +87,10 @@ function App() {
         )}
       </div>
       <FeedbackButton />
+
+      {contactModal && (
+        <ContactModal contact={contactModal} onClose={handleCloseModal} />
+      )}
     </div>
 
   );

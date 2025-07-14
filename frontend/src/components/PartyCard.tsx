@@ -1,3 +1,4 @@
+// PartyCard.tsx
 import type { Party } from "../types";
 import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
 import { analytics } from "../utils/analytics";
@@ -9,12 +10,18 @@ function timeAgo(isoDate: string): string {
   return `${Math.floor(diff / 3600)} ч назад`;
 }
 
-export default function PartyCard({ party }: { party: Party }) {
+export default function PartyCard({
+  party,
+  onJoin,
+}: {
+  party: Party;
+  onJoin: (contact: string) => void;
+}) {
   const isFull = party.joined >= party.slots;
 
   const handleJoinClick = () => {
     analytics.joinPartyClick(party.game);
-    alert(`Свяжитесь с игроком: ${party.contact || "контакт не указан"}`);
+    onJoin(party.contact || "");
   };
 
   return (
