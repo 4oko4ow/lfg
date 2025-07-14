@@ -1,5 +1,6 @@
 import type { Party } from "../types";
 import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
+import { analytics } from "../utils/analytics";
 
 function timeAgo(isoDate: string): string {
   const diff = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
@@ -12,6 +13,7 @@ export default function PartyCard({ party }: { party: Party }) {
   const isFull = party.joined >= party.slots;
 
   const handleJoinClick = () => {
+    analytics.joinPartyClick(party.game);
     alert(`Свяжитесь с игроком: ${party.contact || "контакт не указан"}`);
   };
 
