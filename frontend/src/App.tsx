@@ -5,6 +5,7 @@ import PartyCard from "./components/PartyCard";
 import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
+import { analytics } from "./utils/analytics";
 
 
 const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft","Tarkov","7 Days to Die","Goose Goose Duck"];
@@ -55,7 +56,10 @@ function App() {
         {gameOptions.map((g) => (
           <button
             key={g}
-            onClick={() => setFilter(g)}
+            onClick={() => {
+              setFilter(g)
+              analytics.filterSelect(g);
+            }}
             className={`px-4 py-1.5 text-sm rounded-lg border transition-all ${filter === g
               ? "bg-blue-600 text-white border-blue-600"
               : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"

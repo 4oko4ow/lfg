@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { sendCreateParty } from "../ws/client";
 import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
+import { analytics } from "../utils/analytics";
 
 const games = ["Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG","Minecraft","Tarkov","7 Days to Die","Goose Goose Duck"];
 
@@ -13,6 +14,7 @@ export default function CreatePartyForm() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!goal.trim()) return;
+        analytics.createPartySubmit(game);
         sendCreateParty({ game, goal, slots, contact });
         setGoal("");
         setContact("");
