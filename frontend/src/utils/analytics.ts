@@ -23,6 +23,11 @@ export const analytics = {
   filterSelect: (game: string) =>
     plausibleClient.trackEvent("filter_game", { props: { game } }),
 
+  contactCopy: () =>
+    plausibleClient.trackEvent("contact_copy"),
+  contactClose: () =>
+    plausibleClient.trackEvent("contact_close"),
+
   feedbackClick: () =>
     plausibleClient.trackEvent("feedback_click"),
 };

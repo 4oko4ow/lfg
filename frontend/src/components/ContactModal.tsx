@@ -1,6 +1,7 @@
 // components/ContactModal.tsx
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { analytics } from "../utils/analytics";
 
 export default function ContactModal({
     contact,
@@ -16,8 +17,10 @@ export default function ContactModal({
     }, [onClose]);
 
     const handleCopy = async () => {
+        analytics.contactCopy();
         try {
             await navigator.clipboard.writeText(contact);
+
             toast.success(`Контакт скопирован`, {
                 duration: 5000,
             });
@@ -41,7 +44,10 @@ export default function ContactModal({
                         Скопировать
                     </button>
                     <button
-                        onClick={onClose}
+                        onClick={() => {
+                            analytics.contactClose();
+                            onClose
+                        }}
                         className="px-4 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-sm rounded"
                     >
                         Закрыть
