@@ -24,6 +24,7 @@ export default function ContactModal({
             toast.success(`Контакт скопирован`, {
                 duration: 5000,
             });
+            onClose
         } catch {
             toast.error(`Не удалось скопировать`, {
                 duration: 5000,
@@ -44,10 +45,7 @@ export default function ContactModal({
                         Скопировать
                     </button>
                     <button
-                        onClick={() => {
-                            analytics.contactClose();
-                            onClose
-                        }}
+                        onClick={onClose}
                         className="px-4 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-sm rounded"
                     >
                         Закрыть

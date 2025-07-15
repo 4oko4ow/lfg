@@ -17,7 +17,10 @@ function App() {
   const [filter, setFilter] = useState<string>("Все");
   const [contactModal, setContactModal] = useState<string | null>(null);
 
-  const handleCloseModal = () => setContactModal(null);
+  const handleCloseModal = () => {
+    analytics.contactClose();
+    setContactModal(null);
+  }
 
   useEffect(() => {
     connectWS();
