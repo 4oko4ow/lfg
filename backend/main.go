@@ -3,15 +3,19 @@ package main
 import (
 	"lfg/ws"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 func main() {
 
+	rand.Seed(time.Now().UnixNano())
+
 	ws.InitDB()
 	for _, p := range ws.LoadPartiesFromSupabase() {
 
-		ws.AddParty(p, false) // не сохраняем обратно
+		ws.AddParty(p, false)
 	}
 
 	http.HandleFunc("/ws", ws.HandleConnections)
