@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/supabase-community/supabase-go"
 	"log"
+	"math/rand"
+	"time"
 )
 
 var supabaseClient *supabase.Client
@@ -17,6 +19,8 @@ func InitDB() {
 		log.Fatalf("failed to connect to Supabase: %v", err)
 	}
 	supabaseClient = client
+
+	go RandomizePartyTimestamps()
 }
 
 func SavePartyToSupabase(p *Party) {
@@ -55,5 +59,43 @@ func RemovePartyFromSupabase(id string) {
 		Execute()
 	if err != nil {
 		log.Println("Error deleting party from Supabase:", err)
+	}
+}
+
+func RandomizePartyTimestamps() {
+	var parties []*Party
+	data, _, err := supabaseClient.
+		From("parties").
+		Select("*", "", false).
+		Execute()
+	if err != nil {
+		log.Println("Error loading parties for timestamp randomization:", err)
+		return
+	}
+
+	if err := json.Unmarshal(data, &parties); err != nil {
+		log.Println("Error unmarshalling parties:", err)
+		return
+	}
+
+	for _, p := range parties {
+		randomOffset := time.Duration(rand.Intn(115)+5) * time.Minute // от 5 до 120 минут назад
+		randomTime := time.Now().Add(-randomOffset).UTC().Format(time.RFC3339)
+
+		update := map[string]interface{}{
+			"created_at": randomTime,
+		}
+
+		_, _, err := supabaseClient.
+			From("parties").
+			Update(update, "", "").
+			Eq("id", p.ID).
+			Execute()
+
+		if err != nil {
+			log.Printf("Error updating party %s: %v\n", p.ID, err)
+		} else {
+			log.Printf("Updated party %s with time %s\n", p.ID, randomTime)
+		}
 	}
 }
