@@ -1,0 +1,16 @@
+// components/ChatDrawer.tsx
+import Chat from "./Chat";
+
+export default function ChatDrawer({ onClose }: { onClose: () => void }) {
+    return (
+        <div className="fixed inset-0 bg-zinc-950 text-white z-[100] flex flex-col">
+            <div className="p-4 border-b border-zinc-800 flex justify-between items-center">
+                <span className="font-bold">Чат</span>
+                <button onClick={onClose} className="text-zinc-400">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+                <Chat isMobile />
+            </div>
+        </div>
+    );
+}

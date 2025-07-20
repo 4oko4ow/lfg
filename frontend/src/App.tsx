@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { connectWS, onMessage } from "./ws/client";
-import { Search } from "lucide-react";
+import { MessageCircle, Search } from "lucide-react";
 import PartyCard from "./components/PartyCard";
 import type { Message, Party } from "./types";
 import CreatePartyForm from "./forms/CreatePartyForm";
 import FeedbackButton from "./components/FeedbackButton";
 import { analytics } from "./utils/analytics";
 import ContactModal from "./components/ContactModal";
+import Chat from "./components/Chat";
+import ChatDrawer from "./components/ChatDrawer";
 
 
-const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft", "Tarkov", "7 Days to Die", "Goose Goose Duck"];
+const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft", "Tarkov"];
 
 
 function App() {
@@ -51,12 +53,17 @@ function App() {
       : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
   ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  const isMobile = window.innerWidth < 768;
+  const [chatOpen, setChatOpen] = useState(false);
+
+
   return (
     <div className="p-6 max-w-3xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-2">
         <Search size={24} />
         Поиск тиммейтов
       </h1>
+
 
       <CreatePartyForm />
 
@@ -78,7 +85,7 @@ function App() {
         ))}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mb-18">
         {filteredParties.map((party) => (
           <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
         ))}
@@ -93,6 +100,28 @@ function App() {
 
       {contactModal && (
         <ContactModal contact={contactModal} onClose={handleCloseModal} />
+      )}
+
+      {!isMobile && <Chat />}
+
+      {isMobile && (
+        <>
+          <button
+            onClick={() => setChatOpen(true)}
+            className="fixed bottom-14 right-4 z-50 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white shadow-md flex items-center gap-2"
+          >
+            <MessageCircle size={18} />
+            Чат
+            {/* Пульсирующая точка */}
+            <span className="relative">
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500  animate-pulse"></span>
+            </span>
+          </button>
+
+          {chatOpen && (
+            <ChatDrawer onClose={() => setChatOpen(false)} />
+          )}
+        </>
       )}
     </div>
 
