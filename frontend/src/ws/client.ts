@@ -1,18 +1,12 @@
 // src/ws/client.ts
+import type { Message, OutgoingMessage } from "../types";
 
-import type {  Message, OutgoingMessage } from "../types";
+export let socket: WebSocket | null = null; // <-- экспортируем
 
-
-let socket: WebSocket;
 const listeners: ((msg: Message) => void)[] = [];
 
-/**
- * Устанавливает WebSocket-подключение и обрабатывает события
- */
 export function connectWS() {
   socket = new WebSocket("wss://lfg.fly.dev/ws");
-    // socket = new WebSocket("ws://localhost:8080/ws");
-
 
   socket.onmessage = (event) => {
     try {
@@ -29,36 +23,31 @@ export function connectWS() {
   };
 }
 
-/**
- * Подписка на входящие сообщения
- */
 export function onMessage(cb: (msg: Message) => void) {
   listeners.push(cb);
 }
 
-/**
- * Отправка создания пати
- */
 export function sendCreateParty(payload: {
   game: string;
   goal: string;
   slots: number;
   contact?: string;
 }) {
-  const msg: OutgoingMessage = {
-    type: "create_party",
-    payload,
-  };
-  socket.send(JSON.stringify(msg));
+  if (socket?.readyState === WebSocket.OPEN) {
+    const msg: OutgoingMessage = {
+      type: "create_party",
+      payload,
+    };
+    socket.send(JSON.stringify(msg));
+  }
 }
 
-/**
- * Отправка запроса на вступление в пати
- */
 export function sendJoinParty(id: string) {
-  const msg: OutgoingMessage = {
-    type: "join_party",
-    payload: { id },
-  };
-  socket.send(JSON.stringify(msg));
+  if (socket?.readyState === WebSocket.OPEN) {
+    const msg: OutgoingMessage = {
+      type: "join_party",
+      payload: { id },
+    };
+    socket.send(JSON.stringify(msg));
+  }
 }

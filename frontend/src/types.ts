@@ -12,7 +12,8 @@ export type Message =
   | { type: "initial_state"; payload: Party[] }
   | { type: "new_party"; payload: Party }
   | { type: "party_update"; payload: Party }
-  | { type: "party_remove"; payload: { id: string } };
+  | { type: "party_remove"; payload: { id: string } }
+  | { type: "online_count"; payload: number }; // 🟢 новое
 
 export type OutgoingMessage =
   | {
@@ -29,4 +30,7 @@ export type OutgoingMessage =
       payload: {
         id: string;
       };
+    }
+  | {
+      type: "heartbeat"; // 🟢 новое сообщение от клиента
     };
