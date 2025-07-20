@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@supabase/supabase-js": "^2.52.0",
     "@tailwindcss/vite": "^4.1.11",
     "lucide-react": "^0.525.0",
     "plausible-tracker": "^0.3.9",
