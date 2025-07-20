@@ -15,16 +15,21 @@ var upgrader = websocket.Upgrader{
 
 var clients = make(map[*websocket.Conn]bool)
 
+// HandleConnections управляет новым WebSocket-соединением
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("upgrade error:", err)
 		return
 	}
-	defer ws.Close()
+	defer func() {
+		ws.Close()
+		delete(clients, ws)
+		broadcastOnlineCount()
+	}()
 
 	clients[ws] = true
-	defer delete(clients, ws)
+	broadcastOnlineCount()
 
 	sendInitialState(ws)
 
@@ -69,10 +74,14 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			UpdatePartyJoined(payload.ID)
+
+		case "heartbeat":
+			// опционально: обработка, если нужна (например, log/пинг)
 		}
 	}
 }
 
+// parsePayload извлекает payload в нужную структуру
 func parsePayload(payload interface{}, v interface{}) error {
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -81,20 +90,34 @@ func parsePayload(payload interface{}, v interface{}) error {
 	return json.Unmarshal(b, v)
 }
 
+// sendInitialState отправляет клиенту актуальные пати
 func sendInitialState(ws *websocket.Conn) {
-	parties := LoadPartiesFromSupabase() // гарантированно актуальное
+	parties := LoadPartiesFromSupabase()
 	ws.WriteJSON(Message{
 		Type:    "initial_state",
 		Payload: parties,
 	})
 }
 
+// Broadcast рассылает сообщение всем клиентам
 func Broadcast(msg Message) {
 	for client := range clients {
 		if err := client.WriteJSON(msg); err != nil {
 			log.Println("broadcast error:", err)
 			client.Close()
 			delete(clients, client)
+			broadcastOnlineCount() // обновить при дисконнекте
 		}
+	}
+}
+
+// broadcastOnlineCount отправляет актуальное число онлайн
+func broadcastOnlineCount() {
+	msg := Message{
+		Type:    "online_count",
+		Payload: len(clients),
+	}
+	for client := range clients {
+		_ = client.WriteJSON(msg) // игнорировать ошибки здесь, они обрабатываются в Broadcast
 	}
 }

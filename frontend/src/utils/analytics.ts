@@ -44,4 +44,12 @@ export const analytics = {
 
   chatMobile: () =>
     plausibleClient.trackEvent("chat_mobile"),
+
+
+  suggestGame: (game: string) =>
+  plausibleClient.trackEvent("suggest_game", { props: { game } }),
+
+// Новое событие: Нажатие на кнопку "Хочешь, чтобы здесь появилась твоя игра?"
+suggestGameClick: () =>
+  plausibleClient.trackEvent("suggest_game_click"),
 };
