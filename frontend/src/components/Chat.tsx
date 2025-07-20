@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { getOrCreateAnonIdentity } from '../utils/anonIdentity';
+import { analytics } from '../utils/analytics'; 
 
 const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
     const [messages, setMessages] = useState<any[]>([]);
@@ -22,6 +23,11 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
             )
             .subscribe();
 
+        // 👇 логируем, что пользователь зашёл в чат на мобилке
+        if (isMobile) {
+            analytics.chatMobile();
+        }
+
         return () => {
             supabase.removeChannel(channel);
         };
@@ -38,14 +44,17 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
     };
 
     const sendMessage = async () => {
-        if (!input.trim()) return;
+        const trimmed = input.trim();
+        if (!trimmed) return;
 
         await supabase.from('chat_messages').insert({
             anon_id: id,
             anon_name: name,
-            message: input.trim(),
+            message: trimmed,
         });
 
+        analytics.chatMessageSent();             
+        analytics.chatMessageTyped(trimmed.length); 
         setInput('');
     };
 
@@ -79,7 +88,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && sendMessage()}
                     placeholder="Напиши что-нибудь…"
-                    autoFocus={isMobile} // 👈 удобно для мобилок
+                    autoFocus={isMobile}
                 />
             </div>
         </div>

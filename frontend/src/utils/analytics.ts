@@ -3,7 +3,7 @@ import plausible from "plausible-tracker";
 
 const plausibleClient = plausible({
   domain: "findparty.online",
-  trackLocalhost: true, // optional, useful for testing locally
+  trackLocalhost: true, // useful for testing locally
 });
 
 export const analytics = {
@@ -25,9 +25,23 @@ export const analytics = {
 
   contactCopy: () =>
     plausibleClient.trackEvent("contact_copy"),
+
   contactClose: () =>
     plausibleClient.trackEvent("contact_close"),
 
   feedbackClick: () =>
     plausibleClient.trackEvent("feedback_click"),
+
+  // 🟢 Chat-related events:
+  chatOpened: () =>
+    plausibleClient.trackEvent("chat_opened"),
+
+  chatMessageSent: () =>
+    plausibleClient.trackEvent("chat_message_sent"),
+
+  chatMessageTyped: (length: number) =>
+    plausibleClient.trackEvent("chat_message_typed", { props: { length } }),
+
+  chatMobile: () =>
+    plausibleClient.trackEvent("chat_mobile"),
 };
