@@ -92,7 +92,7 @@ func parsePayload(payload interface{}, v interface{}) error {
 
 // sendInitialState отправляет клиенту актуальные пати
 func sendInitialState(ws *websocket.Conn) {
-	parties := LoadPartiesFromSupabase()
+	parties := GetParties()
 	ws.WriteJSON(Message{
 		Type:    "initial_state",
 		Payload: parties,
