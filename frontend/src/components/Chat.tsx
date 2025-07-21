@@ -73,7 +73,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
         <div
             className={
                 isMobile
-                    ? "w-full h-full flex flex-col bg-zinc-950"
+                    ? "fixed flex flex-col bg-zinc-950 "
                     : "fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50"
             }
         >
