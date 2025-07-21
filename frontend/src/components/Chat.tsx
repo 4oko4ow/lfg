@@ -1,13 +1,16 @@
 // components/Chat.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { getOrCreateAnonIdentity } from '../utils/anonIdentity';
-import { analytics } from '../utils/analytics'; 
+import { analytics } from '../utils/analytics';
 
 const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const { id, name } = getOrCreateAnonIdentity();
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         fetchMessages();
@@ -33,6 +36,14 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
         };
     }, []);
 
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     const fetchMessages = async () => {
         const { data } = await supabase
             .from('chat_messages')
@@ -53,8 +64,8 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
             message: trimmed,
         });
 
-        analytics.chatMessageSent();             
-        analytics.chatMessageTyped(trimmed.length); 
+        analytics.chatMessageSent();
+        analytics.chatMessageTyped(trimmed.length);
         setInput('');
     };
 
@@ -79,6 +90,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
                         <span className="text-blue-400">{msg.anon_name}</span>: {msg.message}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             <div className="p-2 border-t border-zinc-700">
