@@ -56,7 +56,7 @@ export default function CreatePartyForm() {
 
             <input
                 type="text"
-                placeholder="Цель пати (например, играть саппортом)"
+                placeholder="Напиши пару слов о себе: цель, возраст, микро и т.п."
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 className="w-full px-4 py-2 rounded bg-zinc-800 border border-zinc-700 text-white text-sm"
@@ -65,7 +65,7 @@ export default function CreatePartyForm() {
             <div className="relative">
                 <input
                     type="text"
-                    placeholder="Контакт (Discord, Telegram...)"
+                    placeholder="Контакт (Discord, Telegram, Steam, VK...)"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     className="w-full px-4 py-2 pl-10 rounded bg-zinc-800 border border-zinc-700 text-white text-sm"
