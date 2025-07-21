@@ -132,10 +132,7 @@ function App() {
       </div>
 
       <div className="space-y-4 mb-18">
-        {filteredParties.map((party) => (
-          <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
-        ))}
-
+       
         {loading ? (
           <div className="text-zinc-500 text-sm text-center py-12">
             Загрузка пати...
