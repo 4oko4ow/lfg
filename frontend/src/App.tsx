@@ -20,6 +20,7 @@ function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const handleCloseModal = () => {
     analytics.contactClose();
@@ -41,6 +42,7 @@ function App() {
       switch (msg.type) {
         case "initial_state":
           setParties(msg.payload);
+          setLoading(false);
           break;
         case "new_party":
           setParties((prev) => [msg.payload, ...prev]);
@@ -134,10 +136,18 @@ function App() {
           <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
         ))}
 
-        {filteredParties.length === 0 && (
+        {loading ? (
+          <div className="text-zinc-500 text-sm text-center py-12">
+            Загрузка пати...
+          </div>
+        ) : filteredParties.length === 0 ? (
           <div className="text-zinc-500 text-sm text-center py-12">
             Нет активных пати
           </div>
+        ) : (
+          filteredParties.map((party) => (
+            <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
+          ))
         )}
       </div>
 
