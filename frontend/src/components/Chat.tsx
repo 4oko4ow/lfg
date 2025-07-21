@@ -101,6 +101,8 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
                     onKeyDown={e => e.key === 'Enter' && sendMessage()}
                     placeholder="Напиши что-нибудь…"
                     autoFocus={isMobile}
+                    inputMode="text"
+                    autoComplete="off"
                 />
             </div>
         </div>
