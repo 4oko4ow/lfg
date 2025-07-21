@@ -55,6 +55,7 @@ func UpdatePartyJoined(id string) {
 	defer partyLock.Unlock()
 	if p, ok := parties[id]; ok && p.Joined < p.Slots {
 		p.Joined++
+		go UpdatePartyInSupabase(p)
 		Broadcast(Message{Type: "party_update", Payload: p})
 	}
 }

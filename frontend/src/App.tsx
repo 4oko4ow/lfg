@@ -56,6 +56,7 @@ function App() {
         case "online_count":
           setOnlineCount(msg.payload);
           break;
+
       }
     });
     analytics.enableAutoPageviews();

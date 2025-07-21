@@ -2,6 +2,8 @@
 import type { Party } from "../types";
 import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
 import { analytics } from "../utils/analytics";
+import { ArrowRightIcon } from "@heroicons/react/24/solid"; // или BoltIcon, PaperAirplaneIcon и т.п.
+import { sendJoinParty } from "../ws/client";
 
 function timeAgo(isoDate: string): string {
   const diff = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
@@ -19,9 +21,13 @@ export default function PartyCard({
 }) {
   const isFull = party.joined >= party.slots;
 
+
+
   const handleJoinClick = () => {
     analytics.joinPartyClick(party.game);
     onJoin(party.contact || "");
+    console.log(party.id)
+    sendJoinParty(party.id);
   };
 
   return (
@@ -53,13 +59,16 @@ export default function PartyCard({
         <button
           disabled={isFull}
           onClick={handleJoinClick}
-          className={`px-4 py-1.5 rounded text-xs font-medium transition ${
-            isFull
-              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
-          }`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
+            ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
         >
-          {isFull ? "Заполнено" : "Вступить"}
+          {isFull ? "Заполнено" :
+            <>
+              Вступить
+              <ArrowRightIcon className="w-4 h-4 ml-1 inline-block" />
+            </>}
         </button>
       </div>
     </div>

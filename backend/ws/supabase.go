@@ -99,3 +99,20 @@ func RandomizePartyTimestamps() {
 		}
 	}
 }
+
+func UpdatePartyInSupabase(p *Party) {
+	update := map[string]interface{}{
+		"joined": p.Joined,
+		// optionally other fields if needed
+	}
+
+	_, _, err := supabaseClient.
+		From("parties").
+		Update(update, "", "").
+		Eq("id", p.ID).
+		Execute()
+
+	if err != nil {
+		log.Println("Error updating party in Supabase:", err)
+	}
+}
