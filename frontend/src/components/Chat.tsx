@@ -73,7 +73,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
         <div
             className={
                 isMobile
-                    ? "fixed flex flex-col bg-zinc-950 "
+                    ? "flex flex-col flex-1 w-full max-w-full bg-zinc-950"
                     : "fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50"
             }
         >
@@ -95,7 +95,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
 
             <div className="p-2 border-t border-zinc-700">
                 <input
-                    className="w-full text-sm p-2 bg-zinc-800 text-white rounded-md outline-none"
+                    className="w-full max-w-full text-sm p-2 bg-zinc-800 text-white rounded-md outline-none"
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && sendMessage()}

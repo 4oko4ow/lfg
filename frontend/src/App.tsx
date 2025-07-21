@@ -70,7 +70,7 @@ function App() {
   const isMobile = window.innerWidth < 768;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto text-white">
+    <div className="w-full overflow-x-hidden p-6 max-w-3xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-2">
         <Search size={24} />
         Поиск тиммейтов
