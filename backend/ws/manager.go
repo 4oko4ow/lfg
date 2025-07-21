@@ -74,3 +74,13 @@ func StartPartyCleanupLoop() {
 		partyLock.Unlock()
 	}
 }
+
+func SynchronizeMemoryWithSupabase() {
+	partiesFromDB := LoadPartiesFromSupabase()
+	partyLock.Lock()
+	defer partyLock.Unlock()
+	parties = make(map[string]*Party)
+	for _, p := range partiesFromDB {
+		parties[p.ID] = p
+	}
+}

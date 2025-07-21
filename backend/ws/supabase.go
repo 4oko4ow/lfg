@@ -20,7 +20,10 @@ func InitDB() {
 	}
 	supabaseClient = client
 
-	go RandomizePartyTimestamps()
+	go func() {
+		RandomizePartyTimestamps()
+		SynchronizeMemoryWithSupabase()
+	}()
 }
 
 func SavePartyToSupabase(p *Party) {
@@ -103,7 +106,6 @@ func RandomizePartyTimestamps() {
 func UpdatePartyInSupabase(p *Party) {
 	update := map[string]interface{}{
 		"joined": p.Joined,
-		// optionally other fields if needed
 	}
 
 	_, _, err := supabaseClient.
