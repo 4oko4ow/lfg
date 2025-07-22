@@ -22,8 +22,9 @@ func InitDB() {
 
 	go func() {
 		RandomizePartyTimestamps()
-		SynchronizeMemoryWithSupabase()
+
 	}()
+	SynchronizeMemoryWithSupabase()
 }
 
 func SavePartyToSupabase(p *Party) {

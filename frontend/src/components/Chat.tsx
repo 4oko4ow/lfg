@@ -86,8 +86,17 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
 
             <div className="flex-1 overflow-y-auto p-3 space-y-1 text-sm">
                 {messages.map(msg => (
-                    <div key={msg.id}>
-                        <span className="text-blue-400">{msg.anon_name}</span>: {msg.message}
+                    <div
+                        key={msg.id}
+                        className="text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0"
+                    >
+                        <div className="flex items-center justify-between">
+                            <span className="text-blue-400 font-medium">{msg.anon_name}</span>
+                            <span className="text-zinc-500 text-[11px] whitespace-nowrap">
+                                {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                        <div className="pl-1 text-zinc-200 break-words">{msg.message}</div>
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
