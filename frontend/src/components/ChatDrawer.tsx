@@ -16,7 +16,8 @@ export default function ChatDrawer({ onClose }: { onClose: () => void }) {
                 <button onClick={onClose} className="text-zinc-400">✕</button>
             </div>
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Chat isMobile />
+                {/* 🛠️ Добавляем onClose */}
+                <Chat isMobile onClose={onClose} />
             </div>
         </div>
     );
