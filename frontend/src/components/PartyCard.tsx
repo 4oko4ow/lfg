@@ -35,27 +35,26 @@ export default function PartyCard({
   };
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3">
-      <div className="flex justify-between items-start">
-        <div className="space-y-1">
-          <h3 className="text-xl font-semibold">{party.game}</h3>
-          <div className="flex gap-2">
-            {isNewlyCreated && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 bg-blue-900/60 px-2 py-0.5 rounded-md">
-                <ClockIcon className="w-4 h-4" />
-                Только что создано
-              </span>
-            )}
-            {isAlmostFull && !isFull && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-400 bg-yellow-900/50 px-2 py-0.5 rounded-md">
-                <UserGroupIcon className="w-4 h-4" />
-                Почти заполнено
-              </span>
-            )}
-          </div>
+    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full max-w-screen-sm mx-auto">      <div className="flex justify-between items-start">
+      <div className="space-y-1">
+        <h3 className="text-xl font-semibold">{party.game}</h3>
+        <div className="flex flex-wrap gap-2">
+          {isNewlyCreated && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 bg-blue-900/60 px-2 py-0.5 rounded-md">
+              <ClockIcon className="w-4 h-4" />
+              Только что создано
+            </span>
+          )}
+          {isAlmostFull && !isFull && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-400 bg-yellow-900/50 px-2 py-0.5 rounded-md">
+              <UserGroupIcon className="w-4 h-4" />
+              Почти заполнено
+            </span>
+          )}
         </div>
-        <span className="text-sm text-zinc-400">{timeAgo(party.created_at)}</span>
       </div>
+      <span className="text-sm text-zinc-400">{timeAgo(party.created_at)}</span>
+    </div>
 
       <div className="flex items-start gap-2 text-sm text-zinc-300">
         <BoltIcon className="w-4 h-4 mt-0.5 shrink-0 text-blue-400" />
@@ -63,9 +62,9 @@ export default function PartyCard({
       </div>
 
       {party.contact && (
-        <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <PhoneIcon className="w-4 h-4 text-green-400" />
-          <span>{party.contact}</span>
+        <div className="flex flex-wrap items-start gap-2 text-sm text-zinc-400">
+          <PhoneIcon className="w-4 h-4 text-green-400 shrink-0" />
+          <span className="break-all min-w-0">{party.contact}</span>
         </div>
       )}
 
@@ -79,11 +78,10 @@ export default function PartyCard({
         <button
           disabled={isFull}
           onClick={handleJoinClick}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${
-            isFull
-              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
-          }`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
+            ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
         >
           {isFull ? (
             "Заполнено"

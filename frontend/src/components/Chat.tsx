@@ -98,7 +98,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-2 border-t border-zinc-700">
+            <div className="p-2 border-t border-zinc-700 pb-[calc(env(safe-area-inset-bottom,0px)+4px)]">
                 <input
                     className="w-full max-w-full text-sm p-2 bg-zinc-800 text-white rounded-md outline-none"
                     value={input}
