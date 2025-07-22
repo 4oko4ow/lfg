@@ -49,7 +49,12 @@ export const analytics = {
   suggestGame: (game: string) =>
   plausibleClient.trackEvent("suggest_game", { props: { game } }),
 
-// Новое событие: Нажатие на кнопку "Хочешь, чтобы здесь появилась твоя игра?"
-suggestGameClick: () =>
-  plausibleClient.trackEvent("suggest_game_click"),
-};
+  suggestGameClick: () =>
+    plausibleClient.trackEvent("suggest_game_click"),
+
+  noJoinFeedback: (reason: string) =>
+    plausibleClient.trackEvent("no_join_feedback", { props: { reason } }),
+
+  noJoinSurveyShown: () =>
+  plausibleClient.trackEvent("no_join_survey_shown"),
+};  

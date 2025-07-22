@@ -10,8 +10,9 @@ import ContactModal from "./components/ContactModal";
 import Chat from "./components/Chat";
 import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
+import { NoJoinSurvey } from "./components/NoJoinSurvey";
 
-const gameOptions = ["Все","R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Minecraft", "Tarkov"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Minecraft", "Tarkov"];
 
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
@@ -21,6 +22,8 @@ function App() {
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [joinClicked, setJoinClicked] = useState(false);
 
   const handleCloseModal = () => {
     analytics.contactClose();
@@ -64,6 +67,7 @@ function App() {
     analytics.enableAutoPageviews();
   }, []);
 
+
   const filteredParties = (
     filter === "Все"
       ? parties
@@ -71,6 +75,24 @@ function App() {
   ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const isMobile = window.innerWidth < 768;
+
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem("no_join_survey_shown") === "true";
+
+    if (
+      filteredParties.length > 0 &&
+      !joinClicked &&
+      !alreadyShown
+    ) {
+      const timeout = setTimeout(() => {
+        analytics.noJoinSurveyShown();
+        setShowSurvey(true);
+        sessionStorage.setItem("no_join_survey_shown", "true");
+      }, 15000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [filter, filteredParties.length, joinClicked]);
 
   return (
     <div className="w-full overflow-x-hidden p-6 max-w-3xl mx-auto text-white">
@@ -132,7 +154,7 @@ function App() {
       </div>
 
       <div className="space-y-4 mb-18">
-       
+
         {loading ? (
           <div className="text-zinc-500 text-sm text-center py-12">
             Загрузка пати...
@@ -142,8 +164,16 @@ function App() {
             Нет активных пати
           </div>
         ) : (
-          filteredParties.map((party) => (
-            <PartyCard key={party.id} party={party} onJoin={(contact) => setContactModal(contact)} />
+          filteredParties.map((party,i) => (
+            <PartyCard
+              key={party.id}
+              party={party}
+              onJoin={(contact) => {
+                setJoinClicked(true);
+                setContactModal(contact);
+              }}
+              isNewlyCreated={i === 0}
+            />
           ))
         )}
       </div>
@@ -178,6 +208,8 @@ function App() {
       {suggestModalOpen && (
         <SuggestGameModal onClose={() => setSuggestModalOpen(false)} />
       )}
+
+      <NoJoinSurvey visible={showSurvey} />
     </div>
   );
 }

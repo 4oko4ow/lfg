@@ -1,8 +1,12 @@
-// PartyCard.tsx
 import type { Party } from "../types";
-import { UserGroupIcon, PhoneIcon, BoltIcon } from "@heroicons/react/24/outline";
+import {
+  UserGroupIcon,
+  PhoneIcon,
+  BoltIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
 import { analytics } from "../utils/analytics";
-import { ArrowRightIcon } from "@heroicons/react/24/solid"; // или BoltIcon, PaperAirplaneIcon и т.п.
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { sendJoinParty } from "../ws/client";
 
 function timeAgo(isoDate: string): string {
@@ -15,25 +19,41 @@ function timeAgo(isoDate: string): string {
 export default function PartyCard({
   party,
   onJoin,
+  isNewlyCreated = false,
 }: {
   party: Party;
   onJoin: (contact: string) => void;
+  isNewlyCreated?: boolean;
 }) {
   const isFull = party.joined >= party.slots;
-
-
+  const isAlmostFull = party.joined === party.slots - 1;
 
   const handleJoinClick = () => {
     analytics.joinPartyClick(party.game);
     onJoin(party.contact || "");
-    console.log(party.id)
     sendJoinParty(party.id);
   };
 
   return (
     <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold">{party.game}</h3>
+      <div className="flex justify-between items-start">
+        <div className="space-y-1">
+          <h3 className="text-xl font-semibold">{party.game}</h3>
+          <div className="flex gap-2">
+            {isNewlyCreated && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 bg-blue-900/60 px-2 py-0.5 rounded-md">
+                <ClockIcon className="w-4 h-4" />
+                Только что создано
+              </span>
+            )}
+            {isAlmostFull && !isFull && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-400 bg-yellow-900/50 px-2 py-0.5 rounded-md">
+                <UserGroupIcon className="w-4 h-4" />
+                Почти заполнено
+              </span>
+            )}
+          </div>
+        </div>
         <span className="text-sm text-zinc-400">{timeAgo(party.created_at)}</span>
       </div>
 
@@ -59,16 +79,20 @@ export default function PartyCard({
         <button
           disabled={isFull}
           onClick={handleJoinClick}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
-            ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${
+            isFull
+              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
         >
-          {isFull ? "Заполнено" :
+          {isFull ? (
+            "Заполнено"
+          ) : (
             <>
               Вступить
               <ArrowRightIcon className="w-4 h-4 ml-1 inline-block" />
-            </>}
+            </>
+          )}
         </button>
       </div>
     </div>
