@@ -20,10 +20,7 @@ func InitDB() {
 	}
 	supabaseClient = client
 
-	go func() {
-		RandomizePartyTimestamps()
-
-	}()
+	RandomizePartyTimestamps()
 	SynchronizeMemoryWithSupabase()
 }
 
