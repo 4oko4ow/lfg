@@ -11,7 +11,7 @@ import Chat from "./components/Chat";
 import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
 
-const gameOptions = ["Все", "Dota 2", "CS2", "PEAK", "R.E.P.O", "PUBG", "Minecraft", "Tarkov"];
+const gameOptions = ["Все","R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Minecraft", "Tarkov"];
 
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
