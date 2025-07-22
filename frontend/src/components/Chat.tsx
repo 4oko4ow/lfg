@@ -1,4 +1,3 @@
-// components/Chat.tsx
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { getOrCreateAnonIdentity } from '../utils/anonIdentity';
@@ -8,9 +7,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const { id, name } = getOrCreateAnonIdentity();
-
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
 
     useEffect(() => {
         fetchMessages();
@@ -26,7 +23,6 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
             )
             .subscribe();
 
-        // 👇 логируем, что пользователь зашёл в чат на мобилке
         if (isMobile) {
             analytics.chatMobile();
         }
@@ -73,7 +69,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
         <div
             className={
                 isMobile
-                    ? "flex flex-col flex-1 w-full max-w-full bg-zinc-950"
+                    ? "flex flex-col w-full h-full max-h-screen bg-zinc-950"
                     : "fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50"
             }
         >
@@ -84,7 +80,7 @@ const Chat = ({ isMobile = false }: { isMobile?: boolean }) => {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-1 text-sm">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 text-sm">
                 {messages.map(msg => (
                     <div
                         key={msg.id}
