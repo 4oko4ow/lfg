@@ -35,7 +35,8 @@ export default function PartyCard({
   };
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full max-w-screen-sm mx-auto">      <div className="flex justify-between items-start">
+    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full max-w-screen-md mx-auto"> 
+         <div className="flex justify-between items-start">
       <div className="space-y-1">
         <h3 className="text-xl font-semibold">{party.game}</h3>
         <div className="flex flex-wrap gap-2">
