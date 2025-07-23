@@ -10,6 +10,7 @@ type Party struct {
 	Joined    int       `json:"joined"`
 	CreatedAt time.Time `json:"created_at"`
 	Contact   string    `json:"contact,omitempty"`
+	Pinned    bool      `json:"pinned"`
 }
 
 type Message struct {

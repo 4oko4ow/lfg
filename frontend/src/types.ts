@@ -6,6 +6,7 @@ export type Party = {
   joined: number;
   created_at: string;
   contact?: string;
+  pinned?: boolean;
 };
 
 export type Message =
