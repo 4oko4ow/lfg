@@ -73,17 +73,19 @@ function App() {
       ? parties
       : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
   ).sort((a, b) => {
-  const getPriority = (p: Party) => {
-    if (p.pinned) return 100;
-    if (p.joined === p.slots - 1) return 10;
-    return 0;
-  };
+    const getPriority = (p: Party) => {
+      if (p.pinned) return 100;
+      const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
+      if (createdAgoMin < 5) return 50;
+      if (p.joined === p.slots - 1) return 10;
+      return 0;
+    };
 
-  const priorityDiff = getPriority(b) - getPriority(a);
-  if (priorityDiff !== 0) return priorityDiff;
+    const priorityDiff = getPriority(b) - getPriority(a);
+    if (priorityDiff !== 0) return priorityDiff;
 
-  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-});
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   const isMobile = window.innerWidth < 768;
 
