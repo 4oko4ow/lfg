@@ -97,6 +97,8 @@ func sendInitialState(ws *websocket.Conn) {
 		Type:    "initial_state",
 		Payload: parties,
 	})
+
+	ThrottledSync() // ✅ запуск синхронизации с лимитом
 }
 
 // Broadcast рассылает сообщение всем клиентам
