@@ -20,8 +20,10 @@ func InitDB() {
 	}
 	supabaseClient = client
 
+	ThrottledSync()
+
 	//go RandomizePartyTimestamps()
-	SynchronizeMemoryWithSupabase()
+	//SynchronizeMemoryWithSupabase()
 }
 
 func SavePartyToSupabase(p *Party) {
