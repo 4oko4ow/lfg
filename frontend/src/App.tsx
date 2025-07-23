@@ -76,7 +76,7 @@ function App() {
     const getPriority = (p: Party) => {
       if (p.pinned) return 100;
       const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
-      if (createdAgoMin < 5) return 50;
+      if (createdAgoMin < 30) return 50;
       if (p.joined === p.slots - 1) return 10;
       return 0;
     };
