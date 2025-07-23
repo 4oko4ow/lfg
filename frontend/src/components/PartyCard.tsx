@@ -20,11 +20,9 @@ function timeAgo(isoDate: string): string {
 export default function PartyCard({
   party,
   onJoin,
-  isNewlyCreated = false,
 }: {
   party: Party;
   onJoin: (contact: string) => void;
-  isNewlyCreated?: boolean;
 }) {
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1;
@@ -35,6 +33,9 @@ export default function PartyCard({
     onJoin(party.contact || "");
     sendJoinParty(party.id);
   };
+
+  const createdAgoMinutes = (Date.now() - new Date(party.created_at).getTime()) / 60000;
+  const isNewlyCreated = createdAgoMinutes < 30;
 
   return (
     <div
@@ -91,11 +92,10 @@ export default function PartyCard({
         <button
           disabled={isFull}
           onClick={handleJoinClick}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${
-            isFull
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
               ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 text-white"
-          }`}
+            }`}
         >
           {isFull ? (
             "Заполнено"
