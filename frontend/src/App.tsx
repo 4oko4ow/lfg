@@ -72,7 +72,18 @@ function App() {
     filter === "Все"
       ? parties
       : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
-  ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  ).sort((a, b) => {
+  const getPriority = (p: Party) => {
+    if (p.pinned) return 100;
+    if (p.joined === p.slots - 1) return 10;
+    return 0;
+  };
+
+  const priorityDiff = getPriority(b) - getPriority(a);
+  if (priorityDiff !== 0) return priorityDiff;
+
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+});
 
   const isMobile = window.innerWidth < 768;
 
@@ -164,7 +175,7 @@ function App() {
             Нет активных пати
           </div>
         ) : (
-          filteredParties.map((party,i) => (
+          filteredParties.map((party) => (
             <PartyCard
               key={party.id}
               party={party}
@@ -172,7 +183,6 @@ function App() {
                 setJoinClicked(true);
                 setContactModal(contact);
               }}
-              isNewlyCreated={i === 0}
             />
           ))
         )}
