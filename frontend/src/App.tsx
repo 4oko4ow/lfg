@@ -12,7 +12,7 @@ import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "./components/NoJoinSurvey";
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Minecraft", "Tarkov","Fortnite", "The Finals","Marvel Rivals"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "The Finals", "Marvel Rivals"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
@@ -40,11 +40,17 @@ function App() {
 
   useEffect(() => {
     connectWS();
+
+    const fallbackTimeout = setTimeout(() => {
+    setLoading(false); 
+  }, 15000);
+
     onMessage((msg: Message) => {
       switch (msg.type) {
         case "initial_state":
           setParties(msg.payload);
           setLoading(false);
+          clearTimeout(fallbackTimeout);
           break;
         case "new_party":
           setParties((prev) => [msg.payload, ...prev]);
@@ -64,6 +70,10 @@ function App() {
       }
     });
     analytics.enableAutoPageviews();
+
+    return () => {
+    clearTimeout(fallbackTimeout);
+  };
   }, []);
 
 
