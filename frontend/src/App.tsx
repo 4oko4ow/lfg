@@ -12,7 +12,7 @@ import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "./components/NoJoinSurvey";
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite","Roblox","Valorant", "The Finals", "Marvel Rivals","Deep Rock Galactic"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "The Finals", "Marvel Rivals", "Deep Rock Galactic"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
@@ -23,7 +23,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showSurvey, setShowSurvey] = useState(false);
   const [joinClicked, setJoinClicked] = useState(false);
-
+  const [contactPartyId, setContactPartyId] = useState<string>("");
   const handleCloseModal = () => {
     analytics.contactClose();
     setContactModal(null);
@@ -194,6 +194,7 @@ function App() {
               onJoin={(contact) => {
                 setJoinClicked(true);
                 setContactModal(contact);
+                setContactPartyId(party.id);
               }}
             />
           ))
@@ -203,8 +204,7 @@ function App() {
       <FeedbackButton />
 
       {contactModal && (
-        <ContactModal contact={contactModal} onClose={handleCloseModal} />
-      )}
+        <ContactModal contact={contactModal} partyId={contactPartyId} onClose={handleCloseModal} />)}
 
       {!isMobile && <Chat />}
 
