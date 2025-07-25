@@ -2,12 +2,15 @@
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { analytics } from "../utils/analytics";
+import { sendJoinParty } from "../ws/client";
 
 export default function ContactModal({
     contact,
     onClose,
+    partyId,
 }: {
     contact: string;
+    partyId: string;
     onClose: () => void;
 }) {
     useEffect(() => {
@@ -20,7 +23,7 @@ export default function ContactModal({
         analytics.contactCopy();
         try {
             await navigator.clipboard.writeText(contact);
-
+            sendJoinParty(partyId);
             toast.success(`Контакт скопирован`, {
                 duration: 5000,
             });
