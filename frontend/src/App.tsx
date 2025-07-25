@@ -42,8 +42,8 @@ function App() {
     connectWS();
 
     const fallbackTimeout = setTimeout(() => {
-    setLoading(false); 
-  }, 15000);
+      setLoading(false);
+    }, 15000);
 
     onMessage((msg: Message) => {
       switch (msg.type) {
@@ -72,8 +72,8 @@ function App() {
     analytics.enableAutoPageviews();
 
     return () => {
-    clearTimeout(fallbackTimeout);
-  };
+      clearTimeout(fallbackTimeout);
+    };
   }, []);
 
 
@@ -83,11 +83,12 @@ function App() {
       : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
   ).sort((a, b) => {
     const getPriority = (p: Party) => {
-      if (p.pinned) return 100;
+      if (p.pinned) return 100; // 🧷 Закреп
       const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
-      if (createdAgoMin < 30) return 50;
-      if (p.joined === p.slots - 1) return 10;
-      return 0;
+      if (createdAgoMin < 60) return 50; // 🕑 Свежие (< 30 мин)
+      if (p.joined === p.slots - 1) return 10; // ⚠️ Почти заполненные
+      if (p.joined >= p.slots) return -10; // ✅ Уже заполненные
+      return 0; // 🔹 Обычные
     };
 
     const priorityDiff = getPriority(b) - getPriority(a);
