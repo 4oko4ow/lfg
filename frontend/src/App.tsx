@@ -12,7 +12,7 @@ import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "./components/NoJoinSurvey";
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "The Finals", "Marvel Rivals","Deep Rock Galactic"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite","Roblox","Valorant", "The Finals", "Marvel Rivals","Deep Rock Galactic"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
