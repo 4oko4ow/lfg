@@ -8,7 +8,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { analytics } from "../utils/analytics";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
-import { sendJoinParty } from "../ws/client";
 
 function timeAgo(isoDate: string): string {
   const diff = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
@@ -31,7 +30,6 @@ export default function PartyCard({
   const handleJoinClick = () => {
     analytics.joinPartyClick(party.game);
     onJoin(party.contact || "");
-    sendJoinParty(party.id);
   };
 
   const createdAgoMinutes = (Date.now() - new Date(party.created_at).getTime()) / 60000;
