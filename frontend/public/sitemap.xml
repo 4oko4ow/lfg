@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://findparty.online/</loc></url>
-  <url><loc>https://findparty.online/dota2.html</loc></url>
-  <url><loc>https://findparty.online/cs2.html</loc></url>
-  <url><loc>https://findparty.online/minecraft.html</loc></url>
-  <url><loc>https://findparty.online/repo.html</loc></url>
-  <url><loc>https://findparty.online/peak.html</loc></url>
+  <url><loc>https://findparty.online/?game=repo</loc></url>
+  <url><loc>https://findparty.online/?game=dota2</loc></url>
+  <url><loc>https://findparty.online/?game=cs2</loc></url>
+  <url><loc>https://findparty.online/?game=peak</loc></url>
+  <url><loc>https://findparty.online/?game=pubg</loc></url>
+  <url><loc>https://findparty.online/?game=rust</loc></url>
+  <url><loc>https://findparty.online/?game=minecraft</loc></url>
+  <url><loc>https://findparty.online/?game=tarkov</loc></url>
+  <url><loc>https://findparty.online/?game=fortnite</loc></url>
+  <url><loc>https://findparty.online/?game=roblox</loc></url>
+  <url><loc>https://findparty.online/?game=valorant</loc></url>
+  <url><loc>https://findparty.online/?game=apex</loc></url>
+  <url><loc>https://findparty.online/?game=thefinals</loc></url>
+  <url><loc>https://findparty.online/?game=marvelrivals</loc></url>
+  <url><loc>https://findparty.online/?game=deeprock</loc></url>
+  <url><loc>https://findparty.online/?game=baldursgate3</loc></url>
 </urlset>
