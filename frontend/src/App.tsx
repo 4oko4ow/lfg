@@ -13,6 +13,25 @@ import SuggestGameModal from "./components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "./components/NoJoinSurvey";
 import { DynamicMeta } from "./components/DynamicMeta";
 
+const gameSlugMap: Record<string, string> = {
+  repo: "R.E.P.O",
+  dota2: "Dota 2",
+  cs2: "CS2",
+  peak: "PEAK",
+  pubg: "PUBG",
+  rust: "Rust",
+  minecraft: "Minecraft",
+  tarkov: "Tarkov",
+  fortnite: "Fortnite",
+  roblox: "Roblox",
+  valorant: "Valorant",
+  apex: "Apex",
+  thefinals: "The Finals",
+  marvelrivals: "Marvel Rivals",
+  deeprockgalactic: "Deep Rock Galactic",
+  baldursgate3: "Baldurs Gate 3",
+};
+
 const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
@@ -81,14 +100,13 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const game = params.get("game");
 
-    if (game && gameOptions.includes(capitalize(game))) {
-      setFilter(capitalize(game));
+    const mappedGame = game ? gameSlugMap[game] : undefined;
+    if (mappedGame && gameOptions.includes(mappedGame)) {
+      setFilter(mappedGame);
     }
   }, []);
 
-  function capitalize(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
+
 
 
   const filteredParties = (
