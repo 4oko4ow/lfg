@@ -11,8 +11,9 @@ import Chat from "./components/Chat";
 import ChatDrawer from "./components/ChatDrawer";
 import SuggestGameModal from "./components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "./components/NoJoinSurvey";
+import { DynamicMeta } from "./components/DynamicMeta";
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic","Baldurs Gate 3"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
@@ -76,6 +77,19 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const game = params.get("game");
+
+    if (game && gameOptions.includes(capitalize(game))) {
+      setFilter(capitalize(game));
+    }
+  }, []);
+
+  function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
 
   const filteredParties = (
     filter === "Все"
@@ -118,121 +132,178 @@ function App() {
   }, [filter, filteredParties.length, joinClicked]);
 
   return (
-    <div className="w-full overflow-x-hidden p-6 max-w-3xl mx-auto text-white">
-      <h1 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-2">
-        <Search size={24} />
-        Поиск тиммейтов
-      </h1>
+    <>
+      <DynamicMeta />
 
-      <div className="flex flex-col items-center gap-2 mb-6">
-        <div className="bg-blue-950 text-blue-300 text-sm px-4 py-2 rounded-lg text-center flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
-          <div className="flex items-center gap-1 justify-center">
-            <Sparkles size={16} />
-            <span>Сайт только запустился — добро пожаловать!</span>
-          </div>
+      <div className="w-full overflow-x-hidden p-6 max-w-3xl mx-auto text-white">
+        <h1 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-2">
+          <Search size={24} />
+          Поиск тиммейтов
+        </h1>
 
-          <div className="flex items-center gap-2 justify-center text-zinc-400 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span>
-                Сейчас онлайн: <span className="text-white font-medium">{onlineCount}</span>
-              </span>
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <div className="bg-blue-950 text-blue-300 text-sm px-4 py-2 rounded-lg text-center flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
+            <div className="flex items-center gap-1 justify-center">
+              <Sparkles size={16} />
+              <span>Сайт только запустился — добро пожаловать!</span>
+            </div>
+
+            <div className="flex items-center gap-2 justify-center text-zinc-400 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span>
+                  Сейчас онлайн: <span className="text-white font-medium">{onlineCount}</span>
+                </span>
+              </div>
             </div>
           </div>
+
+          <button
+            onClick={() => {
+              analytics.suggestGameClick();
+              setSuggestModalOpen(true);
+            }}
+            className="text-sm text-zinc-300 hover:text-white underline"
+          >
+            <HelpCircle className="inline mr-1" size={16} />
+            Хочешь, чтобы здесь появилась твоя игра?
+          </button>
         </div>
 
-        <button
-          onClick={() => {
-            analytics.suggestGameClick();
-            setSuggestModalOpen(true);
-          }}
-          className="text-sm text-zinc-300 hover:text-white underline"
-        >
-          <HelpCircle className="inline mr-1" size={16} />
-          Хочешь, чтобы здесь появилась твоя игра?
-        </button>
-      </div>
+        <CreatePartyForm />
 
-      <CreatePartyForm />
+        <div className="flex flex-wrap gap-2 mb-6 justify-center sm:justify-start">
+          {gameOptions.map((g) => (
+            <button
+              key={g}
+              onClick={() => {
+                setFilter(g);
+                analytics.filterSelect(g);
 
-      <div className="flex flex-wrap gap-2 mb-6 justify-center sm:justify-start">
-        {gameOptions.map((g) => (
-          <button
-            key={g}
-            onClick={() => {
-              setFilter(g);
-              analytics.filterSelect(g);
-            }}
-            className={`px-4 py-1.5 text-sm rounded-lg border transition-all ${filter === g
-              ? "bg-blue-600 text-white border-blue-600"
-              : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
-              }`}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-4 mb-18">
-
-        {loading ? (
-          <div className="text-zinc-500 text-sm text-center py-12">
-            Загрузка пати...
-          </div>
-        ) : filteredParties.length === 0 ? (
-          <div className="text-zinc-500 text-sm text-center py-12">
-            Нет активных пати
-          </div>
-        ) : (
-          filteredParties.map((party) => (
-            <PartyCard
-              key={party.id}
-              party={party}
-              onJoin={(contact) => {
-                setJoinClicked(true);
-                setContactModal(contact);
-                setContactPartyId(party.id);
+                const gameParam = g.toLowerCase().replaceAll(" ", "");
+                const url = gameParam === "все" ? "/" : `/?game=${gameParam}`;
+                window.history.pushState({}, "", url);
               }}
-            />
-          ))
+              className={`px-4 py-1.5 text-sm rounded-lg border transition-all ${filter === g
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
+                }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-4 mb-18">
+
+          {loading ? (
+            <div className="text-zinc-500 text-sm text-center py-12">
+              Загрузка пати...
+            </div>
+          ) : filteredParties.length === 0 ? (
+            <div className="text-zinc-500 text-sm text-center py-12">
+              Нет активных пати
+            </div>
+          ) : (
+            filteredParties.map((party) => (
+              <PartyCard
+                key={party.id}
+                party={party}
+                onJoin={(contact) => {
+                  setJoinClicked(true);
+                  setContactModal(contact);
+                  setContactPartyId(party.id);
+                }}
+              />
+            ))
+          )}
+        </div>
+
+        <FeedbackButton />
+
+        {contactModal && (
+          <ContactModal contact={contactModal} partyId={contactPartyId} onClose={handleCloseModal} />)}
+
+        {!isMobile && <Chat />}
+
+        {isMobile && (
+          <>
+            <button
+              onClick={() => setChatOpen(true)}
+              className="fixed bottom-14 right-4 z-50 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white shadow-md flex items-center gap-2"
+            >
+              <MessageCircle size={18} />
+              Чат
+              <span className="relative">
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+              </span>
+            </button>
+
+            {chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />}
+          </>
         )}
+
+
+
+        {suggestModalOpen && (
+          <SuggestGameModal onClose={() => setSuggestModalOpen(false)} />
+        )}
+
+        <NoJoinSurvey visible={showSurvey} />
+        <div style={{ display: "none" }}>
+          <h2>С кем поиграть в R.E.P.O</h2>
+          <p>Найди пати для R.E.P.O — активные игроки, живой чат и быстрый старт игры. Без регистрации.</p>
+
+          <h2>С кем поиграть в Dota 2</h2>
+          <p>Ищешь тиммейтов для Dota 2? Создай пати или присоединяйся к команде прямо сейчас.</p>
+
+          <h2>Ищу тиммейтов в CS2</h2>
+          <p>Находи напарников в CS2 — удобный поиск, фильтры и быстрый контакт через Discord или VK.</p>
+
+          <h2>С кем поиграть в PEAK</h2>
+          <p>PEAK — отличная игра для совместной игры. Найди команду или создай своё объявление.</p>
+
+          <h2>Играешь в PUBG?</h2>
+          <p>Зови друзей или вступай в уже созданную пати для PUBG. Сайт работает без регистрации и ожидания.</p>
+
+          <h2>Найти пати в Rust</h2>
+          <p>Rust требует слаженной игры. Найди напарников с голосом и опытом.</p>
+
+          <h2>С кем поиграть в Minecraft</h2>
+          <p>Выживи и строй в Minecraft вместе. Найди друзей для ваниллы, модов или мини-игр.</p>
+
+          <h2>Ищу тиммейтов в Tarkov</h2>
+          <p>Играешь в Escape from Tarkov? Создай пати или найди слаженную команду.</p>
+
+          <h2>Найти тиммейтов в Fortnite</h2>
+          <p>Играешь в Fortnite? Присоединяйся к пати или собирай свою. Время — играть.</p>
+
+          <h2>Ищу с кем поиграть в Roblox</h2>
+          <p>Находи друзей и напарников в Roblox. Больше веселья — вместе.</p>
+
+          <h2>Valorant — ищу пати</h2>
+          <p>Найди команду для ранкеда в Valorant. Только активные игроки.</p>
+
+          <h2>Apex Legends — с кем поиграть</h2>
+          <p>Быстрый поиск пати для Apex. Не играй в соло — найди команду.</p>
+
+          <h2>The Finals — пати</h2>
+          <p>Создай объявление и найди тиммейтов для The Finals за пару кликов.</p>
+
+          <h2>Marvel Rivals — найди тиммейтов</h2>
+          <p>Сражайся вместе с командой в Marvel Rivals. Пати без регистрации.</p>
+
+          <h2>Deep Rock Galactic — с кем поиграть</h2>
+          <p>Ищешь копателей и бойцов для Deep Rock Galactic? Найдём тебе экипаж.</p>
+
+          <h2>Baldur’s Gate 3 — кооп</h2>
+          <p>Собери группу для совместного прохождения Baldur’s Gate 3. Найди себе отряд.</p>
+        </div>
       </div>
-
-      <FeedbackButton />
-
-      {contactModal && (
-        <ContactModal contact={contactModal} partyId={contactPartyId} onClose={handleCloseModal} />)}
-
-      {!isMobile && <Chat />}
-
-      {isMobile && (
-        <>
-          <button
-            onClick={() => setChatOpen(true)}
-            className="fixed bottom-14 right-4 z-50 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white shadow-md flex items-center gap-2"
-          >
-            <MessageCircle size={18} />
-            Чат
-            <span className="relative">
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-            </span>
-          </button>
-
-          {chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />}
-        </>
-      )}
-
-
-
-      {suggestModalOpen && (
-        <SuggestGameModal onClose={() => setSuggestModalOpen(false)} />
-      )}
-
-      <NoJoinSurvey visible={showSurvey} />
-    </div>
+    </>
   );
 }
 
