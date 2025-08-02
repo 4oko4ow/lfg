@@ -10,10 +10,17 @@ import { analytics } from "../utils/analytics";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
 function timeAgo(isoDate: string): string {
-  const diff = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
-  if (diff < 60) return `${diff} сек назад`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
-  return `${Math.floor(diff / 3600)} ч назад`;
+  const seconds = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
+
+  if (seconds < 60) return `${seconds} сек назад`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} мин назад`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ч назад`;
+
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  return `${days} дн ${remainingHours} ч назад`;
 }
 
 export default function PartyCard({
@@ -91,8 +98,8 @@ export default function PartyCard({
           disabled={isFull}
           onClick={handleJoinClick}
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
-              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
+            ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
         >
           {isFull ? (
