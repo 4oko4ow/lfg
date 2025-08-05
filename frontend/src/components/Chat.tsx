@@ -28,10 +28,15 @@ const Chat = ({
           const newMsg = payload.new;
 
           setMessages(prev => {
-            // Если уже есть такое сообщение — игнор
-            if (prev.some(m => m.id === newMsg.id)) return prev;
+            const alreadyExists = prev.some(
+              m =>
+                !m.optimistic &&
+                m.message === newMsg.message &&
+                m.anon_id === newMsg.anon_id
+            );
+            if (alreadyExists) return prev;
 
-            // Удалим временное сообщение, если совпадает по тексту и автору
+            // Удалим временное сообщение с таким же текстом и автором
             const filtered = prev.filter(
               m => !(m.optimistic && m.message === newMsg.message && m.anon_id === newMsg.anon_id)
             );
@@ -60,13 +65,21 @@ const Chat = ({
   };
 
   const fetchMessages = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('chat_messages')
       .select('*')
       .order('created_at', { ascending: true })
       .limit(50);
 
-    setMessages(data || []);
+    if (error) {
+      console.error("Ошибка при загрузке сообщений:", error);
+      return;
+    }
+
+    setMessages(prev => {
+      const withoutOptimistic = prev.filter(m => !m.optimistic);
+      return [...withoutOptimistic, ...(data || [])];
+    });
   };
 
   const sendMessage = async () => {
@@ -94,7 +107,6 @@ const Chat = ({
 
     if (error) {
       console.error('Ошибка отправки в Supabase:', error);
-      // Можно показать ошибку в UI или вернуть сообщение в инпут
     } else {
       analytics.chatMessageSent();
       analytics.chatMessageTyped(trimmed.length);
