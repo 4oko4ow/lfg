@@ -61,6 +61,21 @@ const Chat = ({
     const trimmed = input.trim();
     if (!trimmed) return;
 
+    const optimisticMessage = {
+      id: `temp-${Date.now()}`, // временный ID
+      anon_id: id,
+      anon_name: name,
+      message: trimmed,
+      created_at: new Date().toISOString(),
+      optimistic: true, // пометка, что это временное сообщение
+    };
+
+    setMessages(prev => [...prev, optimisticMessage]); // показать сразу
+    scrollToBottom(); // сразу прокрутить
+
+    setInput(''); // очистить инпут
+
+    // отправка в Supabase
     await supabase.from('chat_messages').insert({
       anon_id: id,
       anon_name: name,
@@ -69,7 +84,6 @@ const Chat = ({
 
     analytics.chatMessageSent();
     analytics.chatMessageTyped(trimmed.length);
-    setInput('');
   };
 
   return (
