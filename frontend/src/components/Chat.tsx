@@ -63,17 +63,20 @@ const Chat = ({
     const { data, error } = await supabase
       .from('chat_messages')
       .select('*')
-      .order('created_at', { ascending: true })
-      .limit(50);
+      .order('created_at', { ascending: false }) // последние 100
+      .limit(100);
 
     if (error) {
       console.error('Ошибка при загрузке сообщений:', error);
       return;
     }
 
+    // Переворачиваем: старые сверху, новые снизу
+    const ordered = (data || []).reverse();
+
     setMessages(prev => {
       const withoutOptimistic = prev.filter(m => !m.optimistic);
-      return [...withoutOptimistic, ...(data || [])];
+      return [...withoutOptimistic, ...ordered];
     });
   };
 
@@ -136,9 +139,8 @@ const Chat = ({
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${
-              msg.optimistic ? 'opacity-70 italic' : ''
-            }`}
+            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-blue-400 font-medium">{msg.anon_name}</span>
