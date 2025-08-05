@@ -25,7 +25,19 @@ const Chat = ({
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages' },
         payload => {
-          setMessages(prev => [...prev, payload.new]);
+          const newMsg = payload.new;
+
+          setMessages(prev => {
+            // Если уже есть такое сообщение — игнор
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+
+            // Удалим временное сообщение, если совпадает по тексту и автору
+            const filtered = prev.filter(
+              m => !(m.optimistic && m.message === newMsg.message && m.anon_id === newMsg.anon_id)
+            );
+
+            return [...filtered, newMsg];
+          });
         }
       )
       .subscribe();
@@ -62,28 +74,31 @@ const Chat = ({
     if (!trimmed) return;
 
     const optimisticMessage = {
-      id: `temp-${Date.now()}`, // временный ID
+      id: `temp-${Date.now()}`,
       anon_id: id,
       anon_name: name,
       message: trimmed,
       created_at: new Date().toISOString(),
-      optimistic: true, // пометка, что это временное сообщение
+      optimistic: true,
     };
 
-    setMessages(prev => [...prev, optimisticMessage]); // показать сразу
-    scrollToBottom(); // сразу прокрутить
+    setMessages(prev => [...prev, optimisticMessage]);
+    setInput('');
+    scrollToBottom();
 
-    setInput(''); // очистить инпут
-
-    // отправка в Supabase
-    await supabase.from('chat_messages').insert({
+    const { error } = await supabase.from('chat_messages').insert({
       anon_id: id,
       anon_name: name,
       message: trimmed,
     });
 
-    analytics.chatMessageSent();
-    analytics.chatMessageTyped(trimmed.length);
+    if (error) {
+      console.error('Ошибка отправки в Supabase:', error);
+      // Можно показать ошибку в UI или вернуть сообщение в инпут
+    } else {
+      analytics.chatMessageSent();
+      analytics.chatMessageTyped(trimmed.length);
+    }
   };
 
   return (
@@ -110,7 +125,8 @@ const Chat = ({
         {messages.map(msg => (
           <div
             key={msg.id}
-            className="text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0"
+            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-blue-400 font-medium">{msg.anon_name}</span>
