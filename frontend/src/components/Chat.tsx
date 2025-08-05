@@ -28,16 +28,12 @@ const Chat = ({
           const newMsg = payload.new;
 
           setMessages(prev => {
-            const alreadyExists = prev.some(m => m.id === newMsg.id);
-            if (alreadyExists) return prev;
+            // Уже есть по ID? — не добавляем
+            if (prev.some(m => m.id === newMsg.id)) return prev;
 
+            // Удаляем optimistic-сообщение с тем же client_msg_id (если был)
             const filtered = prev.filter(
-              m =>
-                !(
-                  m.optimistic &&
-                  m.message === newMsg.message &&
-                  m.anon_id === newMsg.anon_id
-                )
+              m => m.client_msg_id !== newMsg.client_msg_id
             );
 
             return [...filtered, newMsg];
@@ -85,8 +81,11 @@ const Chat = ({
     const trimmed = input.trim();
     if (!trimmed) return;
 
+    const client_msg_id = `msg-${Date.now()}-${Math.random()}`;
+
     const optimisticMessage = {
-      id: `temp-${Date.now()}-${Math.random()}`, // ✅ уникальный ID
+      id: client_msg_id,
+      client_msg_id,
       anon_id: id,
       anon_name: name,
       message: trimmed,
@@ -98,13 +97,12 @@ const Chat = ({
     setInput('');
     scrollToBottom();
 
-    const { error } = await supabase
-      .from('chat_messages')
-      .insert({
-        anon_id: id,
-        anon_name: name,
-        message: trimmed,
-      });
+    const { error } = await supabase.from('chat_messages').insert({
+      anon_id: id,
+      anon_name: name,
+      message: trimmed,
+      client_msg_id,
+    });
 
     if (error) {
       console.error('Ошибка отправки в Supabase:', error);
@@ -138,8 +136,9 @@ const Chat = ({
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
-              }`}
+            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${
+              msg.optimistic ? 'opacity-70 italic' : ''
+            }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-blue-400 font-medium">{msg.anon_name}</span>
