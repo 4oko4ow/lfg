@@ -32,7 +32,7 @@ const gameSlugMap: Record<string, string> = {
   baldursgate3: "Baldurs Gate 3",
 };
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3","Lethal Company"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
