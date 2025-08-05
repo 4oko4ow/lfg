@@ -28,12 +28,7 @@ const Chat = ({
           const newMsg = payload.new;
 
           setMessages(prev => {
-            const alreadyExists = prev.some(
-              m =>
-                !m.optimistic &&
-                m.message === newMsg.message &&
-                m.anon_id === newMsg.anon_id
-            );
+            const alreadyExists = prev.some(m => m.id === newMsg.id);
             if (alreadyExists) return prev;
 
             const filtered = prev.filter(
@@ -143,9 +138,8 @@ const Chat = ({
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${
-              msg.optimistic ? 'opacity-70 italic' : ''
-            }`}
+            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-blue-400 font-medium">{msg.anon_name}</span>
