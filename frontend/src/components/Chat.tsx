@@ -36,9 +36,13 @@ const Chat = ({
             );
             if (alreadyExists) return prev;
 
-            // Удалим временное сообщение с таким же текстом и автором
             const filtered = prev.filter(
-              m => !(m.optimistic && m.message === newMsg.message && m.anon_id === newMsg.anon_id)
+              m =>
+                !(
+                  m.optimistic &&
+                  m.message === newMsg.message &&
+                  m.anon_id === newMsg.anon_id
+                )
             );
 
             return [...filtered, newMsg];
@@ -72,7 +76,7 @@ const Chat = ({
       .limit(50);
 
     if (error) {
-      console.error("Ошибка при загрузке сообщений:", error);
+      console.error('Ошибка при загрузке сообщений:', error);
       return;
     }
 
@@ -87,7 +91,7 @@ const Chat = ({
     if (!trimmed) return;
 
     const optimisticMessage = {
-      id: `temp-${Date.now()}`,
+      id: `temp-${Date.now()}-${Math.random()}`, // ✅ уникальный ID
       anon_id: id,
       anon_name: name,
       message: trimmed,
@@ -99,11 +103,13 @@ const Chat = ({
     setInput('');
     scrollToBottom();
 
-    const { error } = await supabase.from('chat_messages').insert({
-      anon_id: id,
-      anon_name: name,
-      message: trimmed,
-    });
+    const { error } = await supabase
+      .from('chat_messages')
+      .insert({
+        anon_id: id,
+        anon_name: name,
+        message: trimmed,
+      });
 
     if (error) {
       console.error('Ошибка отправки в Supabase:', error);
@@ -137,8 +143,9 @@ const Chat = ({
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
-              }`}
+            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${
+              msg.optimistic ? 'opacity-70 italic' : ''
+            }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-blue-400 font-medium">{msg.anon_name}</span>
