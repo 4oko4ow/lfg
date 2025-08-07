@@ -31,7 +31,7 @@ export default function PartyCard({
   onJoin: (contact: string) => void;
 }) {
   const isFull = party.joined >= party.slots;
-  const isAlmostFull = party.joined === party.slots - 1;
+  const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
   const isPinned = party.pinned;
 
   const handleJoinClick = () => {
