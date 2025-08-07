@@ -32,7 +32,7 @@ const gameSlugMap: Record<string, string> = {
   baldursgate3: "Baldurs Gate 3",
 };
 
-const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3","Lethal Company"];
+const gameOptions = ["Все", "R.E.P.O", "Dota 2", "CS2", "PEAK", "PUBG", "Rust", "Minecraft", "Tarkov", "Fortnite", "Roblox", "Valorant", "Apex", "The Finals", "Marvel Rivals", "Deep Rock Galactic", "Baldurs Gate 3", "Lethal Company"];
 function App() {
   const [parties, setParties] = useState<Party[]>([]);
   const [filter, setFilter] = useState<string>("Все");
@@ -118,7 +118,7 @@ function App() {
       if (p.pinned) return 100; // 🧷 Закреп
       const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
       if (createdAgoMin < 60) return 50; // 🕑 Свежие (< 30 мин)
-      if (p.joined === p.slots - 1) return 10; // ⚠️ Почти заполненные
+      if (p.joined === p.slots - 1 && p.slots > 2) return 10; // ⚠️ Почти заполненные
       if (p.joined >= p.slots) return -10; // ✅ Уже заполненные
       return 0; // 🔹 Обычные
     };
