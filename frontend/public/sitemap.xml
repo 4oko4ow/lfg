@@ -1,20 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://findparty.online/</loc></url>
-  <url><loc>https://findparty.online/?game=repo</loc></url>
-  <url><loc>https://findparty.online/?game=dota2</loc></url>
-  <url><loc>https://findparty.online/?game=cs2</loc></url>
-  <url><loc>https://findparty.online/?game=peak</loc></url>
-  <url><loc>https://findparty.online/?game=pubg</loc></url>
-  <url><loc>https://findparty.online/?game=rust</loc></url>
-  <url><loc>https://findparty.online/?game=minecraft</loc></url>
-  <url><loc>https://findparty.online/?game=tarkov</loc></url>
-  <url><loc>https://findparty.online/?game=fortnite</loc></url>
-  <url><loc>https://findparty.online/?game=roblox</loc></url>
-  <url><loc>https://findparty.online/?game=valorant</loc></url>
-  <url><loc>https://findparty.online/?game=apex</loc></url>
-  <url><loc>https://findparty.online/?game=thefinals</loc></url>
-  <url><loc>https://findparty.online/?game=marvelrivals</loc></url>
-  <url><loc>https://findparty.online/?game=deeprock</loc></url>
-  <url><loc>https://findparty.online/?game=baldursgate3</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Главная -->
+  <url>
+    <loc>https://findparty.online/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru" />
+  </url>
+
+  <!-- Игры -->
+  <url>
+    <loc>https://findparty.online/?game=repo</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=repo" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=repo" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=dota2</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=dota2" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=dota2" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=cs2</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=cs2" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=cs2" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=peak</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=peak" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=peak" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=pubg</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=pubg" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=pubg" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=rust</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=rust" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=rust" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=minecraft</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=minecraft" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=minecraft" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=tarkov</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=tarkov" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=tarkov" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=fortnite</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=fortnite" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=fortnite" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=roblox</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=roblox" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=roblox" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=valorant</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=valorant" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=valorant" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=apex</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=apex" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=apex" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=thefinals</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=thefinals" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=thefinals" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=marvelrivals</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=marvelrivals" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=marvelrivals" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=deeprock</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=deeprock" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=deeprock" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=baldursgate3</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=baldursgate3" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=baldursgate3" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=lethalcompany</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=lethalcompany" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=lethalcompany" />
+  </url>
+
+  <url>
+    <loc>https://findparty.online/?game=abioticfactor</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=abioticfactor" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=abioticfactor" />
+  </url>
+
 </urlset>

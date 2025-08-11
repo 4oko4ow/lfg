@@ -40,7 +40,7 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   deeprockgalactic: "Deep Rock Galactic",
   baldursgate3: "Baldurs Gate 3",
   lethalcompany: "Lethal Company",
-abioticfactor: "Abiotic Factor",
+  abioticfactor: "Abiotic Factor",
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })
