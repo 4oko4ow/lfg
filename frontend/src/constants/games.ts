@@ -1,6 +1,5 @@
 // src/constants/games.ts
 export const GAME_SLUGS = [
-  "abioticfactor",
   "repo",
   "dota2",
   "cs2",
@@ -18,12 +17,12 @@ export const GAME_SLUGS = [
   "deeprockgalactic",
   "baldursgate3",
   "lethalcompany",
+   "abioticfactor",
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
 
 export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
-  abioticfactor: "Abiotic Factor",
   repo: "R.E.P.O",
   dota2: "Dota 2",
   cs2: "CS2",
@@ -41,6 +40,7 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   deeprockgalactic: "Deep Rock Galactic",
   baldursgate3: "Baldurs Gate 3",
   lethalcompany: "Lethal Company",
+abioticfactor: "Abiotic Factor",
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })
