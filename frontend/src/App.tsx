@@ -133,25 +133,40 @@ function App() {
     setFilter(found ? found.name : ALL_LABEL);
   }, [games, ALL_LABEL, location.search]);
 
+
+  // Не показываем заполненные пати старше 3 дней
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
   // Сортировка карточек
-  const filteredParties = (
-    filter === ALL_LABEL
-      ? parties
-      : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase())
-  ).sort((a, b) => {
-    const getPriority = (p: Party) => {
-      if (p.pinned) return 100;
-      const createdAgoMin =
-        (Date.now() - new Date(p.created_at).getTime()) / 60000;
-      if (createdAgoMin < 60) return 50;
-      if (p.joined === p.slots - 1 && p.slots > 2) return 10;
-      if (p.joined >= p.slots) return -10;
-      return 0;
-    };
-    const d = getPriority(b) - getPriority(a);
-    if (d !== 0) return d;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const filteredParties = useMemo(() => {
+    const byGame =
+      filter === ALL_LABEL
+        ? parties
+        : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase());
+
+    const pruned = byGame.filter((p) => {
+      const isFull = p.joined >= p.slots;
+      const ageMs = Date.now() - new Date(p.created_at).getTime();
+      const isOld = ageMs > THREE_DAYS_MS;
+      // скрываем только если И полная, И старше 3 дней
+      return !(isFull && isOld);
+    });
+
+    return pruned.sort((a, b) => {
+      const getPriority = (p: Party) => {
+        if (p.pinned) return 100;                          // 🧷 Закреп
+        const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
+        if (createdAgoMin < 60) return 50;                 // 🕑 Свежие (< 60 мин)
+        if (p.joined === p.slots - 1 && p.slots > 2) return 10; // ⚠️ Почти заполненные
+        if (p.joined >= p.slots) return -10;               // ✅ Уже заполненные
+        return 0;
+      };
+
+      const d = getPriority(b) - getPriority(a);
+      if (d !== 0) return d;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [parties, filter, ALL_LABEL]);
 
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
@@ -248,8 +263,8 @@ function App() {
                 window.history.pushState({}, "", url);
               }}
               className={`px-4 py-1.5 text-sm rounded-lg border transition-all ${filter === g
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
                 }`}
             >
               {g}

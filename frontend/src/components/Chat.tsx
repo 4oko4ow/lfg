@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { getOrCreateAnonIdentity } from '../utils/anonIdentity';
-import { analytics } from '../utils/analytics';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { supabase } from "../supabaseClient";
+import { getOrCreateAnonIdentity } from "../utils/anonIdentity";
+import { analytics } from "../utils/analytics";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 const Chat = ({
   isMobile = false,
@@ -11,8 +12,9 @@ const Chat = ({
   isMobile?: boolean;
   onClose?: () => void;
 }) => {
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState<any[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const { id, name } = getOrCreateAnonIdentity();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -20,20 +22,20 @@ const Chat = ({
     fetchMessages();
 
     const channel = supabase
-      .channel('chat-room')
+      .channel("chat-room")
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        payload => {
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages" },
+        (payload) => {
           const newMsg = payload.new;
 
-          setMessages(prev => {
+          setMessages((prev) => {
             // Уже есть по ID? — не добавляем
-            if (prev.some(m => m.id === newMsg.id)) return prev;
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
 
             // Удаляем optimistic-сообщение с тем же client_msg_id (если был)
             const filtered = prev.filter(
-              m => m.client_msg_id !== newMsg.client_msg_id
+              (m) => m.client_msg_id !== newMsg.client_msg_id
             );
 
             return [...filtered, newMsg];
@@ -42,9 +44,7 @@ const Chat = ({
       )
       .subscribe();
 
-    if (isMobile) {
-      analytics.chatMobile();
-    }
+    if (isMobile) analytics.chatMobile();
 
     return () => {
       supabase.removeChannel(channel);
@@ -56,26 +56,26 @@ const Chat = ({
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const fetchMessages = async () => {
     const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .order('created_at', { ascending: false }) // последние 100
+      .from("chat_messages")
+      .select("*")
+      .order("created_at", { ascending: false }) // последние 100
       .limit(100);
 
     if (error) {
-      console.error('Ошибка при загрузке сообщений:', error);
+      console.error("Chat load error:", error);
       return;
     }
 
     // Переворачиваем: старые сверху, новые снизу
     const ordered = (data || []).reverse();
 
-    setMessages(prev => {
-      const withoutOptimistic = prev.filter(m => !m.optimistic);
+    setMessages((prev) => {
+      const withoutOptimistic = prev.filter((m) => !m.optimistic);
       return [...withoutOptimistic, ...ordered];
     });
   };
@@ -96,11 +96,11 @@ const Chat = ({
       optimistic: true,
     };
 
-    setMessages(prev => [...prev, optimisticMessage]);
-    setInput('');
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setInput("");
     scrollToBottom();
 
-    const { error } = await supabase.from('chat_messages').insert({
+    const { error } = await supabase.from("chat_messages").insert({
       anon_id: id,
       anon_name: name,
       message: trimmed,
@@ -108,52 +108,65 @@ const Chat = ({
     });
 
     if (error) {
-      console.error('Ошибка отправки в Supabase:', error);
+      console.error("Chat send error:", error);
     } else {
       analytics.chatMessageSent();
       analytics.chatMessageTyped(trimmed.length);
     }
   };
 
+  const timeFmt = new Intl.DateTimeFormat(i18n.language, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
     <div
       className={
         isMobile
-          ? 'fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden'
-          : 'fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50'
+          ? "fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden"
+          : "fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50"
       }
     >
       <div className="bg-zinc-800 p-3 text-sm font-bold border-b border-zinc-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          Live-чат
+          {t("chat.title", "Live chat")}
           <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
         </div>
         {isMobile && (
-          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-white"
+            aria-label={t("ui.close", "Close")}
+            title={t("ui.close", "Close")}
+          >
             <XMarkIcon className="w-5 h-5" />
           </button>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-1 text-sm">
-        {messages.map(msg => (
-          <div
-            key={msg.id}
-            className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? 'opacity-70 italic' : ''
-              }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-blue-400 font-medium">{msg.anon_name}</span>
-              <span className="text-zinc-500 text-[11px] whitespace-nowrap">
-                {new Date(msg.created_at).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            </div>
-            <div className="pl-1 text-zinc-200 break-words">{msg.message}</div>
+        {messages.length === 0 ? (
+          <div className="text-zinc-500 text-center py-6">
+            {t("chat.empty", "No messages yet")}
           </div>
-        ))}
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? "opacity-70 italic" : ""
+                }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-blue-400 font-medium">{msg.anon_name}</span>
+                <span className="text-zinc-500 text-[11px] whitespace-nowrap">
+                  {timeFmt.format(new Date(msg.created_at))}
+                </span>
+              </div>
+              <div className="pl-1 text-zinc-200 break-words">{msg.message}</div>
+            </div>
+          ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -161,9 +174,9 @@ const Chat = ({
         <input
           className="w-full max-w-full text-sm p-2 bg-zinc-800 text-white rounded-md outline-none"
           value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && sendMessage()}
-          placeholder="Напиши что-нибудь…"
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder={t("chat.placeholder", "Write a message…")}
           autoFocus={isMobile}
           onFocus={scrollToBottom}
           inputMode="text"
