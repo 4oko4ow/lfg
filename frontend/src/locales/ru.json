@@ -75,8 +75,8 @@
       "voice": "Голосовой чат"
     },
     "placeholders": {
-      "contact": "Ссылка или юзернейм Discord/Telegram/Steam",
-      "description": "Кого и зачем ищешь? Напр., «Дуо в ранкед сегодня, EU»"
+      "contact": "Как с вами связаться? Ссылка или юзернейм Discord/Telegram/Steam/VK",
+      "description": "Кого и зачем ищешь? Возраст, ранкед, итп"
     },
     "voice": {
       "yes": "С войсом",
