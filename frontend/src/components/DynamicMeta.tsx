@@ -1,117 +1,341 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const GAME_SEO: Record<string, { title: string; description: string }> = {
+/** распознаём язык из /:lang префикса */
+function getLangFromPath(pathname: string): "ru" | "en" {
+  const m = pathname.match(/^\/(en|ru)(\/|$)/i);
+  return (m?.[1]?.toLowerCase() as "ru" | "en") || "ru";
+}
+
+/** Канонический origin (SSR-safe) */
+function getOrigin() {
+  if (typeof window !== "undefined") return window.location.origin;
+  return "https://findparty.online";
+}
+
+/** Мета для главной страницы (когда нет ?game) */
+const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
+  ru: {
+    title: "Поиск тиммейтов — FindParty",
+    description:
+      "Найди пати для Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft и других. Бесплатно, без регистрации.",
+  },
+  en: {
+    title: "Find Teammates — FindParty",
+    description:
+      "Find a party for Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft and more. Free, no registration.",
+  },
+};
+
+/** Мульти-язычные тайтлы/описания для игр: ключ = slug из ?game */
+const GAME_SEO: Record<
+  "ru" | "en",
+  Record<
+    string,
+    {
+      title: string;
+      description: string;
+    }
+  >
+> = {
+  ru: {
     repo: {
-        title: "С кем поиграть в R.E.P.O — Найди пати на FindParty",
-        description: "Найди пати по R.E.P.O за секунды. Всё бесплатно, без регистрации. Вступи или создай объявление прямо сейчас.",
+      title: "С кем поиграть в R.E.P.O — Найди пати на FindParty",
+      description:
+        "Найди пати по R.E.P.O за секунды. Всё бесплатно, без регистрации. Вступи или создай объявление прямо сейчас.",
     },
     dota2: {
-        title: "Ищу пати в Dota 2 — С кем поиграть",
-        description: "На FindParty легко найти команду по Dota 2. Создай или вступи — всё работает без регистрации.",
+      title: "Ищу пати в Dota 2 — С кем поиграть",
+      description:
+        "На FindParty легко найти команду по Dota 2. Создай или вступи — всё работает без регистрации.",
     },
     cs2: {
-        title: "С кем поиграть в CS2 — Найди тиммейтов",
-        description: "Найди тиммейтов для CS2 по интересам, с голосом и без регистрации. Быстро и удобно.",
+      title: "С кем поиграть в CS2 — Найди тиммейтов",
+      description:
+        "Найди тиммейтов для CS2 по интересам, с голосом и без регистрации. Быстро и удобно.",
     },
     peak: {
-        title: "Ищу пати в PEAK — Найди игроков на FindParty",
-        description: "PEAK — отличная игра для кооператива. Найди пати за 10 секунд на FindParty.",
+      title: "Ищу пати в PEAK — Найди игроков на FindParty",
+      description:
+        "PEAK — отличная игра для кооператива. Найди пати за 10 секунд на FindParty.",
     },
     pubg: {
-        title: "Найти пати в PUBG — Ищи тиммейтов",
-        description: "Хочешь играть в PUBG с командой? Найди или создай пати прямо сейчас.",
+      title: "Найти пати в PUBG — Ищи тиммейтов",
+      description:
+        "Хочешь играть в PUBG с командой? Найди или создай пати прямо сейчас.",
     },
     rust: {
-        title: "С кем поиграть в Rust — Найди выживших",
-        description: "Rust требует слаженной игры — найди подходящую пати на FindParty.",
+      title: "С кем поиграть в Rust — Найди выживших",
+      description:
+        "Rust требует слаженной игры — найди подходящую пати на FindParty.",
     },
     minecraft: {
-        title: "Ищу игроков в Minecraft — Найди с кем поиграть",
-        description: "Найди друзей для выживания или строительства в Minecraft. Без регистрации, всё просто.",
+      title: "Ищу игроков в Minecraft — Найди с кем поиграть",
+      description:
+        "Найди друзей для выживания, креатива, мини-игр или модов в Minecraft. Без регистрации.",
     },
     tarkov: {
-        title: "Пати в Escape from Tarkov — Найди напарников",
-        description: "Найди команду для Tarkov — голос, координация, опыт. Создай или вступи прямо сейчас.",
+      title: "Пати в Escape from Tarkov — Найди напарников",
+      description:
+        "Найди команду для Tarkov — голос, координация, опыт. Создай или вступи прямо сейчас.",
     },
     fortnite: {
-        title: "С кем поиграть в Fortnite — Пати без регистрации",
-        description: "Играешь в Fortnite? На FindParty легко найти команду без регистрации и ожидания.",
+      title: "С кем поиграть в Fortnite — Пати без регистрации",
+      description:
+        "Играешь в Fortnite? На FindParty легко найти команду без регистрации и ожидания.",
     },
     roblox: {
-        title: "Ищу с кем поиграть в Roblox — Найди тиммейтов",
-        description: "Roblox интереснее с друзьями — найди с кем поиграть в любимые режимы.",
+      title: "Ищу с кем поиграть в Roblox — Найди тиммейтов",
+      description:
+        "Roblox интереснее с друзьями — найди с кем поиграть в любимые режимы.",
     },
     valorant: {
-        title: "Ищу пати в Valorant — Быстрый поиск тиммейтов",
-        description: "Найди напарников для ранкеда в Valorant. Активное сообщество, чат, объявления.",
+      title: "Ищу пати в Valorant — Быстрый поиск тиммейтов",
+      description:
+        "Найди напарников для ранкеда в Valorant. Активное сообщество, чат, объявления.",
     },
     apex: {
-        title: "Пати для Apex Legends — Найди с кем поиграть",
-        description: "Apex лучше в команде — найди тиммейтов быстро и удобно на FindParty.",
+      title: "Пати для Apex Legends — Найди с кем поиграть",
+      description:
+        "Apex лучше в команде — найди тиммейтов быстро и удобно на FindParty.",
     },
     thefinals: {
-        title: "С кем поиграть в The Finals — FindParty",
-        description: "The Finals — найди подходящую команду по интересам за пару кликов.",
+      title: "С кем поиграть в The Finals — FindParty",
+      description:
+        "The Finals — найди подходящую команду по интересам за пару кликов.",
     },
     marvelrivals: {
-        title: "Marvel Rivals — Найди пати",
-        description: "Создай пати или вступи в уже созданную команду в Marvel Rivals. Всё просто и бесплатно.",
+      title: "Marvel Rivals — Найди пати",
+      description:
+        "Создай пати или вступи в уже созданную команду в Marvel Rivals. Всё просто и бесплатно.",
     },
-    deeprock: {
-        title: "Deep Rock Galactic — Найди с кем копать",
-        description: "Deep Rock Galactic требует слаженной команды. Найди своих гномов на FindParty.",
+    deeprockgalactic: {
+      title: "Deep Rock Galactic — Найди с кем копать",
+      description:
+        "Deep Rock Galactic требует слаженной команды. Найди своих гномов на FindParty.",
     },
     baldursgate3: {
-        title: "С кем поиграть в Baldur's Gate 3 — Кооператив",
-        description: "Ищешь с кем пройти BG3? На FindParty легко найти команду для совместного прохождения.",
+      title: "С кем поиграть в Baldur's Gate 3 — Кооператив",
+      description:
+        "Ищешь с кем пройти BG3? На FindParty легко найти команду для совместного прохождения.",
     },
+    abioticfactor: {
+      title: "Abiotic Factor — Найди пати",
+      description:
+        "Собери кооп-команду для Abiotic Factor: выживание, исследования и крафт. Создай объявление или вступи сейчас.",
+    },
+    lethalcompany: {
+      title: "Lethal Company — Ищу тиммейтов",
+      description:
+        "Найди состав для Lethal Company: кооперативные вылазки, связь и координация. Без регистрации.",
+    },
+  },
+  en: {
+    repo: {
+      title: "R.E.P.O LFG — Find Teammates on FindParty",
+      description:
+        "Find a R.E.P.O party in seconds. Free, no registration. Join or create a listing right now.",
+    },
+    dota2: {
+      title: "Dota 2 LFG — Find a Party",
+      description:
+        "Easily find a Dota 2 team on FindParty. Create or join — no registration required.",
+    },
+    cs2: {
+      title: "CS2 LFG — Find Teammates",
+      description:
+        "Find CS2 teammates by playstyle, with or without voice. Fast and convenient.",
+    },
+    peak: {
+      title: "PEAK LFG — Find Players on FindParty",
+      description:
+        "PEAK is better in co-op. Find a party in 10 seconds on FindParty.",
+    },
+    pubg: {
+      title: "PUBG LFG — Find a Squad",
+      description:
+        "Want to play PUBG with a squad? Join or create a party now.",
+    },
+    rust: {
+      title: "Rust LFG — Find Survivors",
+      description:
+        "Rust needs coordination — find the right party on FindParty.",
+    },
+    minecraft: {
+      title: "Minecraft LFG — Find Friends to Play",
+      description:
+        "Find players for survival, creative, mini-games or modded Minecraft. No registration.",
+    },
+    tarkov: {
+      title: "Escape from Tarkov LFG — Find Teammates",
+      description:
+        "Find a Tarkov squad with voice and experience. Create or join instantly.",
+    },
+    fortnite: {
+      title: "Fortnite LFG — Play Without Solo",
+      description:
+        "Playing Fortnite? Quickly find a squad without registration.",
+    },
+    roblox: {
+      title: "Roblox LFG — Find People to Play",
+      description:
+        "Roblox is better with friends — find teammates for your favorite modes.",
+    },
+    valorant: {
+      title: "Valorant LFG — Fast Teammate Finder",
+      description:
+        "Find ranked or casual teammates in Valorant. Active community, chat, listings.",
+    },
+    apex: {
+      title: "Apex Legends LFG — Find a Squad",
+      description:
+        "Apex is better with a team — find teammates fast on FindParty.",
+    },
+    thefinals: {
+      title: "The Finals LFG — Find a Team",
+      description:
+        "Find a like-minded squad for The Finals in a couple of clicks.",
+    },
+    marvelrivals: {
+      title: "Marvel Rivals LFG — Find a Party",
+      description:
+        "Create a party or join an existing team in Marvel Rivals. Simple and free.",
+    },
+    deeprockgalactic: {
+      title: "Deep Rock Galactic LFG — Find a Crew",
+      description:
+        "Deep Rock Galactic needs a synced crew. Find your dwarves on FindParty.",
+    },
+    baldursgate3: {
+      title: "Baldur's Gate 3 Co‑op — Find Teammates",
+      description:
+        "Looking for BG3 co-op? Easily find a party for a joint playthrough.",
+    },
+    abioticfactor: {
+      title: "Abiotic Factor LFG — Find a Co‑op Team",
+      description:
+        "Build a co‑op group for Abiotic Factor: survival, exploration, crafting. Create or join now.",
+    },
+    lethalcompany: {
+      title: "Lethal Company LFG — Find Teammates",
+      description:
+        "Find a crew for Lethal Company: co‑op runs, voice comms and coordination. No registration.",
+    },
+  },
 };
 
 export function DynamicMeta() {
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const raw = params.get("game")?.toLowerCase();
-    const game = raw && GAME_SEO[raw] ? raw : null;
-   
+  const location = useLocation();
+  const lang = getLangFromPath(location.pathname);
+  const params = new URLSearchParams(location.search);
+  const raw = params.get("game")?.toLowerCase() || "";
 
-    useEffect(() => {
-        if (game && GAME_SEO[game]) {
-            const { title, description } = GAME_SEO[game];
+  // корректируем ключи: слуги строго по твоей карте
+  const knownSlugs = new Set([
+    "repo",
+    "dota2",
+    "cs2",
+    "peak",
+    "pubg",
+    "rust",
+    "minecraft",
+    "tarkov",
+    "fortnite",
+    "roblox",
+    "valorant",
+    "apex",
+    "thefinals",
+    "marvelrivals",
+    "deeprockgalactic",
+    "baldursgate3",
+    "abioticfactor",
+    "lethalcompany",
+  ]);
 
-            // Title
-            document.title = title;
+  const game = knownSlugs.has(raw) ? raw : null;
+  const seo = game ? GAME_SEO[lang][game] : HOME_SEO[lang];
 
-            // Meta description
-            let metaDesc = document.querySelector("meta[name='description']");
-            if (!metaDesc) {
-                metaDesc = document.createElement("meta");
-                metaDesc.setAttribute("name", "description");
-                document.head.appendChild(metaDesc);
-            }
-            metaDesc.setAttribute("content", description);
+  useEffect(() => {
+    // <html lang>
+    const html = document.documentElement;
+    if (html) html.setAttribute("lang", lang);
 
-            // Open Graph: title
-            let ogTitle = document.querySelector("meta[property='og:title']");
-            if (!ogTitle) {
-                ogTitle = document.createElement("meta");
-                ogTitle.setAttribute("property", "og:title");
-                document.head.appendChild(ogTitle);
-            }
-            ogTitle.setAttribute("content", title);
+    const { title, description } = seo;
 
-            // Open Graph: description
-            let ogDesc = document.querySelector("meta[property='og:description']");
-            if (!ogDesc) {
-                ogDesc = document.createElement("meta");
-                ogDesc.setAttribute("property", "og:description");
-                document.head.appendChild(ogDesc);
-            }
-            ogDesc.setAttribute("content", description);
-        }
-    }, [game]);
+    // Title
+    document.title = title;
 
-    return null;
+    // meta[name=description]
+    let metaDesc = document.querySelector("meta[name='description']");
+    if (!metaDesc) {
+      metaDesc = document.createElement("meta");
+      metaDesc.setAttribute("name", "description");
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute("content", description);
+
+    // OG
+    const ensure = (selector: string, attr: "name" | "property", attrValue: string) => {
+      let el = document.querySelector<HTMLMetaElement>(selector);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, attrValue);
+        document.head.appendChild(el);
+      }
+      return el;
+    };
+
+    const ogTitle = ensure("meta[property='og:title']", "property", "og:title");
+    ogTitle.setAttribute("content", title);
+
+    const ogDesc = ensure("meta[property='og:description']", "property", "og:description");
+    ogDesc.setAttribute("content", description);
+
+    const ogType = ensure("meta[property='og:type']", "property", "og:type");
+    ogType.setAttribute("content", "website");
+
+    const ogUrl = ensure("meta[property='og:url']", "property", "og:url");
+    ogUrl.setAttribute("content", window.location.href);
+
+    // Twitter
+    const twCard = ensure("meta[name='twitter:card']", "name", "twitter:card");
+    twCard.setAttribute("content", "summary");
+
+    const twTitle = ensure("meta[name='twitter:title']", "name", "twitter:title");
+    twTitle.setAttribute("content", title);
+
+    const twDesc = ensure("meta[name='twitter:description']", "name", "twitter:description");
+    twDesc.setAttribute("content", description);
+
+    // canonical + hreflang
+    const origin = getOrigin();
+    // вырезаем /en|/ru чтобы собрать alternate
+    const pathNoLang = location.pathname.replace(/^\/(en|ru)/i, "");
+    const canonicalHref = `${origin}/${lang}${pathNoLang}${location.search}`;
+
+    let linkCanonical = document.querySelector<HTMLLinkElement>("link[rel='canonical']");
+    if (!linkCanonical) {
+      linkCanonical = document.createElement("link");
+      linkCanonical.setAttribute("rel", "canonical");
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute("href", canonicalHref);
+
+    const ensureLink = (hreflang: string, href: string) => {
+      let el = document.querySelector<HTMLLinkElement>(`link[rel='alternate'][hreflang='${hreflang}']`);
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", "alternate");
+        el.setAttribute("hreflang", hreflang);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+
+    ensureLink("en", `${origin}/en${pathNoLang}${location.search}`);
+    ensureLink("ru", `${origin}/ru${pathNoLang}${location.search}`);
+    ensureLink("x-default", `${origin}/en/`);
+  }, [lang, location.pathname, location.search, seo]);
+
+  return null;
 }
-
-
