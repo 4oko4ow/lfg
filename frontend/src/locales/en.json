@@ -16,6 +16,10 @@
     "welcome": "The site just launched — welcome!"
   },
   "suggest_game": {
+    "title": "Suggest a game",
+    "thanks": "Thanks! We’ll consider your suggestion.",
+    "placeholder": "Enter the game name",
+    "submit": "Send",
     "cta": "Want your game to appear here?"
   },
   "ui": {
@@ -54,7 +58,7 @@
   "party": {
     "slots": "slots",
     "pinned": "Pinned",
-    "new" : "Just created",
+    "new": "Just created",
     "joined": "joined",
     "full": "Full",
     "almost_full": "Almost full",
@@ -116,11 +120,16 @@
     "copied": "Copied",
     "close": "Close"
   },
+  "feedback": {
+    "button": "Something not working?"
+  },
   "toasts": {
     "created": "Party created",
     "deleted": "Party deleted",
     "updated": "Saved",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "contact_copied": "Contact copied",
+    "contact_copy_failed": "Failed to copy"
   },
   "errors": {
     "required": "This field is required",
@@ -128,12 +137,13 @@
   },
   "survey": {
     "nojoin_title": "Didn't join? Why?",
-    "reasons": {
-      "no_game": "Didn't find my game",
-      "no_people": "Too few parties",
-      "too_complicated": "Too complicated",
-      "other": "Other"
-    },
+    "reasons": [
+      "Didn't find my game",
+      "Afraid to message strangers",
+      "Too few parties",
+      "Didn't know what to do next",
+      "Just browsing / testing"
+    ],
     "submit": "Send"
   },
   "meta": {
@@ -146,6 +156,11 @@
       "description": "Looking for teammates in {{game}}? Create or join a party, filter by mode and region, and find the perfect squad fast."
     }
   },
+  "common": {
+    "close": "Close",
+    "saving": "Saving…"
+  },
+  "feedback.label": "Something not working?",
   "games": {
     "abioticfactor": { "name": "Abiotic Factor" },
     "repo": { "name": "R.E.P.O" },

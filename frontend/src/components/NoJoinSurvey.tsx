@@ -1,16 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { analytics } from "../utils/analytics";
-
-const reasons = [
-    "Не нашёл подходящую игру",
-    "Боюсь писать незнакомым",
-    "Слишком мало пати",
-    "Не понял, что дальше делать",
-    "Просто смотрю / тестирую",
-];
+import { useTranslation } from "react-i18next";
 
 export function NoJoinSurvey({ visible }: { visible: boolean }) {
+    const { t } = useTranslation();
     const [dismissed, setDismissed] = useState(false);
+
+    // безопасно тянем массив причин из i18n
+    const reasons = useMemo(() => {
+        const raw = t("survey.reasons", { returnObjects: true }) as unknown;
+        if (Array.isArray(raw)) return raw as string[];
+        // fallback на случай кривых ресурсов
+        return [
+            t("survey.reasons.0", "Не нашёл подходящую игру"),
+            t("survey.reasons.1", "Боюсь писать незнакомым"),
+            t("survey.reasons.2", "Слишком мало пати"),
+            t("survey.reasons.3", "Не понял, что дальше делать"),
+            t("survey.reasons.4", "Просто смотрю / тестирую"),
+        ];
+    }, [t]);
 
     useEffect(() => {
         const isDismissed = localStorage.getItem("noJoinDismissed") === "true";
@@ -18,9 +26,7 @@ export function NoJoinSurvey({ visible }: { visible: boolean }) {
     }, []);
 
     useEffect(() => {
-        if (visible && !dismissed) {
-            analytics.noJoinSurveyShown();
-        }
+        if (visible && !dismissed) analytics.noJoinSurveyShown();
     }, [visible, dismissed]);
 
     const handleClick = (reason: string) => {
@@ -44,11 +50,11 @@ export function NoJoinSurvey({ visible }: { visible: boolean }) {
                 } z-50 w-[90vw] max-w-[300px] bg-zinc-900 border border-zinc-700 p-4 rounded-xl shadow-xl text-sm text-white`}
         >
             <div className="flex justify-between items-start mb-3">
-                <p className="font-semibold">Почему ты не вступил в пати?</p>
+                <p className="font-semibold">{t("survey.title", "Почему ты не вступил в пати?")}</p>
                 <button
                     onClick={handleClose}
                     className="text-zinc-400 hover:text-white transition"
-                    title="Больше не показывать"
+                    title={t("survey.dismiss", "Больше не показывать")}
                 >
                     ✕
                 </button>
