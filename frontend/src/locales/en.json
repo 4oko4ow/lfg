@@ -1,0 +1,169 @@
+{
+  "app": {
+    "name": "FindParty",
+    "tagline": "Find teammates fast. No registration."
+  },
+  "nav": {
+    "home": "Home",
+    "create": "Create",
+    "chat": "Live Chat",
+    "faq": "FAQ"
+  },
+  "home": {
+    "title": "Find Teammates"
+  },
+  "banner": {
+    "welcome": "The site just launched — welcome!"
+  },
+  "suggest_game": {
+    "cta": "Want your game to appear here?"
+  },
+  "ui": {
+    "language": "Language",
+    "english": "English",
+    "russian": "Русский",
+    "create_party": "Create Party",
+    "join_party": "Join",
+    "copy_contact": "Copy contact",
+    "copied": "Copied",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "report": "Report",
+    "close": "Close",
+    "back": "Back",
+    "search_placeholder": "Search games…"
+  },
+  "filters": {
+    "all_games": "All games",
+    "game": "Game",
+    "region": "Region",
+    "modes": "Modes",
+    "only_new": "Just created",
+    "almost_full": "Almost full",
+    "with_voice": "With voice chat",
+    "without_voice": "No voice chat",
+    "sort": {
+      "label": "Sort",
+      "new": "Newest",
+      "popular": "Popular",
+      "slots": "By slots"
+    }
+  },
+  "party": {
+    "slots": "slots",
+    "pinned": "Pinned",
+    "new" : "Just created",
+    "joined": "joined",
+    "full": "Full",
+    "almost_full": "Almost full",
+    "contact": "Contact",
+    "description": "Description",
+    "created": "Created",
+    "copy_contact_to_join": "Copy the contact to join the party"
+  },
+  "form": {
+    "title": "Create a party",
+    "cta": "Create Party",
+    "update_cta": "Save changes",
+    "labels": {
+      "game": "Game",
+      "slots": "Slots",
+      "contact": "Contact",
+      "description": "Description",
+      "voice": "Voice chat"
+    },
+    "placeholders": {
+      "contact": "Discord/Telegram/Steam link or username",
+      "description": "What are you looking for? e.g., “Duo for ranked tonight, EU servers”"
+    },
+    "voice": {
+      "yes": "Voice chat",
+      "no": "No voice chat"
+    },
+    "validation": {
+      "game_required": "Select a game",
+      "slots_required": "Choose number of slots",
+      "contact_required": "Enter a contact",
+      "description_required": "Enter a short description (10–200 chars)"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "empty": "No messages yet",
+    "online": "Online"
+  },
+  "empty": {
+    "parties": "No parties yet. Be the first to create one!"
+  },
+  "loading": {
+    "parties": "Loading parties..."
+  },
+  "timeago": {
+    "seconds": "{{count}}s ago",
+    "minute": "1 min ago",
+    "minutes": "{{count}} min ago",
+    "hour": "1 h ago",
+    "hours": "{{count}} h ago"
+  },
+  "modals": {
+    "contact_title": "Join the party",
+    "contact_desc": "Copy the contact and send a message to the host.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "close": "Close"
+  },
+  "toasts": {
+    "created": "Party created",
+    "deleted": "Party deleted",
+    "updated": "Saved",
+    "error": "Something went wrong"
+  },
+  "errors": {
+    "required": "This field is required",
+    "network": "Network error. Try again"
+  },
+  "survey": {
+    "nojoin_title": "Didn't join? Why?",
+    "reasons": {
+      "no_game": "Didn't find my game",
+      "no_people": "Too few parties",
+      "too_complicated": "Too complicated",
+      "other": "Other"
+    },
+    "submit": "Send"
+  },
+  "meta": {
+    "home": {
+      "title": "Find Teammates — FindParty",
+      "description": "Find a party for Valorant, Fortnite, Apex, CS2, Dota 2 and more. No registration."
+    },
+    "game": {
+      "title": "{{game}} LFG — Find teammates, parties & squads",
+      "description": "Looking for teammates in {{game}}? Create or join a party, filter by mode and region, and find the perfect squad fast."
+    }
+  },
+  "games": {
+    "abioticfactor": { "name": "Abiotic Factor" },
+    "repo": { "name": "R.E.P.O" },
+    "dota2": { "name": "Dota 2" },
+    "cs2": { "name": "CS2" },
+    "peak": { "name": "PEAK" },
+    "pubg": { "name": "PUBG" },
+    "rust": { "name": "Rust" },
+    "minecraft": { "name": "Minecraft" },
+    "tarkov": { "name": "Tarkov" },
+    "fortnite": { "name": "Fortnite" },
+    "roblox": { "name": "Roblox" },
+    "valorant": { "name": "Valorant" },
+    "apex": { "name": "Apex" },
+    "thefinals": { "name": "The Finals" },
+    "marvelrivals": { "name": "Marvel Rivals" },
+    "deeprockgalactic": { "name": "Deep Rock Galactic" },
+    "baldursgate3": { "name": "Baldurs Gate 3" },
+    "lethalcompany": { "name": "Lethal Company" }
+  }
+}

@@ -6,21 +6,39 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
-import { analytics } from "../utils/analytics";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { analytics } from "../utils/analytics";
+import { useTranslation } from "react-i18next";
 
-function timeAgo(isoDate: string): string {
+/** Локализованное "time ago" для MVP */
+function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
   const seconds = Math.floor((Date.now() - new Date(isoDate).getTime()) / 1000);
 
-  if (seconds < 60) return `${seconds} сек назад`;
+  if (seconds < 60) {
+    return t("timeago.seconds", { count: seconds, defaultValue: "{{count}} сек назад" });
+  }
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} мин назад`;
+  if (minutes === 1) {
+    return t("timeago.minute", { defaultValue: "1 мин назад" });
+  }
+  if (minutes < 60) {
+    return t("timeago.minutes", { count: minutes, defaultValue: "{{count}} мин назад" });
+  }
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} ч назад`;
-
+  if (hours === 1) {
+    return t("timeago.hour", { defaultValue: "1 ч назад" });
+  }
+  if (hours < 24) {
+    return t("timeago.hours", { count: hours, defaultValue: "{{count}} ч назад" });
+  }
   const days = Math.floor(hours / 24);
-  const remainingHours = hours % 24;
-  return `${days} дн ${remainingHours} ч назад`;
+  const remHours = hours % 24;
+  // если нет ключа — покажем "Xd Xh ago" / "дн ч назад"
+  return t("timeago.days_hours", {
+    d: days,
+    h: remHours,
+    defaultValue: "{{d}} дн {{h}} ч назад",
+  });
 }
 
 export default function PartyCard({
@@ -30,6 +48,8 @@ export default function PartyCard({
   party: Party;
   onJoin: (contact: string) => void;
 }) {
+  const { t } = useTranslation();
+
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
   const isPinned = party.pinned;
@@ -39,7 +59,8 @@ export default function PartyCard({
     onJoin(party.contact || "");
   };
 
-  const createdAgoMinutes = (Date.now() - new Date(party.created_at).getTime()) / 60000;
+  const createdAgoMinutes =
+    (Date.now() - new Date(party.created_at).getTime()) / 60000;
   const isNewlyCreated = createdAgoMinutes < 30;
 
   return (
@@ -51,28 +72,34 @@ export default function PartyCard({
       <div className="flex justify-between items-start">
         <div className="space-y-1">
           <h3 className="text-xl font-semibold">{party.game}</h3>
+
           <div className="flex flex-wrap gap-2">
             {isPinned && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-pink-400 bg-pink-900/60 px-2 py-0.5 rounded-md">
                 <BookmarkIcon className="w-4 h-4" />
-                Закреплено
+                {t("party.pinned", { defaultValue: "Закреплено" })}
               </span>
             )}
+
             {isNewlyCreated && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 bg-blue-900/60 px-2 py-0.5 rounded-md">
                 <ClockIcon className="w-4 h-4" />
-                Только что создано
+                {t("party.new", { defaultValue: "Только что создано" })}
               </span>
             )}
+
             {isAlmostFull && !isFull && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-400 bg-yellow-900/50 px-2 py-0.5 rounded-md">
                 <UserGroupIcon className="w-4 h-4" />
-                Почти заполнено
+                {t("party.almost_full", { defaultValue: "Почти заполнено" })}
               </span>
             )}
           </div>
         </div>
-        <span className="text-sm text-zinc-400">{timeAgo(party.created_at)}</span>
+
+        <span className="text-sm text-zinc-400">
+          {timeAgo(party.created_at, t)}
+        </span>
       </div>
 
       <div className="flex items-start gap-2 text-sm text-zinc-300">
@@ -91,22 +118,30 @@ export default function PartyCard({
         <div className="flex items-center gap-1">
           <UserGroupIcon className="w-4 h-4 text-zinc-400" />
           <span>
-            {party.joined}/{party.slots} слотов
+            {t("party.slots_label", {
+              joined: party.joined,
+              slots: party.slots,
+              // RU fallback: "x/y слотов", EN fallback: "x/y slots"
+              defaultValue:
+                "{{joined}}/{{slots}} " +
+                (t("party.slots", { defaultValue: "слотов" }) as string),
+            })}
           </span>
         </div>
+
         <button
           disabled={isFull}
           onClick={handleJoinClick}
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
-            ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 text-white"
+              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
         >
           {isFull ? (
-            "Заполнено"
+            t("party.full", { defaultValue: "Заполнено" })
           ) : (
             <>
-              Вступить
+              {t("ui.join_party", { defaultValue: "Вступить" })}
               <ArrowRightIcon className="w-4 h-4 ml-1 inline-block" />
             </>
           )}

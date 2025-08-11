@@ -1,0 +1,169 @@
+{
+  "app": {
+    "name": "FindParty",
+    "tagline": "Быстрый поиск тиммейтов. Без регистрации."
+  },
+  "nav": {
+    "home": "Главная",
+    "create": "Создать",
+    "chat": "Чат",
+    "faq": "FAQ"
+  },
+  "home": {
+    "title": "Поиск тиммейтов"
+  },
+  "banner": {
+    "welcome": "Сайт только запустился — добро пожаловать!"
+  },
+  "suggest_game": {
+    "cta": "Хочешь, чтобы здесь появилась твоя игра?"
+  },
+  "ui": {
+    "language": "Язык",
+    "english": "English",
+    "russian": "Русский",
+    "create_party": "Создать пати",
+    "join_party": "Вступить",
+    "copy_contact": "Скопировать контакт",
+    "copied": "Скопировано",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "report": "Пожаловаться",
+    "close": "Закрыть",
+    "back": "Назад",
+    "search_placeholder": "Поиск игр…"
+  },
+  "filters": {
+    "all_games": "Все",
+    "game": "Игра",
+    "region": "Регион",
+    "modes": "Режимы",
+    "only_new": "Только новые",
+    "almost_full": "Почти заполнено",
+    "with_voice": "С войсом",
+    "without_voice": "Без войса",
+    "sort": {
+      "label": "Сортировка",
+      "new": "Сначала новые",
+      "popular": "Популярные",
+      "slots": "По слотам"
+    }
+  },
+  "party": {
+    "slots": "слотов",
+    "joined": "вступило",
+    "pinned": "Закрепленно",
+    "new" : "Только что создано",
+    "full": "Заполнено",
+    "almost_full": "Почти заполнено",
+    "contact": "Контакт",
+    "description": "Описание",
+    "created": "Создано",
+    "copy_contact_to_join": "Скопируй контакт, чтобы вступить в пати"
+  },
+  "form": {
+    "title": "Создать пати",
+    "cta": "Создать пати",
+    "update_cta": "Сохранить изменения",
+    "labels": {
+      "game": "Игра",
+      "slots": "Слоты",
+      "contact": "Контакт",
+      "description": "Описание",
+      "voice": "Голосовой чат"
+    },
+    "placeholders": {
+      "contact": "Ссылка или юзернейм Discord/Telegram/Steam",
+      "description": "Кого и зачем ищешь? Напр., «Дуо в ранкед сегодня, EU»"
+    },
+    "voice": {
+      "yes": "С войсом",
+      "no": "Без войса"
+    },
+    "validation": {
+      "game_required": "Выбери игру",
+      "slots_required": "Укажи число слотов (2–10)",
+      "contact_required": "Укажи контакт",
+      "description_required": "Коротко опиши цель (10–200 символов)"
+    }
+  },
+  "chat": {
+    "title": "Чат",
+    "placeholder": "Напиши сообщение…",
+    "send": "Отправить",
+    "empty": "Сообщений пока нет",
+    "online": "Сейчас онлайн"
+  },
+  "loading": {
+    "parties": "Загрузка пати..."
+  },
+  "empty": {
+    "parties": "Активных пати нет. Будь первым!"
+  },
+  "timeago": {
+    "seconds": "{{count}} сек назад",
+    "minute": "минуту назад",
+    "minutes": "{{count}} мин назад",
+    "hour": "час назад",
+    "hours": "{{count}} ч назад"
+  },
+  "modals": {
+    "contact_title": "Вступить в пати",
+    "contact_desc": "Скопируй контакт и напиши хосту.",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "close": "Закрыть"
+  },
+  "toasts": {
+    "created": "Пати создано",
+    "deleted": "Пати удалено",
+    "updated": "Сохранено",
+    "error": "Что-то пошло не так"
+  },
+  "errors": {
+    "required": "Это обязательное поле",
+    "network": "Сетевая ошибка. Попробуй ещё раз"
+  },
+  "survey": {
+    "nojoin_title": "Почему не вступил?",
+    "reasons": {
+      "no_game": "Не нашёл свою игру",
+      "no_people": "Мало пати",
+      "too_complicated": "Сложно",
+      "other": "Другое"
+    },
+    "submit": "Отправить"
+  },
+  "meta": {
+    "home": {
+      "title": "Поиск тиммейтов — FindParty",
+      "description": "Найди пати для Valorant, Fortnite, Apex, CS2, Dota 2 и других. Без регистрации."
+    },
+    "game": {
+      "title": "{{game}} — поиск тиммейтов (LFG)",
+      "description": "Ищешь тиммейтов в {{game}}? Создай или вступи в пати, фильтруй по режиму и региону и находи идеальную команду."
+    }
+  },
+  "games": {
+    "abioticfactor": { "name": "Abiotic Factor" },
+    "repo": { "name": "R.E.P.O" },
+    "dota2": { "name": "Dota 2" },
+    "cs2": { "name": "CS2" },
+    "peak": { "name": "PEAK" },
+    "pubg": { "name": "PUBG" },
+    "rust": { "name": "Rust" },
+    "minecraft": { "name": "Minecraft" },
+    "tarkov": { "name": "Tarkov" },
+    "fortnite": { "name": "Fortnite" },
+    "roblox": { "name": "Roblox" },
+    "valorant": { "name": "Valorant" },
+    "apex": { "name": "Apex" },
+    "thefinals": { "name": "The Finals" },
+    "marvelrivals": { "name": "Marvel Rivals" },
+    "deeprockgalactic": { "name": "Deep Rock Galactic" },
+    "baldursgate3": { "name": "Baldurs Gate 3" },
+    "lethalcompany": { "name": "Lethal Company" }
+  }
+}
