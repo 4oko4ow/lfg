@@ -17,7 +17,8 @@ export const GAME_SLUGS = [
   "deeprockgalactic",
   "baldursgate3",
   "lethalcompany",
-   "abioticfactor",
+  "abioticfactor",
+  "gta5online"
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
@@ -41,6 +42,8 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   baldursgate3: "Baldurs Gate 3",
   lethalcompany: "Lethal Company",
   abioticfactor: "Abiotic Factor",
+  gta5online: "GTA 5 Online"
+
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })

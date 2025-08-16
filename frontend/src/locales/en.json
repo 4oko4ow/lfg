@@ -111,7 +111,9 @@
     "minute": "1 min ago",
     "minutes": "{{count}} min ago",
     "hour": "1 h ago",
-    "hours": "{{count}} h ago"
+    "hours": "{{count}} h ago",
+    "days_hours": "{{d}}d {{h}}h ago"
+
   },
   "modals": {
     "contact_title": "Join the party",
