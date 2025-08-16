@@ -115,7 +115,9 @@
     "minute": "минуту назад",
     "minutes": "{{count}} мин назад",
     "hour": "час назад",
-    "hours": "{{count}} ч назад"
+    "hours": "{{count}} ч назад",
+    "days_hours": "{{d}}дн {{h}}ч назад"
+
   },
   "modals": {
     "contact_title": "Вступить в пати",

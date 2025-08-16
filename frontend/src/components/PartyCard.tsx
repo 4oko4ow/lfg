@@ -9,6 +9,7 @@ import {
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { analytics } from "../utils/analytics";
 import { useTranslation } from "react-i18next";
+import {getGameName} from "../constants/games.ts";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -71,7 +72,7 @@ export default function PartyCard({
     >
       <div className="flex justify-between items-start">
         <div className="space-y-1">
-          <h3 className="text-xl font-semibold">{party.game}</h3>
+          <h3 className="text-xl font-semibold"> {getGameName(party.game, t)}</h3>
 
           <div className="flex flex-wrap gap-2">
             {isPinned && (
