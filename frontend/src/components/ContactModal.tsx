@@ -27,10 +27,10 @@ export default function ContactModal({
     try {
       await navigator.clipboard.writeText(contact);
       sendJoinParty(partyId);
-      toast.success(t("contact.copySuccess"), { duration: 5000 });
+      toast.success(t("ui.copied"), { duration: 5000 });
       onClose();
     } catch {
-      toast.error(t("contact.copyError"), { duration: 5000 });
+      toast.error(t("toasts.error"), { duration: 5000 });
     }
   };
 
