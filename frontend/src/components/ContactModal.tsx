@@ -44,13 +44,13 @@ export default function ContactModal({
             onClick={handleCopy}
             className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-sm rounded"
           >
-            {t("contact.copy")}
+            {t("ui.copy_contact")}
           </button>
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-sm rounded"
           >
-            {t("contact.close")}
+            {t("ui.close")}
           </button>
         </div>
       </div>
