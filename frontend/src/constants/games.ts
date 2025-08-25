@@ -36,7 +36,7 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   fortnite: "Fortnite",
   roblox: "Roblox",
   valorant: "Valorant",
-   terraria: "Terraria",
+  terraria: "Terraria",
   apex: "Apex",
   thefinals: "The Finals",
   marvelrivals: "Marvel Rivals",
