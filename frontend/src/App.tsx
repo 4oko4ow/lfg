@@ -137,6 +137,10 @@ function App() {
   // Не показываем заполненные пати старше 3 дней
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
+  // И незаполненные старше 3 недель
+  const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
+
+
   // Сортировка карточек
   const filteredParties = useMemo(() => {
     const byGame =
@@ -147,18 +151,23 @@ function App() {
     const pruned = byGame.filter((p) => {
       const isFull = p.joined >= p.slots;
       const ageMs = Date.now() - new Date(p.created_at).getTime();
-      const isOld = ageMs > THREE_DAYS_MS;
-      // скрываем только если И полная, И старше 3 дней
-      return !(isFull && isOld);
+
+      const isOldFull = isFull && ageMs > THREE_DAYS_MS;
+      const isStaleUnfilled = !isFull && ageMs > THREE_WEEKS_MS;
+
+      // скрываем:
+      // 1) если пати полная и ей > 3 дней
+      // 2) если пати НЕ заполнена и ей > 3 недель
+      return !(isOldFull || isStaleUnfilled);
     });
 
     return pruned.sort((a, b) => {
       const getPriority = (p: Party) => {
-        if (p.pinned) return 100;                          // 🧷 Закреп
+        if (p.pinned) return 100;
         const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
-        if (createdAgoMin < 60) return 50;                 // 🕑 Свежие (< 60 мин)
-        if (p.joined === p.slots - 1 && p.slots > 2) return 10; // ⚠️ Почти заполненные
-        if (p.joined >= p.slots) return -10;               // ✅ Уже заполненные
+        if (createdAgoMin < 60) return 50;
+        if (p.joined === p.slots - 1 && p.slots > 2) return 10;
+        if (p.joined >= p.slots) return -10;
         return 0;
       };
 
