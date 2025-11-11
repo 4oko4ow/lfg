@@ -4,7 +4,6 @@ import { supabase } from "../supabaseClient";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../context/AuthContext";
-import { useParams } from "react-router-dom";
 import LoginModal from "./modals/LoginModal";
 
 const Chat = ({
@@ -17,7 +16,6 @@ const Chat = ({
   onlineCount?: number;
 }) => {
   const { t, i18n } = useTranslation();
-  const { lang } = useParams();
   const { profile } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
