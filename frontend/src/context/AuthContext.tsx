@@ -35,7 +35,7 @@ type AuthContextValue = {
   profile: AuthProfile | null;
   loading: boolean;
   contactHandles: ContactHandlesMap;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<boolean>;
   signIn: (provider: SocialProvider) => void;
   signOut: () => Promise<void>;
   linkProvider: (provider: SocialProvider) => void;
@@ -128,27 +128,37 @@ async function readProfile(): Promise<{
   contacts: ContactHandlesMap;
 }> {
   try {
-    const response = await fetch(buildBackendUrl("/auth/session"), {
+    const url = buildBackendUrl("/auth/session");
+    console.log("[Auth] Fetching profile from:", url);
+    const response = await fetch(url, {
       credentials: "include",
     });
+    console.log("[Auth] Session response status:", response.status);
+    
     if (response.status === 204) {
+      console.log("[Auth] No session found (204 No Content)");
       return { profile: null, contacts: {} };
     }
     if (!response.ok) {
       // Don't throw for 401/403 - just return no profile
       if (response.status === 401 || response.status === 403) {
+        console.log("[Auth] Unauthorized (401/403)");
         return { profile: null, contacts: {} };
       }
+      const errorText = await response.text().catch(() => "unknown error");
+      console.error("[Auth] Failed to load session:", response.status, errorText);
       throw new Error(`Failed to load session: ${response.status}`);
     }
     const data = (await response.json()) as RawProfile;
     if (!data?.user) {
+      console.log("[Auth] Response missing user data");
       return { profile: null, contacts: {} };
     }
+    console.log("[Auth] Profile loaded successfully for user:", data.user.id);
     return mapProfile(data);
   } catch (error) {
     // Network errors or other failures - log but don't crash
-    console.error("Failed to read profile:", error);
+    console.error("[Auth] Failed to read profile:", error);
     return { profile: null, contacts: {} };
   }
 }
@@ -180,23 +190,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = useCallback(async (): Promise<boolean> => {
     try {
+      setLoading(true);
       const { profile: mapped, contacts } = await readProfile();
       setProfile(mapped);
       setContactHandles(contacts);
+      const success = mapped !== null;
+      setLoading(false);
+      return success;
     } catch (error) {
       console.error("Failed to refresh profile:", error);
       setProfile(null);
       setContactHandles({});
-    } finally {
       setLoading(false);
+      return false;
     }
   }, []);
 
   useEffect(() => {
-    void refreshProfile();
-  }, [refreshProfile]);
+    // Initial load - don't set loading to false if profile is null on first load
+    // This allows the UI to show loading state properly
+    const loadInitial = async () => {
+      try {
+        setLoading(true);
+        const { profile: mapped, contacts } = await readProfile();
+        setProfile(mapped);
+        setContactHandles(contacts);
+      } catch (error) {
+        console.error("Failed to load initial profile:", error);
+        setProfile(null);
+        setContactHandles({});
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadInitial();
+  }, []);
 
   useEffect(() => {
     void loadConfig();

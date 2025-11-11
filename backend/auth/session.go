@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -65,17 +66,26 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 		// Only use SameSite=None if Secure is true (required by browsers)
 		sameSite = http.SameSiteNoneMode
 	}
-	http.SetCookie(w, &http.Cookie{
+	
+	// For cross-domain cookies, don't set Domain if it's empty or if it would restrict the cookie
+	// Empty domain means the cookie is set for the exact domain that set it
+	cookie := &http.Cookie{
 		Name:     s.cookieName,
 		Value:    token,
 		Path:     "/",
-		Domain:   s.cookieDomain,
 		Expires:  expires,
 		MaxAge:   int(ttl.Seconds()),
 		HttpOnly: true,
 		Secure:   s.secure,
 		SameSite: sameSite,
-	})
+	}
+	// Only set Domain if it's explicitly provided and not empty
+	// This allows the cookie to work for cross-domain scenarios
+	if s.cookieDomain != "" {
+		cookie.Domain = s.cookieDomain
+	}
+	http.SetCookie(w, cookie)
+	log.Printf("[Session] Issued session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
 	return nil
 }
 
@@ -84,17 +94,21 @@ func (s *SessionManager) Clear(w http.ResponseWriter) {
 	if s.secure {
 		sameSite = http.SameSiteNoneMode
 	}
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     s.cookieName,
 		Value:    "",
 		Path:     "/",
-		Domain:   s.cookieDomain,
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   s.secure,
 		SameSite: sameSite,
-	})
+	}
+	// Only set Domain if it's explicitly provided
+	if s.cookieDomain != "" {
+		cookie.Domain = s.cookieDomain
+	}
+	http.SetCookie(w, cookie)
 }
 
 func (s *SessionManager) Extract(r *http.Request) (string, error) {

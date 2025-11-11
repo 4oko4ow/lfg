@@ -34,20 +34,36 @@ export default function AuthCallbackPage() {
           // Retry logic: try to refresh profile multiple times with increasing delays
           // This handles cases where the cookie might not be immediately available
           // especially in cross-domain scenarios
-          const maxRetries = 3;
-          const delays = [300, 600, 1000]; // Progressive delays
+          const maxRetries = 5;
+          const delays = [200, 400, 600, 1000, 1500]; // Progressive delays
+          let profileLoaded = false;
 
           for (let attempt = 0; attempt < maxRetries; attempt++) {
             await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
 
             try {
-              await refreshProfile();
+              profileLoaded = await refreshProfile();
+              if (profileLoaded) {
+                console.log(`Profile loaded successfully on attempt ${attempt + 1}`);
+                break;
+              } else {
+                console.warn(`Profile not loaded yet (attempt ${attempt + 1}/${maxRetries})`);
+              }
             } catch (error) {
               console.warn(`Failed to refresh profile (attempt ${attempt + 1}/${maxRetries}):`, error);
             }
           }
 
-          toast.success(t(messageMeta.key, "Вы успешно вошли"));
+          if (profileLoaded) {
+            toast.success(t(messageMeta.key, "Вы успешно вошли"));
+          } else {
+            console.warn("Profile not loaded after all retries, but showing success message");
+            toast.success(t(messageMeta.key, "Вы успешно вошли"));
+            // Try one more time after showing the message
+            setTimeout(() => {
+              void refreshProfile();
+            }, 500);
+          }
         } catch (error) {
           console.error("Failed to refresh profile after auth:", error);
           // Still show success message and navigate, profile might load on next page

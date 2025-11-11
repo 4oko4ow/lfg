@@ -239,13 +239,16 @@ func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
 	}
 	profile, err := h.getCurrentProfile(r)
 	if err != nil {
+		log.Printf("[Auth] Error getting profile: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if profile == nil {
+		log.Printf("[Auth] No profile found for session")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	log.Printf("[Auth] Returning profile for user: %s", profile.User.ID)
 	writeJSON(w, profile)
 }
 
