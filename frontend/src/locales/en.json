@@ -65,12 +65,18 @@
     "contact": "Contact",
     "description": "Description",
     "created": "Created",
-    "copy_contact_to_join": "Copy the contact to join the party"
+    "copy_contact_to_join": "Copy the contact to join the party",
+    "preferred": "Primary"
   },
   "form": {
     "title": "Create a party",
     "cta": "Create Party",
     "update_cta": "Save changes",
+    "contact_methods": "Choose which contact methods to show",
+    "no_contacts": "You don't have any contacts yet. Configure them in your profile.",
+    "go_to_profile": "Go to profile",
+    "preferred_contact": "Preferred contact method",
+    "preferred_contact_hint": "This contact will appear first on your listing",
     "labels": {
       "game": "Game",
       "slots": "Slots",
@@ -91,6 +97,41 @@
       "slots_required": "Choose number of slots",
       "contact_required": "Enter a contact",
       "description_required": "Enter a short description (10–200 chars)"
+    }
+  },
+  "auth": {
+    "loading": "Loading...",
+    "error": "Failed to authenticate",
+    "success": "Signed in",
+    "steam_conflict": "This Steam account is already linked to another profile",
+    "telegram_conflict": "This Telegram account is already linked to another profile",
+    "sign_in_prompt": "Sign in with:",
+    "sign_out": "Sign out"
+  },
+  "profile": {
+    "link": "Profile",
+    "anonymous": "Player",
+    "title": "Your profile",
+    "description": "Connect messaging platforms and choose which ones to show in your ads.",
+    "steam_description": "Link your Steam account to share your profile.",
+    "discord_description": "Link Discord so players can reach you by username or profile.",
+    "telegram_description": "Connect Telegram to share your handle.",
+    "relink": "Reconnect",
+    "connect": "Connect",
+    "contact_label": "Contact for ads",
+    "save": "Save",
+    "link_required": "Connect the account first to set up the contact.",
+    "saved": "Saved"
+  },
+  "contact": {
+    "title": "Contacts",
+    "opened": "Opening contact",
+    "open": "Open",
+    "no_methods": "No contacts provided",
+    "methods": {
+      "steam": "Steam",
+      "discord": "Discord",
+      "telegram": "Telegram"
     }
   },
   "chat": {
