@@ -129,6 +129,11 @@ const GAME_SEO: Record<
       description:
         "Найди состав для Lethal Company: кооперативные вылазки, связь и координация. Без регистрации.",
     },
+    arcraiders: {
+      title: "Arc Raiders — Найди команду",
+      description:
+        "Найди пати для Arc Raiders: кооперативные рейды и командная игра. Создай объявление или вступи сейчас.",
+    },
   },
   en: {
     repo: {
@@ -221,6 +226,11 @@ const GAME_SEO: Record<
       description:
         "Find a crew for Lethal Company: co‑op runs, voice comms and coordination. No registration.",
     },
+    arcraiders: {
+      title: "Arc Raiders LFG — Find a Squad",
+      description:
+        "Find a party for Arc Raiders: co-op raids and team play. Create or join now.",
+    },
   },
 };
 
@@ -250,6 +260,7 @@ export function DynamicMeta() {
     "baldursgate3",
     "abioticfactor",
     "lethalcompany",
+    "arcraiders",
   ]);
 
   const game = knownSlugs.has(raw) ? raw : null;

@@ -54,6 +54,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
             {t("auth.sign_in_title", "Sign in")}
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-zinc-400 hover:text-white transition-colors p-1"
             aria-label={t("ui.close", "Close")}
@@ -70,6 +71,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           {PROVIDERS.map((provider) => (
             <button
               key={provider.id}
+              type="button"
               onClick={() => handleSignIn(provider.id)}
               className={`w-full ${provider.brandColor} ${provider.hoverColor} ${provider.textColor} border-0 rounded-lg px-6 py-3.5 font-semibold transition-all duration-200 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl`}
               style={{
@@ -84,6 +86,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <button
+          type="button"
           className="mt-4 w-full text-sm text-zinc-400 hover:text-white transition-colors duration-200 py-2"
           onClick={onClose}
         >

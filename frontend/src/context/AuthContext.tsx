@@ -187,7 +187,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = (await response.json()) as {
         telegram_bot_id?: string | null;
       };
-      const botId = data.telegram_bot_id?.trim() ? data.telegram_bot_id : null;
+      // Обрабатываем случай, когда бэкенд возвращает пустую строку или null
+      const rawBotId = data.telegram_bot_id;
+      const botId = rawBotId && typeof rawBotId === 'string' && rawBotId.trim() !== '' 
+        ? rawBotId.trim() 
+        : null;
       setTelegramBotId(botId);
       return botId;
     } catch (error) {
@@ -247,15 +251,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleTelegramAuth = useCallback(async () => {
     const redirect = getRedirectPath();
-    const botId = telegramBotId ?? (await loadConfig());
-    if (!botId) {
-      console.error("Telegram bot ID is not configured");
+    let botId = telegramBotId;
+    
+    // Если botId еще не загружен, загружаем его
+    if (!botId || botId.trim() === "") {
+      botId = await loadConfig();
+    }
+    
+    // Проверяем, что botId не пустой
+    if (!botId || botId.trim() === "") {
+      console.error("Telegram bot ID is not configured. Please check backend configuration.");
       redirectToCallback("telegram_error", redirect);
       return;
     }
 
     try {
-      const payload = await openTelegramAuth(botId);
+      const payload = await openTelegramAuth(botId.trim());
       // Convert id from number to string as backend expects string
       const requestBody = {
         id: String(payload.id),
@@ -285,6 +296,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       redirectToCallback(status, redirect);
     } catch (error) {
       console.error("Telegram auth failed", error);
+      // Если ошибка связана с bot ID, показываем более понятное сообщение
+      if (error instanceof Error && error.message.includes("bot ID")) {
+        console.error("Telegram bot ID is missing or invalid. Please check backend configuration (TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_ID).");
+      }
       redirectToCallback("telegram_error", redirect);
     }
   }, [redirectToCallback, telegramBotId, loadConfig]);

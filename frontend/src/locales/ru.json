@@ -164,7 +164,9 @@
     "send": "Отправить",
     "empty": "Сообщений пока нет",
     "online": "Сейчас онлайн",
-    "login_required": "Войдите, чтобы писать в чат"
+    "login_required": "Войдите, чтобы писать в чат",
+    "collapse": "Свернуть чат",
+    "expand": "Развернуть чат"
   },
   "empty": {
     "parties": "Активных пати нет. Будь первым!"
@@ -246,6 +248,7 @@
     "marvelrivals": { "name": "Marvel Rivals" },
     "deeprockgalactic": { "name": "Deep Rock Galactic" },
     "baldursgate3": { "name": "Baldurs Gate 3" },
-    "lethalcompany": { "name": "Lethal Company" }
+    "lethalcompany": { "name": "Lethal Company" },
+    "arcraiders": { "name": "Arc Raiders" }
   }
 }

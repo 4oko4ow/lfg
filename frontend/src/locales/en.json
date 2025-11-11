@@ -160,7 +160,9 @@
     "send": "Send",
     "empty": "No messages yet",
     "online": "Online",
-    "login_required": "Sign in to chat"
+    "login_required": "Sign in to chat",
+    "collapse": "Collapse chat",
+    "expand": "Expand chat"
   },
   "empty": {
     "parties": "No parties yet. Be the first to create one!"
@@ -285,6 +287,9 @@
     },
     "lethalcompany": {
       "name": "Lethal Company"
+    },
+    "arcraiders": {
+      "name": "Arc Raiders"
     }
   }
 }

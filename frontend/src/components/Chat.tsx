@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../supabaseClient";
 import { analytics } from "../utils/analytics";
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./modals/LoginModal";
 
@@ -24,6 +24,11 @@ const Chat = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (isMobile) return false;
+    const saved = localStorage.getItem("chat_collapsed");
+    return saved === "true";
+  });
 
   useEffect(() => {
     fetchMessages();
@@ -115,6 +120,13 @@ const Chat = ({
     scrollToBottom();
   }, [messages]);
 
+  // Сохраняем состояние сворачивания в localStorage
+  useEffect(() => {
+    if (!isMobile) {
+      localStorage.setItem("chat_collapsed", String(isCollapsed));
+    }
+  }, [isCollapsed, isMobile]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -184,12 +196,18 @@ const Chat = ({
     return msg.user_display_name || msg.user_id || t("profile.anonymous", "Player");
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div
       ref={chatRef}
       className={
         isMobile
           ? "fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden"
+          : isCollapsed
+          ? `fixed w-80 bg-zinc-900 border border-zinc-700/50 rounded-lg flex flex-col shadow-lg overflow-hidden z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
           : `fixed w-80 h-96 bg-zinc-900 border border-zinc-700/50 rounded-lg flex flex-col shadow-lg overflow-hidden z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
       }
       style={
@@ -209,11 +227,27 @@ const Chat = ({
           <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
         </div>
         <div className="flex items-center gap-3">
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              className="text-zinc-400 hover:text-white transition-colors p-1"
+              aria-label={isCollapsed ? t("chat.expand", "Expand chat") : t("chat.collapse", "Collapse chat")}
+              title={isCollapsed ? t("chat.expand", "Expand chat") : t("chat.collapse", "Collapse chat")}
+            >
+              {isCollapsed ? (
+                <ChevronUpIcon className="w-5 h-5" />
+              ) : (
+                <ChevronDownIcon className="w-5 h-5" />
+              )}
+            </button>
+          )}
           <span className="text-xs text-zinc-400 font-normal">
             {t("hero.online", "Online: {{count}}", { count: onlineCount })}
           </span>
           {isMobile && (
             <button
+              type="button"
               onClick={onClose}
               className="text-zinc-400 hover:text-white transition-colors"
               aria-label={t("ui.close", "Close")}
@@ -225,62 +259,67 @@ const Chat = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
-        {messages.length === 0 ? (
-          <div className="text-zinc-500 text-center py-6">
-            {t("chat.empty", "No messages yet")}
-          </div>
-        ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`text-sm pb-2 ${msg.optimistic ? "opacity-70 italic" : ""}`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-blue-400 font-medium text-xs">
-                  {displayName(msg)}
-                </span>
-                <span className="text-zinc-500 text-[10px] whitespace-nowrap">
-                  {timeFmt.format(new Date(msg.created_at))}
-                </span>
+      {!isCollapsed && (
+        <>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
+            {messages.length === 0 ? (
+              <div className="text-zinc-500 text-center py-6">
+                {t("chat.empty", "No messages yet")}
               </div>
-              <div className="text-zinc-200 break-words text-xs">{msg.message}</div>
-            </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`text-sm pb-2 ${msg.optimistic ? "opacity-70 italic" : ""}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-blue-400 font-medium text-xs">
+                      {displayName(msg)}
+                    </span>
+                    <span className="text-zinc-500 text-[10px] whitespace-nowrap">
+                      {timeFmt.format(new Date(msg.created_at))}
+                    </span>
+                  </div>
+                  <div className="text-zinc-200 break-words text-xs">{msg.message}</div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-      <div className="p-3 border-t border-zinc-700/50 bg-zinc-950">
-        {!profile ? (
-          <div className="text-center py-2">
-            <p className="text-xs text-zinc-400 mb-2">
-              {t("chat.login_required", "Sign in to chat")}
-            </p>
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="text-xs text-blue-400 hover:text-blue-300 underline"
-            >
-              {t("auth.sign_in", "Sign in")}
-            </button>
-            {showLoginModal && (
-              <LoginModal onClose={() => setShowLoginModal(false)} />
+          <div className="p-3 border-t border-zinc-700/50 bg-zinc-950">
+            {!profile ? (
+              <div className="text-center py-2">
+                <p className="text-xs text-zinc-400 mb-2">
+                  {t("chat.login_required", "Sign in to chat")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-xs text-blue-400 hover:text-blue-300 underline"
+                >
+                  {t("auth.sign_in", "Sign in")}
+                </button>
+                {showLoginModal && (
+                  <LoginModal onClose={() => setShowLoginModal(false)} />
+                )}
+              </div>
+            ) : (
+              <input
+                className="w-full text-sm p-2 bg-zinc-800 border border-zinc-700/50 text-white rounded-lg transition-colors hover:border-zinc-600"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                placeholder={t("chat.placeholder", "Write a message…")}
+                autoFocus={isMobile}
+                onFocus={scrollToBottom}
+                inputMode="text"
+                autoComplete="off"
+              />
             )}
           </div>
-        ) : (
-          <input
-            className="w-full text-sm p-2 bg-zinc-800 border border-zinc-700/50 text-white rounded-lg transition-colors hover:border-zinc-600"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder={t("chat.placeholder", "Write a message…")}
-            autoFocus={isMobile}
-            onFocus={scrollToBottom}
-            inputMode="text"
-            autoComplete="off"
-          />
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };

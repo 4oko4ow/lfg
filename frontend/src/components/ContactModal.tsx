@@ -25,6 +25,11 @@ export default function ContactModal({
   const { t } = useTranslation();
 
   useEffect(() => {
+    // Отправляем join при открытии модального окна
+    sendJoinParty(partyId);
+  }, [partyId]);
+
+  useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
@@ -34,7 +39,6 @@ export default function ContactModal({
     analytics.contactCopy();
     try {
       await navigator.clipboard.writeText(value);
-      sendJoinParty(partyId);
       toast.success(t("ui.copied"), { duration: 5000 });
       onClose();
     } catch {
@@ -45,7 +49,6 @@ export default function ContactModal({
   const handleOpen = (url: string) => {
     analytics.contactCopy();
     window.open(url, "_blank", "noopener");
-    sendJoinParty(partyId);
     toast.success(t("contact.opened", "Открываем контакт"), { duration: 4000 });
     onClose();
   };

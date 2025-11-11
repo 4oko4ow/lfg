@@ -6,13 +6,10 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
-import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { Gamepad2, MessageCircle, Send } from "lucide-react";
-import { analytics } from "../utils/analytics";
 import { useTranslation } from "react-i18next";
 import { getGameName } from "../constants/games";
 import { StarIcon } from "@heroicons/react/20/solid";
-import toast from "react-hot-toast";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -62,30 +59,16 @@ const CONTACT_ICONS: Record<string, { icon: ReactNode; label: string }> = {
 
 export default function PartyCard({
   party,
-  onJoin,
+  onContactClick,
 }: {
   party: Party;
-  onJoin: () => void;
+  onContactClick: () => void;
 }) {
   const { t } = useTranslation();
 
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
   const isPinned = party.pinned;
-
-  const handleJoinClick = () => {
-    analytics.joinPartyClick(party.game);
-    onJoin();
-  };
-
-  const handleCopy = async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      toast.success(t("ui.copied", "Скопировано"));
-    } catch {
-      toast.error(t("toasts.error", "Что-то пошло не так"));
-    }
-  };
 
   const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
@@ -102,7 +85,7 @@ export default function PartyCard({
               <span className="font-medium text-zinc-200">{config.label}</span>
               <span className="text-zinc-400">{contact.handle}</span>
               {contact.preferred && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-0.5 text-[10px] font-semibold uppercase text-blue-200">
                   <StarIcon className="h-3 w-3" />
                   {t("party.preferred", "Основной")}
                 </span>
@@ -110,29 +93,18 @@ export default function PartyCard({
             </>
           );
 
-          return contact.url ? (
-            <a
-              key={`${contact.type}-${contact.handle}`}
-              href={contact.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${
-                contact.preferred
-                  ? "border-blue-500/40 bg-blue-500/10"
-                  : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60"
-              }`}
-            >
-              {content}
-            </a>
-          ) : (
+          return (
             <button
               key={`${contact.type}-${contact.handle}`}
               type="button"
-              onClick={() => handleCopy(contact.handle)}
+              onClick={onContactClick}
+              disabled={isFull}
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${
-                contact.preferred
-                  ? "border-blue-500/40 bg-blue-500/10"
-                  : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60"
+                isFull
+                  ? "border-zinc-700/40 bg-zinc-800/30 opacity-50 cursor-not-allowed"
+                  : contact.preferred
+                  ? "border-blue-500/40 bg-blue-500/10 hover:border-blue-500/60 hover:bg-blue-500/20 cursor-pointer"
+                  : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60 hover:bg-zinc-800/50 cursor-pointer"
               }`}
             >
               {content}
@@ -199,7 +171,7 @@ export default function PartyCard({
 
       {renderContacts(party.contacts)}
 
-      <div className="flex items-center justify-between pt-2 border-t border-zinc-700/40">
+      <div className="flex items-center justify-end pt-2 border-t border-zinc-700/40">
         <div className="flex items-center gap-1.5 text-sm text-zinc-400">
           <UserGroupIcon className="w-4 h-4" />
           <span>
@@ -207,26 +179,12 @@ export default function PartyCard({
             <span className="mx-1">/</span>
             <span>{party.slots}</span>
           </span>
-        </div>
-
-        <button
-          disabled={isFull}
-          onClick={handleJoinClick}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-            isFull
-              ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-500 text-white"
-          }`}
-        >
-          {isFull ? (
-            t("party.full", { defaultValue: "Заполнено" })
-          ) : (
-            <>
-              {t("ui.join_party", { defaultValue: "Вступить" })}
-              <ArrowRightIcon className="w-4 h-4" />
-            </>
+          {isFull && (
+            <span className="ml-2 text-xs text-zinc-500">
+              {t("party.full", { defaultValue: "Заполнено" })}
+            </span>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );

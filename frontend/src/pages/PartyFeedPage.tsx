@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  MessageCircle,
   Search,
   HelpCircle,
   Sparkles,
@@ -169,7 +168,7 @@ function PartyFeedPage() {
     }
   }, [filter, filteredParties.length, joinClicked]);
 
-  const handleJoinClick = (party: Party) => {
+  const handleContactClick = (party: Party) => {
     analytics.joinPartyClick(party.game);
     setJoinClicked(true);
     setContactPartyId(party.id);
@@ -210,12 +209,8 @@ function PartyFeedPage() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-zinc-400">
-              <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              {t("hero.online", { defaultValue: "Онлайн: {{count}}", count: onlineCount })}
-            </span>
-            {isMobile && (
+          {isMobile && (
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setChatOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors hover:bg-zinc-700"
@@ -223,8 +218,8 @@ function PartyFeedPage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 {t("chat.title", "Чат")}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -257,7 +252,7 @@ function PartyFeedPage() {
                 className="animate-fadeIn"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <PartyCard party={party} onJoin={() => handleJoinClick(party)} />
+                <PartyCard party={party} onContactClick={() => handleContactClick(party)} />
               </div>
             ))}
           </div>

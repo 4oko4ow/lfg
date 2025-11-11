@@ -10,14 +10,15 @@ export type TelegramAuthData = {
 
 export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
   return new Promise((resolve, reject) => {
-    if (!botId) {
+    const trimmedBotId = botId?.trim();
+    if (!trimmedBotId) {
       reject(new Error("Telegram bot ID is not configured"));
       return;
     }
 
     const origin = window.location.origin;
     const url = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(
-      botId
+      trimmedBotId
     )}&origin=${encodeURIComponent(origin)}&embed=1&request_access=write`;
 
     const width = 500;

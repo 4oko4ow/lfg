@@ -19,7 +19,8 @@ export const GAME_SLUGS = [
   "baldursgate3",
   "lethalcompany",
   "abioticfactor",
-  "gta5online"
+  "gta5online",
+  "arcraiders"
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
@@ -44,7 +45,8 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   baldursgate3: "Baldurs Gate 3",
   lethalcompany: "Lethal Company",
   abioticfactor: "Abiotic Factor",
-  gta5online: "GTA 5 Online"
+  gta5online: "GTA 5 Online",
+  arcraiders: "Arc Raiders"
 
 };
 
