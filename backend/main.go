@@ -14,8 +14,8 @@ import (
 )
 
 var allowedOrigins = []string{
-	"https://findparty.online",
-	"https://www.findparty.online",
+	"https://findpaty.online",
+	"https://www.findpaty.online",
 	"http://localhost:5173", // for local development
 	"http://localhost:3000", // for local development
 	// при необходимости: превью Vercel

@@ -23,7 +23,6 @@ const Chat = ({
   const chatRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchMessages();
@@ -77,7 +76,6 @@ const Chat = ({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       };
-      setDragOffset(currentDragOffset);
     };
 
     const handleMouseMove = (e: MouseEvent) => {

@@ -168,7 +168,6 @@
     "hour": "1 h ago",
     "hours": "{{count}} h ago",
     "days_hours": "{{d}}d {{h}}h ago"
-
   },
   "modals": {
     "contact_title": "Join the party",
@@ -226,23 +225,59 @@
   },
   "feedback.label": "Something not working?",
   "games": {
-    "abioticfactor": { "name": "Abiotic Factor" },
-    "repo": { "name": "R.E.P.O" },
-    "dota2": { "name": "Dota 2" },
-    "cs2": { "name": "CS2" },
-    "peak": { "name": "PEAK" },
-    "pubg": { "name": "PUBG" },
-    "rust": { "name": "Rust" },
-    "minecraft": { "name": "Minecraft" },
-    "tarkov": { "name": "Tarkov" },
-    "fortnite": { "name": "Fortnite" },
-    "roblox": { "name": "Roblox" },
-    "valorant": { "name": "Valorant" },
-    "apex": { "name": "Apex" },
-    "thefinals": { "name": "The Finals" },
-    "marvelrivals": { "name": "Marvel Rivals" },
-    "deeprockgalactic": { "name": "Deep Rock Galactic" },
-    "baldursgate3": { "name": "Baldurs Gate 3" },
-    "lethalcompany": { "name": "Lethal Company" }
+    "abioticfactor": {
+      "name": "Abiotic Factor"
+    },
+    "repo": {
+      "name": "R.E.P.O"
+    },
+    "dota2": {
+      "name": "Dota 2"
+    },
+    "cs2": {
+      "name": "CS2"
+    },
+    "peak": {
+      "name": "PEAK"
+    },
+    "pubg": {
+      "name": "PUBG"
+    },
+    "rust": {
+      "name": "Rust"
+    },
+    "minecraft": {
+      "name": "Minecraft"
+    },
+    "tarkov": {
+      "name": "Tarkov"
+    },
+    "fortnite": {
+      "name": "Fortnite"
+    },
+    "roblox": {
+      "name": "Roblox"
+    },
+    "valorant": {
+      "name": "Valorant"
+    },
+    "apex": {
+      "name": "Apex"
+    },
+    "thefinals": {
+      "name": "The Finals"
+    },
+    "marvelrivals": {
+      "name": "Marvel Rivals"
+    },
+    "deeprockgalactic": {
+      "name": "Deep Rock Galactic"
+    },
+    "baldursgate3": {
+      "name": "Baldurs Gate 3"
+    },
+    "lethalcompany": {
+      "name": "Lethal Company"
+    }
   }
 }
