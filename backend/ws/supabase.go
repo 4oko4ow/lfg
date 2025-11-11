@@ -32,15 +32,54 @@ func InitDB() {
 }
 
 func SavePartyToSupabase(p *Party) {
-	// Используем Upsert (Insert с ON CONFLICT) чтобы избежать дубликатов
+	// Преобразуем Party в map для правильной сериализации
+	partyData := map[string]interface{}{
+		"id":         p.ID,
+		"game":       p.Game,
+		"goal":       p.Goal,
+		"slots":      p.Slots,
+		"joined":     p.Joined,
+		"created_at": p.CreatedAt.Format(time.RFC3339),
+		"pinned":     p.Pinned,
+	}
+	
+	// Сериализуем contacts в JSON
+	if p.Contacts != nil && len(p.Contacts) > 0 {
+		contactsJSON, err := json.Marshal(p.Contacts)
+		if err != nil {
+			log.Printf("Error marshalling contacts for party %s: %v", p.ID, err)
+		} else {
+			// Преобразуем JSON bytes в interface{} для Supabase
+			var contactsInterface interface{}
+			if err := json.Unmarshal(contactsJSON, &contactsInterface); err != nil {
+				log.Printf("Error unmarshalling contacts JSON for party %s: %v", p.ID, err)
+			} else {
+				partyData["contacts"] = contactsInterface
+			}
+		}
+	}
+	
+	// Пытаемся использовать Insert сначала
 	_, _, err := supabaseClient.
 		From("parties").
-		Upsert(p, "id", "", "representation").
+		Insert(partyData, false, "", "representation", "").
 		Execute()
+	
+	// Если Insert не удался (возможно запись уже существует), пробуем Upsert
 	if err != nil {
-		log.Printf("Error saving party %s to Supabase: %v", p.ID, err)
+		log.Printf("⚠️  Insert failed for party %s, trying Upsert: %v", p.ID, err)
+		_, _, err = supabaseClient.
+			From("parties").
+			Upsert(partyData, "id", "", "representation").
+			Execute()
+		if err != nil {
+			log.Printf("❌ Error saving party %s to Supabase (both Insert and Upsert failed): %v", p.ID, err)
+			log.Printf("   Party data: %+v", partyData)
+		} else {
+			log.Printf("✅ Successfully saved party %s to Supabase (via Upsert)", p.ID)
+		}
 	} else {
-		log.Printf("✅ Successfully saved party %s to Supabase", p.ID)
+		log.Printf("✅ Successfully saved party %s to Supabase (via Insert)", p.ID)
 	}
 }
 
