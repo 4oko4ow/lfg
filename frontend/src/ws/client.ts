@@ -1,5 +1,5 @@
 // src/ws/client.ts
-import type { Message, OutgoingMessage } from "../types";
+import type { ContactMethod, Message, OutgoingMessage } from "../types";
 
 export let socket: WebSocket | null = null; // <-- экспортируем
 
@@ -31,7 +31,7 @@ export function sendCreateParty(payload: {
   game: string;
   goal: string;
   slots: number;
-  contact?: string;
+  contacts?: ContactMethod[];
 }) {
   if (socket?.readyState === WebSocket.OPEN) {
     const msg: OutgoingMessage = {

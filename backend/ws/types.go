@@ -3,14 +3,20 @@ package ws
 import "time"
 
 type Party struct {
-	ID        string    `json:"id"`
-	Game      string    `json:"game"`
-	Goal      string    `json:"goal"`
-	Slots     int       `json:"slots"`
-	Joined    int       `json:"joined"`
-	CreatedAt time.Time `json:"created_at"`
-	Contact   string    `json:"contact,omitempty"`
-	Pinned    bool      `json:"pinned"`
+        ID        string          `json:"id"`
+        Game      string          `json:"game"`
+        Goal      string          `json:"goal"`
+        Slots     int             `json:"slots"`
+        Joined    int             `json:"joined"`
+        CreatedAt time.Time       `json:"created_at"`
+        Contacts  []ContactMethod `json:"contacts,omitempty"`
+        Pinned    bool            `json:"pinned"`
+}
+
+type ContactMethod struct {
+        Type   string `json:"type"`
+        Handle string `json:"handle"`
+        URL    string `json:"url,omitempty"`
 }
 
 type Message struct {
@@ -19,10 +25,10 @@ type Message struct {
 }
 
 type CreatePartyPayload struct {
-	Game    string `json:"game"`
-	Goal    string `json:"goal"`
-	Slots   int    `json:"slots"`
-	Contact string `json:"contact,omitempty"`
+        Game     string          `json:"game"`
+        Goal     string          `json:"goal"`
+        Slots    int             `json:"slots"`
+        Contacts []ContactMethod `json:"contacts,omitempty"`
 }
 
 type JoinPartyPayload struct {
