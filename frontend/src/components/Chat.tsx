@@ -10,9 +10,11 @@ import { useParams } from "react-router-dom";
 const Chat = ({
   isMobile = false,
   onClose,
+  onlineCount = 0,
 }: {
   isMobile?: boolean;
   onClose?: () => void;
+  onlineCount?: number;
 }) => {
   const { t, i18n } = useTranslation();
   const { lang } = useParams();
@@ -194,9 +196,9 @@ const Chat = ({
       }
       style={
         !isMobile && position.x !== 0 && position.y !== 0
-          ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto' }
+          ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto', transform: 'none' }
           : !isMobile
-          ? { bottom: '1rem', right: '1rem' }
+          ? { right: '1rem', top: '50%', transform: 'translateY(-50%)' }
           : {}
       }
     >
@@ -208,16 +210,21 @@ const Chat = ({
           {t("chat.title", "Chat")}
           <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
         </div>
-        {isMobile && (
-          <button
-            onClick={onClose}
-            className="text-zinc-400 hover:text-white transition-colors"
-            aria-label={t("ui.close", "Close")}
-            title={t("ui.close", "Close")}
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-zinc-400 font-normal">
+            {t("hero.online", "Online: {{count}}", { count: onlineCount })}
+          </span>
+          {isMobile && (
+            <button
+              onClick={onClose}
+              className="text-zinc-400 hover:text-white transition-colors"
+              aria-label={t("ui.close", "Close")}
+              title={t("ui.close", "Close")}
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">

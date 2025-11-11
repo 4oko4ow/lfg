@@ -14,8 +14,8 @@ import (
 )
 
 var allowedOrigins = []string{
-	"https://findpaty.online",
-	"https://www.findpaty.online",
+	"https://findparty.online",
+	"https://www.findparty.online",
 	"http://localhost:5173", // for local development
 	"http://localhost:3000", // for local development
 	// при необходимости: превью Vercel
@@ -78,7 +78,7 @@ func main() {
 	defer store.Close()
 
 	secureCookie := os.Getenv("AUTH_COOKIE_SECURE") == "true"
-	
+
 	// Parse session TTL from environment variable (in days, default: 365 days = 1 year)
 	sessionTTLDays := 365
 	if ttlStr := os.Getenv("AUTH_SESSION_TTL_DAYS"); ttlStr != "" {
@@ -88,7 +88,7 @@ func main() {
 	}
 	sessionTTL := time.Duration(sessionTTLDays) * 24 * time.Hour
 	log.Printf("Session TTL set to %d days (%v)", sessionTTLDays, sessionTTL)
-	
+
 	sessionManager := auth.NewSessionManagerWithTTL(secret, os.Getenv("AUTH_COOKIE_NAME"), os.Getenv("AUTH_COOKIE_DOMAIN"), secureCookie, sessionTTL)
 
 	handler := auth.NewHandler(store, sessionManager, auth.Config{

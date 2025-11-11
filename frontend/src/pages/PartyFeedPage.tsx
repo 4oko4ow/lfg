@@ -282,7 +282,7 @@ function PartyFeedPage() {
       {isMobile ? (
         chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />
       ) : (
-        <Chat />
+        <Chat onlineCount={onlineCount} />
       )}
 
       <button
