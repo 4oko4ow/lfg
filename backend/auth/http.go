@@ -9,9 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"time"
@@ -41,6 +43,7 @@ type SteamConfig struct {
 
 type TelegramConfig struct {
 	BotToken string
+	BotID    string
 }
 
 type Handler struct {
@@ -93,6 +96,15 @@ func NewHandler(store *Store, sessions *SessionManager, cfg Config) *Handler {
 		cfg.Steam.RedirectPath = "/auth/steam/callback"
 	}
 
+	telegramConfig := cfg.Telegram
+	if telegramConfig.BotID == "" && telegramConfig.BotToken != "" {
+		if botID, err := resolveTelegramBotID(telegramConfig.BotToken); err != nil {
+			log.Printf("failed to resolve telegram bot id: %v", err)
+		} else {
+			telegramConfig.BotID = botID
+		}
+	}
+
 	return &Handler{
 		store:         store,
 		sessions:      sessions,
@@ -100,7 +112,7 @@ func NewHandler(store *Store, sessions *SessionManager, cfg Config) *Handler {
 		baseURL:       base,
 		discordConfig: discordConfig,
 		steamConfig:   cfg.Steam,
-		telegram:      cfg.Telegram,
+		telegram:      telegramConfig,
 	}
 }
 
@@ -120,6 +132,26 @@ type statePayload struct {
 	Nonce    string `json:"nonce"`
 	Redirect string `json:"redirect"`
 	Link     bool   `json:"link"`
+}
+
+func sanitizeRedirect(raw string) string {
+	if raw == "" {
+		return "/"
+	}
+	if decoded, err := url.QueryUnescape(raw); err == nil && decoded != "" {
+		raw = decoded
+	}
+	if strings.Contains(raw, "://") {
+		return "/"
+	}
+	cleaned := path.Clean(raw)
+	if cleaned == "." || cleaned == "" {
+		cleaned = "/"
+	}
+	if !strings.HasPrefix(cleaned, "/") {
+		cleaned = "/" + cleaned
+	}
+	return cleaned
 }
 
 func (h *Handler) writeStateCookie(w http.ResponseWriter, payload statePayload) error {
@@ -171,6 +203,7 @@ func (h *Handler) clearStateCookie(w http.ResponseWriter) {
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/auth/session", h.handleSession)
 	mux.HandleFunc("/auth/logout", h.handleLogout)
+	mux.HandleFunc("/auth/config", h.handleConfig)
 	mux.HandleFunc("/auth/contact", h.handleContact)
 	mux.HandleFunc("/auth/preferred", h.handlePreferred)
 
@@ -206,6 +239,16 @@ func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, profile)
+}
+
+func (h *Handler) handleConfig(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	writeJSON(w, map[string]any{
+		"telegram_bot_id": h.telegram.BotID,
+	})
 }
 
 func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -301,10 +344,7 @@ func (h *Handler) handleDiscordLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "discord login not configured", http.StatusServiceUnavailable)
 		return
 	}
-	redirect := r.URL.Query().Get("redirect")
-	if redirect == "" {
-		redirect = "/"
-	}
+	redirect := sanitizeRedirect(r.URL.Query().Get("redirect"))
 	link := r.URL.Query().Get("link") == "1"
 	state := uuid.NewString()
 	if err := h.writeStateCookie(w, statePayload{Nonce: state, Redirect: redirect, Link: link}); err != nil {
@@ -434,17 +474,12 @@ func (h *Handler) exchangeDiscordCode(ctx context.Context, code string) (*discor
 }
 
 func (h *Handler) frontendRedirect(path, status string) string {
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-	return fmt.Sprintf("%s/auth/callback?status=%s&redirect=%s", strings.TrimRight(h.frontendURL, "/"), url.QueryEscape(status), url.QueryEscape(path))
+	target := sanitizeRedirect(path)
+	return fmt.Sprintf("%s/auth/callback?status=%s&redirect=%s", strings.TrimRight(h.frontendURL, "/"), url.QueryEscape(status), url.QueryEscape(target))
 }
 
 func (h *Handler) handleSteamLogin(w http.ResponseWriter, r *http.Request) {
-	redirect := r.URL.Query().Get("redirect")
-	if redirect == "" {
-		redirect = "/"
-	}
+	redirect := sanitizeRedirect(r.URL.Query().Get("redirect"))
 	link := r.URL.Query().Get("link") == "1"
 	nonce := uuid.NewString()
 	if err := h.writeStateCookie(w, statePayload{Nonce: nonce, Redirect: redirect, Link: link}); err != nil {
@@ -566,6 +601,43 @@ func (h *Handler) fetchSteamPersona(ctx context.Context, steamID string) string 
 		return payload.Response.Players[0].PersonaName
 	}
 	return steamID
+}
+
+func resolveTelegramBotID(token string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("https://api.telegram.org/bot%s/getMe", token), nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return "", fmt.Errorf("telegram getMe failed: %s", resp.Status)
+	}
+
+	var payload struct {
+		OK     bool `json:"ok"`
+		Result struct {
+			Username string `json:"username"`
+		} `json:"result"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return "", err
+	}
+	if !payload.OK {
+		return "", errors.New("telegram getMe response not ok")
+	}
+	if payload.Result.Username == "" {
+		return "", errors.New("telegram bot username missing")
+	}
+	return payload.Result.Username, nil
 }
 
 type telegramVerifyRequest struct {

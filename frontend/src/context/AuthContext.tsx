@@ -41,19 +41,17 @@ type AuthContextValue = {
   linkProvider: (provider: SocialProvider) => void;
   updateContactHandle: (
     provider: SocialProvider,
-    handle: ContactHandle | null
+    handle: ContactHandle | null,
   ) => Promise<void>;
-  setPreferredContact: (
-    provider: ContactMethodType | null
-  ) => Promise<void>;
+  setPreferredContact: (provider: ContactMethodType | null) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const getRedirectPath = () =>
-  window.location.pathname + window.location.search || "/";
-
-const telegramBotId = import.meta.env.VITE_TELEGRAM_BOT_ID as string | undefined;
+const getRedirectPath = () => {
+  const path = `${window.location.pathname}${window.location.search}`;
+  return path || "/";
+};
 
 type RawProfile = {
   user: {
@@ -131,6 +129,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [contactHandles, setContactHandles] = useState<ContactHandlesMap>({});
   const [loading, setLoading] = useState(true);
+  const [telegramBotId, setTelegramBotId] = useState<string | null>(null);
+
+  const loadConfig = useCallback(async (): Promise<string | null> => {
+    try {
+      const response = await fetch("/auth/config", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to load auth config: ${response.status}`);
+      }
+      const data = (await response.json()) as {
+        telegram_bot_id?: string | null;
+      };
+      const botId = data.telegram_bot_id?.trim() ? data.telegram_bot_id : null;
+      setTelegramBotId(botId);
+      return botId;
+    } catch (error) {
+      console.error("Failed to load auth config", error);
+      setTelegramBotId(null);
+      return null;
+    }
+  }, []);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -150,22 +170,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refreshProfile();
   }, [refreshProfile]);
 
+  useEffect(() => {
+    void loadConfig();
+  }, [loadConfig]);
+
   const redirectToCallback = useCallback((status: string, redirect: string) => {
     window.location.href = `/auth/callback?status=${status}&redirect=${encodeURIComponent(
-      redirect
+      redirect,
     )}`;
   }, []);
 
   const handleTelegramAuth = useCallback(async () => {
     const redirect = getRedirectPath();
-    if (!telegramBotId) {
+    const botId = telegramBotId ?? (await loadConfig());
+    if (!botId) {
       console.error("Telegram bot ID is not configured");
       redirectToCallback("telegram_error", redirect);
       return;
     }
 
     try {
-      const payload = await openTelegramAuth(telegramBotId);
+      const payload = await openTelegramAuth(botId);
       const response = await fetch("/auth/telegram/verify", {
         method: "POST",
         headers: {
@@ -180,13 +205,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const status = response.status === 409 ? "telegram_conflict" : "telegram_error";
+      const status =
+        response.status === 409 ? "telegram_conflict" : "telegram_error";
       redirectToCallback(status, redirect);
     } catch (error) {
       console.error("Telegram auth failed", error);
       redirectToCallback("telegram_error", redirect);
     }
-  }, [redirectToCallback]);
+  }, [redirectToCallback, telegramBotId, loadConfig]);
 
   const signIn = useCallback(
     (provider: SocialProvider) => {
@@ -197,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const redirect = encodeURIComponent(getRedirectPath());
       window.location.href = `/auth/${provider}/login?redirect=${redirect}`;
     },
-    [handleTelegramAuth]
+    [handleTelegramAuth],
   );
 
   const linkProvider = useCallback(
@@ -209,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const redirect = encodeURIComponent(getRedirectPath());
       window.location.href = `/auth/${provider}/login?redirect=${redirect}&link=1`;
     },
-    [handleTelegramAuth]
+    [handleTelegramAuth],
   );
 
   const signOut = useCallback(async () => {
@@ -243,7 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(mapped);
       setContactHandles(contacts);
     },
-    []
+    [],
   );
 
   const setPreferredContact = useCallback(
@@ -264,7 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(mapped);
       setContactHandles(contacts);
     },
-    []
+    [],
   );
 
   const value = useMemo(
@@ -289,7 +315,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       linkProvider,
       updateContactHandle,
       setPreferredContact,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -302,4 +328,3 @@ export function useAuth() {
   }
   return ctx;
 }
-
