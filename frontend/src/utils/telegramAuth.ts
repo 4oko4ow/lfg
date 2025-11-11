@@ -39,10 +39,15 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
 
     let resolved = false;
     let rejected = false;
+    let closeTimeout: number | null = null;
 
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       clearInterval(intervalId);
+      if (closeTimeout !== null) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+      }
       try {
         popup.close();
       } catch {
@@ -67,18 +72,19 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
     window.addEventListener("message", onMessage);
 
     const intervalId = window.setInterval(() => {
-      if (popup.closed && !resolved && !rejected) {
-        // Give a short delay before rejecting to allow message to arrive
+      if (popup.closed && !resolved && !rejected && closeTimeout === null) {
+        // Give a longer delay before rejecting to allow message to arrive
         // Telegram sometimes closes the popup right after sending the message
-        setTimeout(() => {
+        // Keep listening for messages even after popup closes
+        closeTimeout = window.setTimeout(() => {
           if (!resolved && !rejected) {
             rejected = true;
             cleanup();
             reject(new Error("Telegram popup closed"));
           }
-        }, 1000);
+        }, 2000) as unknown as number;
       }
-    }, 500);
+    }, 200);
   });
 }
 

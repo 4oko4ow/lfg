@@ -11,6 +11,23 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 -- Add missing columns if they don't exist (for existing tables)
 DO $$ 
 BEGIN
+    -- Add anon_id column if it doesn't exist (make it nullable)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'chat_messages' AND column_name = 'anon_id') THEN
+        ALTER TABLE chat_messages ADD COLUMN anon_id TEXT;
+    END IF;
+    
+    -- Make anon_id nullable (remove NOT NULL constraint if it exists)
+    -- Check if column is NOT NULL and make it nullable
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'chat_messages' 
+        AND column_name = 'anon_id' 
+        AND is_nullable = 'NO'
+    ) THEN
+        ALTER TABLE chat_messages ALTER COLUMN anon_id DROP NOT NULL;
+    END IF;
+    
     -- Add user_id column if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                    WHERE table_name = 'chat_messages' AND column_name = 'user_id') THEN

@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -57,10 +58,24 @@ func NewSessionStore() (*SessionStore, error) {
 
 	client, err := supabase.NewClient(url, key, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create Supabase client: %w", err)
 	}
 
 	store := &SessionStore{client: client}
+	
+	// Test connection by trying to query the table (this will fail if table doesn't exist)
+	_, _, testErr := client.
+		From("auth_sessions").
+		Select("id", "", false).
+		Execute()
+	
+	if testErr != nil {
+		log.Printf("[Session] ⚠️  Warning: Could not access auth_sessions table: %v", testErr)
+		log.Printf("[Session] ⚠️  Make sure the table exists. Run the migration: migrations/create_sessions_table.sql")
+		// Don't fail completely - table might be created later
+	} else {
+		log.Println("[Session] ✅ Successfully connected to auth_sessions table")
+	}
 	
 	// Cleanup expired sessions on startup
 	go store.cleanupExpiredSessions()

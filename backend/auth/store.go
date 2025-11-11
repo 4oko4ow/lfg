@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -75,6 +76,15 @@ type persistedState struct {
 	IdentityIndex map[string]string      `json:"identity_index"`
 }
 
+// StoreInterface defines the interface for user/identity storage
+type StoreInterface interface {
+	UpsertIdentity(linkUserID string, provider Provider, providerID, username, url, accessToken, refreshToken string) (*Profile, error)
+	GetProfile(userID string) (*Profile, error)
+	UpdateContact(userID string, provider Provider, handle, url string) (*Profile, error)
+	SetPreferredContact(userID string, provider *Provider) error
+	Close() error
+}
+
 type Store struct {
 	path  string
 	mu    sync.RWMutex
@@ -107,11 +117,13 @@ func (s *Store) load() error {
 	data, err := os.ReadFile(s.path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
+			log.Printf("[Auth] Auth store file does not exist, starting fresh: %s", s.path)
 			return nil
 		}
 		return err
 	}
 	if len(data) == 0 {
+		log.Printf("[Auth] Auth store file is empty, starting fresh")
 		return nil
 	}
 	if err := json.Unmarshal(data, &s.state); err != nil {
@@ -123,6 +135,7 @@ func (s *Store) load() error {
 	if s.state.IdentityIndex == nil {
 		s.state.IdentityIndex = make(map[string]string)
 	}
+	log.Printf("[Auth] Loaded auth store: %d users, %d identity mappings", len(s.state.Users), len(s.state.IdentityIndex))
 	return nil
 }
 
@@ -155,16 +168,24 @@ func (s *Store) UpsertIdentity(linkUserID string, provider Provider, providerID,
 
 	key := identityKey(provider, providerID)
 	if existingUserID, ok := s.state.IdentityIndex[key]; ok {
+		log.Printf("[Auth] Found existing identity %s -> user %s", key, existingUserID)
 		if linkUserID != "" && existingUserID != linkUserID {
+			log.Printf("[Auth] Identity %s already linked to user %s, but trying to link to %s", key, existingUserID, linkUserID)
 			return nil, ErrIdentityLinked
 		}
 		linkUserID = existingUserID
+		log.Printf("[Auth] Using existing user ID: %s", linkUserID)
+	} else {
+		log.Printf("[Auth] No existing identity found for %s", key)
 	}
 
 	userID := linkUserID
 	now := time.Now().UTC()
 	if userID == "" {
 		userID = uuid.NewString()
+		log.Printf("[Auth] Creating new user ID: %s for identity %s", userID, key)
+	} else {
+		log.Printf("[Auth] Using provided/linked user ID: %s", userID)
 	}
 
 	record, ok := s.state.Users[userID]
@@ -199,6 +220,7 @@ func (s *Store) UpsertIdentity(linkUserID string, provider Provider, providerID,
 		LinkedAt:     now,
 	}
 	s.state.IdentityIndex[key] = userID
+	log.Printf("[Auth] Updated identity index: %s -> %s (total mappings: %d)", key, userID, len(s.state.IdentityIndex))
 
 	if username != "" {
 		if record.Contacts == nil {
@@ -212,8 +234,10 @@ func (s *Store) UpsertIdentity(linkUserID string, provider Provider, providerID,
 	}
 
 	if err := s.saveLocked(); err != nil {
+		log.Printf("[Auth] Error saving auth store: %v", err)
 		return nil, err
 	}
+	log.Printf("[Auth] Successfully saved auth store with %d users, %d identity mappings", len(s.state.Users), len(s.state.IdentityIndex))
 	return buildProfile(record), nil
 }
 

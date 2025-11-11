@@ -71,9 +71,19 @@ func main() {
 		log.Fatal("AUTH_JWT_SECRET must be set")
 	}
 
-	store, err := auth.NewStore(os.Getenv("AUTH_DB_PATH"))
+	// Try to use database store first, fallback to file store
+	var store auth.StoreInterface
+	dbStore, err := auth.NewDBStore()
 	if err != nil {
-		log.Fatalf("failed to init auth store: %v", err)
+		log.Printf("[Auth] Database store not available, using file store: %v", err)
+		fileStore, err := auth.NewStore(os.Getenv("AUTH_DB_PATH"))
+		if err != nil {
+			log.Fatalf("failed to init auth store: %v", err)
+		}
+		store = fileStore
+	} else {
+		log.Println("[Auth] Using database-backed user store")
+		store = dbStore
 	}
 	defer store.Close()
 

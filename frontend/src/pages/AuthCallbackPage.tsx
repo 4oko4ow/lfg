@@ -84,10 +84,29 @@ export default function AuthCallbackPage() {
           )
         );
       } else if (status === "telegram_error") {
-        // For telegram_error, try refreshing profile anyway
+        // For telegram_error, try refreshing profile anyway with retries
         // The popup might have closed before we got the message, but auth might have succeeded
         try {
-          const profileLoaded = await refreshProfile();
+          const maxRetries = 5;
+          const delays = [200, 400, 600, 1000, 1500]; // Progressive delays
+          let profileLoaded = false;
+
+          for (let attempt = 0; attempt < maxRetries; attempt++) {
+            await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+
+            try {
+              profileLoaded = await refreshProfile();
+              if (profileLoaded) {
+                console.log(`Profile loaded successfully on telegram_error attempt ${attempt + 1}`);
+                break;
+              } else {
+                console.warn(`Profile not loaded yet (telegram_error attempt ${attempt + 1}/${maxRetries})`);
+              }
+            } catch (error) {
+              console.warn(`Failed to refresh profile (telegram_error attempt ${attempt + 1}/${maxRetries}):`, error);
+            }
+          }
+
           if (profileLoaded) {
             // Auth actually succeeded, show success
             toast.success(t("auth.success", "Вы успешно вошли"));

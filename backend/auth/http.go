@@ -47,7 +47,7 @@ type TelegramConfig struct {
 }
 
 type Handler struct {
-	store    *Store
+	store    StoreInterface
 	sessions *SessionManager
 
 	frontendURL string
@@ -65,7 +65,7 @@ type discordSettings struct {
 	scopes       []string
 }
 
-func NewHandler(store *Store, sessions *SessionManager, cfg Config) *Handler {
+func NewHandler(store StoreInterface, sessions *SessionManager, cfg Config) *Handler {
 	frontend := cfg.FrontendURL
 	if frontend == "" {
 		frontend = os.Getenv("FRONTEND_URL")
