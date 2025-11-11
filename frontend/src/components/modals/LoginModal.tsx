@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { createPortal } from "react-dom";
 import { useAuth, type SocialProvider } from "../../context/AuthContext";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
@@ -36,11 +38,19 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const { signIn } = useAuth();
 
+  // Block body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const handleSignIn = (provider: SocialProvider) => {
     signIn(provider);
   };
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] animate-fadeIn p-4 overflow-y-auto"
       onClick={onClose}
@@ -95,5 +105,10 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+
+  // Render modal using portal to body to ensure it's above everything
+  return typeof document !== "undefined"
+    ? createPortal(modalContent, document.body)
+    : null;
 }
 
