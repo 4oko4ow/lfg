@@ -123,6 +123,12 @@
     "steam_conflict": "Этот Steam-аккаунт уже привязан к другой учетной записи",
     "telegram_conflict": "Этот Telegram-аккаунт уже привязан к другой учетной записи",
     "sign_in_prompt": "Войти через:",
+    "sign_in": "Войти",
+    "sign_in_title": "Вход",
+    "sign_in_with_steam": "Войти через Steam",
+    "sign_in_with_discord": "Войти через Discord",
+    "sign_in_with_telegram": "Войти через Telegram",
+    "choose_provider": "Выберите способ входа:",
     "sign_out": "Выйти"
   },
   "profile": {

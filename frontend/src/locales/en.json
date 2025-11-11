@@ -119,6 +119,12 @@
     "steam_conflict": "This Steam account is already linked to another profile",
     "telegram_conflict": "This Telegram account is already linked to another profile",
     "sign_in_prompt": "Sign in with:",
+    "sign_in": "Sign in",
+    "sign_in_title": "Sign in",
+    "sign_in_with_steam": "Sign in with Steam",
+    "sign_in_with_discord": "Sign in with Discord",
+    "sign_in_with_telegram": "Sign in with Telegram",
+    "choose_provider": "Choose your preferred sign-in method:",
     "sign_out": "Sign out"
   },
   "profile": {
