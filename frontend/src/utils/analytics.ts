@@ -1,60 +1,40 @@
 // src/utils/analytics.ts
-import plausible from "plausible-tracker";
-
-const plausibleClient = plausible({
-  domain: "findparty.online",
-  trackLocalhost: true, // useful for testing locally
-});
+// Analytics removed - all methods are no-ops
 
 export const analytics = {
   // Track pageviews manually if needed
-  trackPageView: () => plausibleClient.trackPageview(),
+  trackPageView: () => {},
 
   // Automatically track pageviews on navigation (for SPAs)
-  enableAutoPageviews: () => plausibleClient.enableAutoPageviews(),
+  enableAutoPageviews: () => {},
 
   // Custom events
-  createPartySubmit: (game: string) =>
-    plausibleClient.trackEvent("create_party_submit", { props: { game } }),
+  createPartySubmit: (_game: string) => {},
 
-  joinPartyClick: (game: string) =>
-    plausibleClient.trackEvent("join_party_click", { props: { game } }),
+  joinPartyClick: (_game: string) => {},
 
-  filterSelect: (game: string) =>
-    plausibleClient.trackEvent("filter_game", { props: { game } }),
+  filterSelect: (_game: string) => {},
 
-  contactCopy: () =>
-    plausibleClient.trackEvent("contact_copy"),
+  contactCopy: () => {},
 
-  contactClose: () =>
-    plausibleClient.trackEvent("contact_close"),
+  contactClose: () => {},
 
-  feedbackClick: () =>
-    plausibleClient.trackEvent("feedback_click"),
+  feedbackClick: () => {},
 
-  // 🟢 Chat-related events:
-  chatOpened: () =>
-    plausibleClient.trackEvent("chat_opened"),
+  // Chat-related events:
+  chatOpened: () => {},
 
-  chatMessageSent: () =>
-    plausibleClient.trackEvent("chat_message_sent"),
+  chatMessageSent: () => {},
 
-  chatMessageTyped: (length: number) =>
-    plausibleClient.trackEvent("chat_message_typed", { props: { length } }),
+  chatMessageTyped: (_length: number) => {},
 
-  chatMobile: () =>
-    plausibleClient.trackEvent("chat_mobile"),
+  chatMobile: () => {},
 
+  suggestGame: (_game: string) => {},
 
-  suggestGame: (game: string) =>
-  plausibleClient.trackEvent("suggest_game", { props: { game } }),
+  suggestGameClick: () => {},
 
-  suggestGameClick: () =>
-    plausibleClient.trackEvent("suggest_game_click"),
+  noJoinFeedback: (_reason: string) => {},
 
-  noJoinFeedback: (reason: string) =>
-    plausibleClient.trackEvent("no_join_feedback", { props: { reason } }),
-
-  noJoinSurveyShown: () =>
-  plausibleClient.trackEvent("no_join_survey_shown"),
+  noJoinSurveyShown: () => {},
 };  

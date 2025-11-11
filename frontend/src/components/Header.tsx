@@ -3,10 +3,30 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAuth, type SocialProvider } from "../context/AuthContext";
 
-const PROVIDERS: { id: SocialProvider; label: string }[] = [
-  { id: "steam", label: "Steam" },
-  { id: "discord", label: "Discord" },
-  { id: "telegram", label: "Telegram" },
+const PROVIDERS: { 
+  id: SocialProvider; 
+  label: string;
+  brandColor: string;
+  hoverColor: string;
+}[] = [
+  { 
+    id: "steam", 
+    label: "Steam",
+    brandColor: "from-[#171a21] to-[#1b2838]",
+    hoverColor: "hover:from-[#1b2838] hover:to-[#2a475e]"
+  },
+  { 
+    id: "discord", 
+    label: "Discord",
+    brandColor: "from-[#5865F2] to-[#4752C4]",
+    hoverColor: "hover:from-[#4752C4] hover:to-[#3c45a5]"
+  },
+  { 
+    id: "telegram", 
+    label: "Telegram",
+    brandColor: "from-[#0088cc] to-[#006699]",
+    hoverColor: "hover:from-[#006699] hover:to-[#005580]"
+  },
 ];
 
 export default function Header({
@@ -79,7 +99,7 @@ export default function Header({
                 <button
                   key={provider.id}
                   onClick={() => handleSignIn(provider.id)}
-                  className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-all duration-200 hover:from-blue-500 hover:to-blue-400 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                  className={`rounded-lg bg-gradient-to-r ${provider.brandColor} ${provider.hoverColor} px-4 py-2 text-xs font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg border border-white/10`}
                 >
                   {provider.label}
                 </button>

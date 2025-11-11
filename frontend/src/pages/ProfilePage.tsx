@@ -143,7 +143,7 @@ export default function ProfilePage() {
                 </button>
               </div>
 
-              <label className="block text-xs uppercase tracking-wide text-zinc-400">
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                 {t("profile.contact_label", "Контакт для объявлений")}
               </label>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -154,12 +154,12 @@ export default function ProfilePage() {
                     setValues((prev) => ({ ...prev, [provider.id]: e.target.value }))
                   }
                   placeholder={provider.placeholder}
-                  className="w-full rounded border border-zinc-700 bg-zinc-950 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-3 text-sm font-medium text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-zinc-700/60"
                 />
                 <button
                   onClick={() => handleSave(provider.id)}
                   disabled={!isLinked}
-                  className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold uppercase tracking-wide transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-700"
+                  className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-4 py-3 text-sm font-semibold uppercase tracking-wide transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-blue-500/50 active:scale-95 disabled:cursor-not-allowed disabled:from-zinc-700 disabled:to-zinc-700 disabled:opacity-50 disabled:hover:shadow-none"
                 >
                   {t("profile.save", "Сохранить")}
                 </button>

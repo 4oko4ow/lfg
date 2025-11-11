@@ -22,6 +22,13 @@
     "submit": "Send",
     "cta": "Want your game to appear here?"
   },
+  "hero": {
+    "title": "Find a team for gaming",
+    "subtitle": "Join ready parties or create your own listing",
+    "online": "Online: {{count}}",
+    "suggest_game": "Don't see your game?",
+    "suggest_game_short": "Game?"
+  },
   "ui": {
     "language": "Language",
     "english": "English",
@@ -37,7 +44,8 @@
     "report": "Report",
     "close": "Close",
     "back": "Back",
-    "search_placeholder": "Search games…"
+    "search_placeholder": "Search games…",
+    "loading": "Loading listings..."
   },
   "filters": {
     "all_games": "All games",
@@ -48,6 +56,8 @@
     "almost_full": "Almost full",
     "with_voice": "With voice chat",
     "without_voice": "No voice chat",
+    "empty": "No listings yet. Be the first to create one!",
+    "empty_hint": "Create your listing above 👆",
     "sort": {
       "label": "Sort",
       "new": "Newest",
@@ -57,6 +67,7 @@
   },
   "party": {
     "slots": "slots",
+    "slots_label": "{{joined}}/{{slots}} slots",
     "pinned": "Pinned",
     "new": "Just created",
     "joined": "joined",
@@ -74,6 +85,8 @@
     "update_cta": "Save changes",
     "contact_methods": "Choose which contact methods to show",
     "no_contacts": "You don't have any contacts yet. Configure them in your profile.",
+    "no_contacts_required": "You need to add at least one contact in your profile to create a party.",
+    "select_contact_required": "Please select at least one contact method to show in your listing.",
     "go_to_profile": "Go to profile",
     "preferred_contact": "Preferred contact method",
     "preferred_contact_hint": "This contact will appear first on your listing",
@@ -164,6 +177,8 @@
     "close": "Close"
   },
   "feedback": {
+    "label": "Something not working?",
+    "label_short": "Feedback",
     "button": "Something not working?"
   },
   "toasts": {
@@ -187,6 +202,11 @@
       "Didn't know what to do next",
       "Just browsing / testing"
     ],
+    "reasons.0": "Didn't find my game",
+    "reasons.1": "Afraid to message strangers",
+    "reasons.2": "Too few parties",
+    "reasons.3": "Didn't know what to do next",
+    "reasons.4": "Just browsing / testing",
     "submit": "Send"
   },
   "meta": {
