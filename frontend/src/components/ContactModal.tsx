@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { analytics } from "../utils/analytics";
 import { sendJoinParty } from "../ws/client";
 import type { ContactMethod } from "../types";
+import { StarIcon } from "@heroicons/react/20/solid";
 
 const CONTACT_LABELS: Record<string, { key: string; defaultValue: string }> = {
   steam: { key: "contact.methods.steam", defaultValue: "Steam" },
@@ -64,7 +65,7 @@ export default function ContactModal({
                 key={`${contact.type}-${contact.handle}`}
                 className="rounded-lg border border-zinc-700 bg-zinc-800/70 p-4"
               >
-                <div className="mb-2 text-sm text-zinc-300">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-zinc-300">
                   <span className="font-semibold text-white">
                     {
                       CONTACT_LABELS[contact.type]
@@ -75,8 +76,13 @@ export default function ContactModal({
                         : contact.type
                     }
                   </span>
-                  {": "}
-                  <span className="break-all">{contact.handle}</span>
+                  <span className="break-all text-zinc-200">{contact.handle}</span>
+                  {contact.preferred && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200">
+                      <StarIcon className="h-3 w-3" />
+                      {t("party.preferred", "Основной")}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {contact.url && (

@@ -7,160 +7,288 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Provider, Session, User } from "@supabase/supabase-js";
-import { supabase } from "../supabaseClient";
 import type {
   ContactHandle,
   ContactHandlesMap,
   ContactMethodType,
 } from "../types";
+import { openTelegramAuth } from "../utils/telegramAuth";
 
 export type SocialProvider = ContactMethodType;
 
+export type LinkedIdentity = {
+  provider: ContactMethodType;
+  providerId: string;
+  username: string;
+  url?: string;
+  linkedAt?: string;
+};
+
+export type AuthProfile = {
+  id: string;
+  displayName: string;
+  preferredContact: ContactMethodType | null;
+  identities: LinkedIdentity[];
+};
+
 type AuthContextValue = {
-  user: User | null;
-  session: Session | null;
+  profile: AuthProfile | null;
   loading: boolean;
   contactHandles: ContactHandlesMap;
-  refreshUser: () => Promise<void>;
-  signIn: (provider: SocialProvider) => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  signIn: (provider: SocialProvider) => void;
   signOut: () => Promise<void>;
-  linkProvider: (provider: SocialProvider) => Promise<void>;
+  linkProvider: (provider: SocialProvider) => void;
   updateContactHandle: (
     provider: SocialProvider,
     handle: ContactHandle | null
+  ) => Promise<void>;
+  setPreferredContact: (
+    provider: ContactMethodType | null
   ) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const getRedirectTo = () =>
-  `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(
-    window.location.pathname + window.location.search
-  )}`;
+const getRedirectPath = () =>
+  window.location.pathname + window.location.search || "/";
+
+const telegramBotId = import.meta.env.VITE_TELEGRAM_BOT_ID as string | undefined;
+
+type RawProfile = {
+  user: {
+    id: string;
+    display_name: string;
+    preferred_contact?: ContactMethodType | null;
+  };
+  identities?: {
+    provider: ContactMethodType;
+    provider_id: string;
+    username?: string;
+    url?: string;
+    linked_at?: string;
+  }[];
+  contacts?: {
+    provider: ContactMethodType;
+    handle: string;
+    url?: string;
+  }[];
+};
+
+function mapProfile(raw: RawProfile): {
+  profile: AuthProfile;
+  contacts: ContactHandlesMap;
+} {
+  const identities: LinkedIdentity[] =
+    raw.identities?.map((identity) => ({
+      provider: identity.provider,
+      providerId: identity.provider_id,
+      username: identity.username ?? "",
+      url: identity.url,
+      linkedAt: identity.linked_at,
+    })) ?? [];
+
+  const contacts: ContactHandlesMap = {};
+  raw.contacts?.forEach((contact) => {
+    contacts[contact.provider] = {
+      handle: contact.handle,
+      url: contact.url,
+    };
+  });
+
+  return {
+    profile: {
+      id: raw.user.id,
+      displayName: raw.user.display_name,
+      preferredContact: raw.user.preferred_contact ?? null,
+      identities,
+    },
+    contacts,
+  };
+}
+
+async function readProfile(): Promise<{
+  profile: AuthProfile | null;
+  contacts: ContactHandlesMap;
+}> {
+  const response = await fetch("/auth/session", {
+    credentials: "include",
+  });
+  if (response.status === 204) {
+    return { profile: null, contacts: {} };
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to load session: ${response.status}`);
+  }
+  const data = (await response.json()) as RawProfile;
+  if (!data?.user) {
+    return { profile: null, contacts: {} };
+  }
+  return mapProfile(data);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
+  const [contactHandles, setContactHandles] = useState<ContactHandlesMap>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return;
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+  const refreshProfile = useCallback(async () => {
+    try {
+      const { profile: mapped, contacts } = await readProfile();
+      setProfile(mapped);
+      setContactHandles(contacts);
+    } catch (error) {
+      console.error(error);
+      setProfile(null);
+      setContactHandles({});
+    } finally {
       setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const contactHandles = useMemo<ContactHandlesMap>(() => {
-    const raw = (user?.user_metadata?.contact_handles || {}) as Record<
-      ContactMethodType,
-      ContactHandle
-    >;
-    return raw ?? {};
-  }, [user]);
-
-  const refreshUser = useCallback(async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) {
-      setUser(data.user);
     }
   }, []);
 
-  const signIn = useCallback(async (provider: SocialProvider) => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider as unknown as Provider,
-      options: {
-        redirectTo: getRedirectTo(),
-        skipBrowserRedirect: false,
-      },
-    });
-    if (error) throw error;
+  useEffect(() => {
+    void refreshProfile();
+  }, [refreshProfile]);
+
+  const redirectToCallback = useCallback((status: string, redirect: string) => {
+    window.location.href = `/auth/callback?status=${status}&redirect=${encodeURIComponent(
+      redirect
+    )}`;
   }, []);
 
-  const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  }, []);
+  const handleTelegramAuth = useCallback(async () => {
+    const redirect = getRedirectPath();
+    if (!telegramBotId) {
+      console.error("Telegram bot ID is not configured");
+      redirectToCallback("telegram_error", redirect);
+      return;
+    }
 
-  const linkProvider = useCallback(
-    async (provider: SocialProvider) => {
-      if (!session) {
-        await signIn(provider);
+    try {
+      const payload = await openTelegramAuth(telegramBotId);
+      const response = await fetch("/auth/telegram/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        redirectToCallback("success", redirect);
         return;
       }
-      const { error } = await supabase.auth.linkIdentity({
-        provider: provider as unknown as Provider,
-      });
-      if (error) throw error;
+
+      const status = response.status === 409 ? "telegram_conflict" : "telegram_error";
+      redirectToCallback(status, redirect);
+    } catch (error) {
+      console.error("Telegram auth failed", error);
+      redirectToCallback("telegram_error", redirect);
+    }
+  }, [redirectToCallback]);
+
+  const signIn = useCallback(
+    (provider: SocialProvider) => {
+      if (provider === "telegram") {
+        void handleTelegramAuth();
+        return;
+      }
+      const redirect = encodeURIComponent(getRedirectPath());
+      window.location.href = `/auth/${provider}/login?redirect=${redirect}`;
     },
-    [session, signIn]
+    [handleTelegramAuth]
   );
+
+  const linkProvider = useCallback(
+    (provider: SocialProvider) => {
+      if (provider === "telegram") {
+        void handleTelegramAuth();
+        return;
+      }
+      const redirect = encodeURIComponent(getRedirectPath());
+      window.location.href = `/auth/${provider}/login?redirect=${redirect}&link=1`;
+    },
+    [handleTelegramAuth]
+  );
+
+  const signOut = useCallback(async () => {
+    await fetch("/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setProfile(null);
+    setContactHandles({});
+  }, []);
 
   const updateContactHandle = useCallback(
     async (provider: SocialProvider, handle: ContactHandle | null) => {
-      const updated: ContactHandlesMap = {
-        ...contactHandles,
-      };
-      if (handle) {
-        updated[provider] = handle;
-      } else {
-        delete updated[provider];
-      }
-
-      const { data, error } = await supabase.auth.updateUser({
-        data: {
-          contact_handles: updated,
+      const response = await fetch("/auth/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        credentials: "include",
+        body: JSON.stringify({
+          provider,
+          handle: handle?.handle ?? "",
+          url: handle?.url ?? "",
+        }),
       });
-
-      if (error) throw error;
-      if (data.user) {
-        setUser(data.user);
-      } else {
-        await refreshUser();
+      if (!response.ok) {
+        throw new Error("Failed to update contact");
       }
+      const data = (await response.json()) as RawProfile;
+      const { profile: mapped, contacts } = mapProfile(data);
+      setProfile(mapped);
+      setContactHandles(contacts);
     },
-    [contactHandles, refreshUser]
+    []
+  );
+
+  const setPreferredContact = useCallback(
+    async (provider: ContactMethodType | null) => {
+      const response = await fetch("/auth/preferred", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ provider }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update preferred contact");
+      }
+      const data = (await response.json()) as RawProfile;
+      const { profile: mapped, contacts } = mapProfile(data);
+      setProfile(mapped);
+      setContactHandles(contacts);
+    },
+    []
   );
 
   const value = useMemo(
     () => ({
-      user,
-      session,
+      profile,
       loading,
       contactHandles,
-      refreshUser,
+      refreshProfile,
       signIn,
       signOut,
       linkProvider,
       updateContactHandle,
+      setPreferredContact,
     }),
     [
-      user,
-      session,
+      profile,
       loading,
       contactHandles,
-      refreshUser,
+      refreshProfile,
       signIn,
       signOut,
       linkProvider,
       updateContactHandle,
+      setPreferredContact,
     ]
   );
 
@@ -174,3 +302,4 @@ export function useAuth() {
   }
   return ctx;
 }
+

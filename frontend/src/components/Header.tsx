@@ -15,20 +15,18 @@ export default function Header({
   currentLang: string;
 }) {
   const { t } = useTranslation();
-  const { user, loading, signOut, signIn } = useAuth();
+  const { profile, loading, signOut, signIn } = useAuth();
   const navigate = useNavigate();
 
   const profilePath = `/${currentLang}/profile`;
   const homePath = `/${currentLang}`;
 
   const displayName =
-    (user?.user_metadata?.full_name as string | undefined) ||
-    user?.email ||
-    t("profile.anonymous", "Игрок");
+    profile?.displayName || t("profile.anonymous", "Игрок");
 
   const handleSignIn = async (provider: SocialProvider) => {
     try {
-      await signIn(provider);
+      signIn(provider);
     } catch (error) {
       console.error(error);
       toast.error(t("auth.error", "Не удалось авторизоваться"));
@@ -56,11 +54,9 @@ export default function Header({
             <span className="text-zinc-400">
               {t("auth.loading", "Загрузка...")}
             </span>
-          ) : user ? (
+          ) : profile ? (
             <>
-              <span className="hidden text-zinc-300 sm:inline">
-                {displayName}
-              </span>
+              <span className="hidden text-zinc-300 sm:inline">{displayName}</span>
               <Link
                 to={profilePath}
                 className="rounded border border-zinc-700 px-3 py-1 text-xs font-medium uppercase tracking-wide text-zinc-200 transition hover:border-blue-500 hover:text-blue-400"

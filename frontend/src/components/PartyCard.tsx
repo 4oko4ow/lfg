@@ -10,7 +10,9 @@ import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { analytics } from "../utils/analytics";
 import { useTranslation } from "react-i18next";
-import {getGameName} from "../constants/games.ts";
+import { getGameName } from "../constants/games";
+import { StarIcon } from "@heroicons/react/20/solid";
+import toast from "react-hot-toast";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -76,6 +78,15 @@ export default function PartyCard({
     onJoin();
   };
 
+  const handleCopy = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(t("ui.copied", "Скопировано"));
+    } catch {
+      toast.error(t("toasts.error", "Что-то пошло не так"));
+    }
+  };
+
   const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
     return (
@@ -85,15 +96,47 @@ export default function PartyCard({
             icon: <MessageCircle className="h-4 w-4" />,
             label: contact.type,
           };
-          return (
-            <span
-              key={`${contact.type}-${contact.handle}`}
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/60 px-3 py-1"
-            >
+          const content = (
+            <>
               {config.icon}
               <span className="font-medium text-zinc-200">{config.label}</span>
               <span className="text-zinc-400">{contact.handle}</span>
-            </span>
+              {contact.preferred && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200">
+                  <StarIcon className="h-3 w-3" />
+                  {t("party.preferred", "Основной")}
+                </span>
+              )}
+            </>
+          );
+
+          return contact.url ? (
+            <a
+              key={`${contact.type}-${contact.handle}`}
+              href={contact.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition hover:border-blue-500 hover:bg-blue-500/10 ${
+                contact.preferred
+                  ? "border-blue-500 bg-blue-500/10"
+                  : "border-zinc-700 bg-zinc-800/60"
+              }`}
+            >
+              {content}
+            </a>
+          ) : (
+            <button
+              key={`${contact.type}-${contact.handle}`}
+              type="button"
+              onClick={() => handleCopy(contact.handle)}
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition hover:border-blue-500 hover:bg-blue-500/10 ${
+                contact.preferred
+                  ? "border-blue-500 bg-blue-500/10"
+                  : "border-zinc-700 bg-zinc-800/60"
+              }`}
+            >
+              {content}
+            </button>
           );
         })}
       </div>
