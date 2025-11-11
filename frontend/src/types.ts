@@ -4,6 +4,7 @@ export type ContactMethod = {
   type: ContactMethodType;
   handle: string;
   url?: string;
+  preferred?: boolean;
 };
 
 export type ContactHandle = {

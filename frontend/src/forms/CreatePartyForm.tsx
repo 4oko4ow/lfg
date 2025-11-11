@@ -18,7 +18,7 @@ export default function CreatePartyForm() {
     const [game, setGame] = useState<GameSlug>(games[0]?.slug ?? "abioticfactor");
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
-    const { contactHandles } = useAuth();
+    const { contactHandles, profile } = useAuth();
 
     const availableMethods = useMemo(
         () =>
@@ -29,10 +29,37 @@ export default function CreatePartyForm() {
     );
 
     const [selectedMethods, setSelectedMethods] = useState<ContactMethodType[]>(availableMethods);
+    const [preferredMethod, setPreferredMethod] = useState<ContactMethodType | null>(
+        availableMethods[0] ?? null
+    );
 
     useEffect(() => {
         setSelectedMethods(availableMethods);
+        setPreferredMethod((prev) =>
+            availableMethods.includes(prev as ContactMethodType)
+                ? prev
+                : availableMethods[0] ?? null
+        );
     }, [availableMethods]);
+
+    useEffect(() => {
+        if (!profile?.preferredContact) return;
+        if (availableMethods.includes(profile.preferredContact)) {
+            setPreferredMethod(profile.preferredContact);
+        }
+    }, [profile?.preferredContact, availableMethods]);
+
+    useEffect(() => {
+        if (selectedMethods.length === 0) {
+            setPreferredMethod(null);
+            return;
+        }
+        setPreferredMethod((prev) =>
+            prev && selectedMethods.includes(prev)
+                ? prev
+                : selectedMethods[0]
+        );
+    }, [selectedMethods]);
 
     useEffect(() => {
         if (!games.find((g) => g.slug === game)) {
@@ -45,8 +72,19 @@ export default function CreatePartyForm() {
         analytics.createPartySubmit(game);
         if (!goal.trim()) return;
 
+        const effectivePreferred =
+            preferredMethod && selectedMethods.includes(preferredMethod)
+                ? preferredMethod
+                : selectedMethods[0];
+
         const contacts = selectedMethods
-            .map((method) => contactHandleToMethod(method, contactHandles[method]))
+            .map((method) =>
+                contactHandleToMethod(
+                    method,
+                    contactHandles[method],
+                    method === effectivePreferred
+                )
+            )
             .filter((contact): contact is NonNullable<typeof contact> => Boolean(contact));
 
         if (availableMethods.length > 0 && contacts.length === 0) {
@@ -57,6 +95,7 @@ export default function CreatePartyForm() {
         sendCreateParty({ game, goal, slots, contacts });
         setGoal("");
         setSelectedMethods(availableMethods);
+        setPreferredMethod(availableMethods[0] ?? null);
     };
 
     return (
@@ -131,33 +170,63 @@ export default function CreatePartyForm() {
                 ) : (
                     <div className="flex flex-wrap gap-2">
                         {availableMethods.map((method) => (
-                            <label
-                                key={method}
-                                className={`cursor-pointer rounded-full border px-3 py-1 text-xs uppercase tracking-wide transition ${
-                                    selectedMethods.includes(method)
-                                        ? "border-blue-500 bg-blue-500/20 text-blue-200"
-                                        : "border-zinc-700 bg-zinc-800 text-zinc-300"
-                                }`}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedMethods.includes(method)}
-                                    onChange={(e) => {
-                                        setSelectedMethods((prev) => {
-                                            if (e.target.checked) {
-                                                return [...prev, method];
-                                            }
-                                            return prev.filter((item) => item !== method);
-                                        });
-                                    }}
-                                    className="hidden"
-                                />
-                                {method.toUpperCase()}
-                            </label>
+                            <div key={method} className="flex items-center gap-2">
+                                <label
+                                    className={`cursor-pointer rounded-full border px-3 py-1 text-xs uppercase tracking-wide transition ${
+                                        selectedMethods.includes(method)
+                                            ? "border-blue-500 bg-blue-500/20 text-blue-200"
+                                            : "border-zinc-700 bg-zinc-800 text-zinc-300"
+                                    }`}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedMethods.includes(method)}
+                                        onChange={(e) => {
+                                            setSelectedMethods((prev) => {
+                                                if (e.target.checked) {
+                                                    return [...prev, method];
+                                                }
+                                                const next = prev.filter((item) => item !== method);
+                                                if (preferredMethod === method) {
+                                                    setPreferredMethod(next[0] ?? null);
+                                                }
+                                                return next;
+                                            });
+                                        }}
+                                        className="hidden"
+                                    />
+                                    {method.toUpperCase()}
+                                </label>
+                            </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {selectedMethods.length > 0 && (
+                <div className="space-y-2 rounded-lg border border-zinc-700 bg-zinc-900/60 p-4">
+                    <label className="block text-xs uppercase tracking-wide text-zinc-400">
+                        {t("form.preferred_contact", "Предпочтительный способ связи")}
+                    </label>
+                    <select
+                        value={preferredMethod ?? selectedMethods[0] ?? ""}
+                        onChange={(e) => setPreferredMethod(e.target.value as ContactMethodType)}
+                        className="w-full rounded border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white"
+                    >
+                        {selectedMethods.map((method) => (
+                            <option key={method} value={method}>
+                                {method.toUpperCase()}
+                            </option>
+                        ))}
+                    </select>
+                    <p className="text-xs text-zinc-500">
+                        {t(
+                            "form.preferred_contact_hint",
+                            "Этот контакт будет отображаться первым в списке"
+                        )}
+                    </p>
+                </div>
+            )}
 
             <button
                 type="submit"

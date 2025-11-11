@@ -54,13 +54,15 @@ export function normalizeContactHandle(
 
 export function contactHandleToMethod(
   provider: ContactMethodType,
-  handle: ContactHandle | null | undefined
+  handle: ContactHandle | null | undefined,
+  preferred: boolean
 ): ContactMethod | null {
   if (!handle) return null;
   return {
     type: provider,
     handle: handle.handle,
     url: handle.url,
+    preferred,
   };
 }
 

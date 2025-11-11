@@ -39,7 +39,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
-    user,
+    profile,
     loading,
     contactHandles,
     linkProvider,
@@ -61,22 +61,22 @@ export default function ProfilePage() {
   }, [contactHandles]);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !profile) {
       navigate(`/${lang ?? "en"}`, { replace: true });
     }
-  }, [user, loading, lang, navigate]);
+  }, [profile, loading, lang, navigate]);
 
   const linkedProviders = useMemo(() => {
     const set = new Set<string>();
-    user?.identities?.forEach((identity) => {
+    profile?.identities.forEach((identity) => {
       if (identity.provider) set.add(identity.provider);
     });
     return set;
-  }, [user]);
+  }, [profile]);
 
   const handleLink = async (provider: SocialProvider) => {
     try {
-      await linkProvider(provider);
+      linkProvider(provider);
     } catch (error) {
       console.error(error);
       toast.error(t("auth.error", "Не удалось авторизоваться"));
@@ -94,7 +94,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading || !user) {
+  if (loading || !profile) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-3xl items-center justify-center px-4 text-white">
         <span className="text-sm text-zinc-300">

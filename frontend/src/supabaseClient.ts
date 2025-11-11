@@ -5,7 +5,7 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!url || !anonKey) {
   throw new Error(
-    "Supabase environment variables are not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable social login."
+    "Supabase environment variables are not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable chat and suggestion features."
   );
 }
 
