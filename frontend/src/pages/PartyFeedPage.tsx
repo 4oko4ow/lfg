@@ -168,13 +168,13 @@ function PartyFeedPage() {
   return (
     <>
       <DynamicMeta />
-      <main className="mx-auto w-full max-w-5xl px-4 py-6 text-white">
-        <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <main className="mx-auto w-full max-w-5xl px-4 py-4 sm:py-6 text-white">
+        <section className="mb-4 sm:mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-xl sm:text-2xl font-bold">
               {t("hero.title", "Найди команду для игры")}
             </h1>
-            <p className="text-sm text-zinc-400">
+            <p className="text-xs sm:text-sm text-zinc-400">
               {t("hero.subtitle", "Вступай в готовые пати или создай своё объявление")}
             </p>
           </div>
@@ -183,13 +183,13 @@ function PartyFeedPage() {
 
         <CreatePartyForm />
 
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-400">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs sm:text-sm text-zinc-400">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {gameOptions.map((option) => (
               <button
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`rounded-full px-3 py-1 text-xs uppercase tracking-wide transition ${
+                className={`rounded-full px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition ${
                   filter === option
                     ? "bg-blue-600 text-white"
                     : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
@@ -199,16 +199,16 @@ function PartyFeedPage() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-xs text-zinc-400">
-              <MessageCircle className="h-4 w-4" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1 text-[10px] sm:text-xs text-zinc-400">
+              <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("hero.online", { defaultValue: "Онлайн: {{count}}", count: onlineCount })}
             </span>
             <button
               onClick={() => setChatOpen(true)}
-              className="flex items-center gap-2 rounded bg-zinc-800 px-3 py-1 text-xs uppercase tracking-wide transition hover:bg-zinc-700"
+              className="flex items-center gap-1.5 sm:gap-2 rounded bg-zinc-800 px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition hover:bg-zinc-700"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("chat.title", "Чат")}
             </button>
           </div>
@@ -227,7 +227,7 @@ function PartyFeedPage() {
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 max-w-screen-md mx-auto">
             {filteredParties.map((party) => (
               <PartyCard key={party.id} party={party} onJoin={() => handleJoinClick(party)} />
             ))}
@@ -256,10 +256,11 @@ function PartyFeedPage() {
 
       <button
         onClick={() => setSuggestModalOpen(true)}
-        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-pink-500"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 flex items-center gap-2 rounded-full bg-pink-600 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-lg transition hover:bg-pink-500 z-50"
       >
-        <HelpCircle className="h-4 w-4" />
-        {t("hero.suggest_game", "Нет нужной игры?")}
+        <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <span className="hidden sm:inline">{t("hero.suggest_game", "Нет нужной игры?")}</span>
+        <span className="sm:hidden">{t("hero.suggest_game_short", "Игра?")}</span>
       </button>
     </>
   );

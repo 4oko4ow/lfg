@@ -15,10 +15,11 @@ export default function FeedbackButton() {
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="fixed bottom-4 right-4 flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm shadow hover:bg-zinc-700 transition z-50"
+      className="fixed bottom-20 right-4 sm:right-6 flex items-center gap-2 bg-zinc-800 text-white px-3 py-2 sm:px-4 rounded-lg text-xs sm:text-sm shadow-lg hover:bg-zinc-700 transition z-50"
     >
-      <ExclamationCircleIcon className="w-5 h-5" />
-      {t("feedback.label")}
+      <ExclamationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+      <span className="hidden sm:inline">{t("feedback.label")}</span>
+      <span className="sm:hidden">{t("feedback.label_short", "Feedback")}</span>
     </a>
   );
 }

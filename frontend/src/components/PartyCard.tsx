@@ -149,7 +149,7 @@ export default function PartyCard({
 
   return (
     <div
-      className={`rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full max-w-screen-md mx-auto
+      className={`rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full
       ${isPinned ? "bg-pink-950 border border-pink-600" : "bg-zinc-800 border border-zinc-700"}
     `}
     >

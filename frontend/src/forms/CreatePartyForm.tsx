@@ -101,18 +101,18 @@ export default function CreatePartyForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="mb-6 space-y-4 rounded-xl border border-zinc-700 bg-zinc-900 p-4"
+            className="mb-6 space-y-3 rounded-xl border border-zinc-700 bg-zinc-800 p-4 max-w-screen-md mx-auto"
         >
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
-                <BoltIcon className="h-5 w-5 text-blue-500" />
+            <h2 className="flex items-center gap-2 text-base font-semibold text-white">
+                <BoltIcon className="h-4 w-4 text-blue-500" />
                 {t("form.title", "Создать пати")}
             </h2>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
                 <select
                     value={game}
                     onChange={(e) => setGame(e.target.value as GameSlug)}
-                    className="w-full rounded border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white sm:w-auto"
+                    className="flex-1 min-w-[200px] rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
                 >
                     {games.map((g) => (
                         <option key={g.slug} value={g.slug}>
@@ -121,17 +121,17 @@ export default function CreatePartyForm() {
                     ))}
                 </select>
 
-                <div className="relative w-full sm:w-24">
+                <div className="relative w-full sm:w-20">
                     <input
                         type="number"
                         value={slots}
                         min={2}
                         max={10}
                         onChange={(e) => setSlots(parseInt(e.target.value || "0", 10))}
-                        className="w-full rounded bg-zinc-800 px-3 py-2 pl-9 text-sm text-white"
+                        className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 pl-8 text-sm text-white"
                         placeholder={t("form.labels.slots", "Слоты")}
                     />
-                    <UserGroupIcon className="pointer-events-none absolute left-2 top-2.5 h-5 w-5 text-zinc-500" />
+                    <UserGroupIcon className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-zinc-500" />
                 </div>
             </div>
 
@@ -144,11 +144,11 @@ export default function CreatePartyForm() {
                 required
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                className="w-full rounded border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white"
+                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
             />
 
-            <div className="space-y-3 rounded-lg border border-zinc-700 bg-zinc-900/60 p-4">
-                <p className="text-sm text-zinc-300">
+            <div className="space-y-2 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
+                <p className="text-xs text-zinc-400">
                     {t(
                         "form.contact_methods",
                         "Выберите способы связи, которые хотите показать"
@@ -168,11 +168,11 @@ export default function CreatePartyForm() {
                         </Link>
                     </p>
                 ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                         {availableMethods.map((method) => (
                             <div key={method} className="flex items-center gap-2">
                                 <label
-                                    className={`cursor-pointer rounded-full border px-3 py-1 text-xs uppercase tracking-wide transition ${
+                                    className={`cursor-pointer rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-wide transition ${
                                         selectedMethods.includes(method)
                                             ? "border-blue-500 bg-blue-500/20 text-blue-200"
                                             : "border-zinc-700 bg-zinc-800 text-zinc-300"
@@ -204,14 +204,14 @@ export default function CreatePartyForm() {
             </div>
 
             {selectedMethods.length > 0 && (
-                <div className="space-y-2 rounded-lg border border-zinc-700 bg-zinc-900/60 p-4">
-                    <label className="block text-xs uppercase tracking-wide text-zinc-400">
+                <div className="space-y-1.5 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
+                    <label className="block text-[10px] uppercase tracking-wide text-zinc-400">
                         {t("form.preferred_contact", "Предпочтительный способ связи")}
                     </label>
                     <select
                         value={preferredMethod ?? selectedMethods[0] ?? ""}
                         onChange={(e) => setPreferredMethod(e.target.value as ContactMethodType)}
-                        className="w-full rounded border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white"
+                        className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-white"
                     >
                         {selectedMethods.map((method) => (
                             <option key={method} value={method}>
@@ -219,7 +219,7 @@ export default function CreatePartyForm() {
                             </option>
                         ))}
                     </select>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-[10px] text-zinc-500">
                         {t(
                             "form.preferred_contact_hint",
                             "Этот контакт будет отображаться первым в списке"
@@ -231,7 +231,7 @@ export default function CreatePartyForm() {
             <button
                 type="submit"
                 disabled={availableMethods.length > 0 && selectedMethods.length === 0}
-                className={`w-full rounded px-5 py-2 text-sm font-medium text-white transition sm:w-auto ${
+                className={`w-full rounded px-4 py-2 text-sm font-medium text-white transition sm:w-auto ${
                     availableMethods.length > 0 && selectedMethods.length === 0
                         ? "bg-zinc-700 cursor-not-allowed"
                         : "bg-blue-600 hover:bg-blue-700"
