@@ -628,40 +628,17 @@ func (h *Handler) fetchSteamPersona(ctx context.Context, steamID string) string 
 }
 
 func resolveTelegramBotID(token string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("https://api.telegram.org/bot%s/getMe", token), nil)
-	if err != nil {
-		return "", err
+	// Bot token format is: {bot_id}:{secret_hash}
+	// Extract the bot ID (the part before the colon)
+	parts := strings.Split(token, ":")
+	if len(parts) < 2 {
+		return "", errors.New("invalid telegram bot token format")
 	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
+	botID := parts[0]
+	if botID == "" {
+		return "", errors.New("telegram bot ID missing from token")
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return "", fmt.Errorf("telegram getMe failed: %s", resp.Status)
-	}
-
-	var payload struct {
-		OK     bool `json:"ok"`
-		Result struct {
-			Username string `json:"username"`
-		} `json:"result"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return "", err
-	}
-	if !payload.OK {
-		return "", errors.New("telegram getMe response not ok")
-	}
-	if payload.Result.Username == "" {
-		return "", errors.New("telegram bot username missing")
-	}
-	return payload.Result.Username, nil
+	return botID, nil
 }
 
 type telegramVerifyRequest struct {
