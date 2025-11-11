@@ -130,10 +130,17 @@ async function readProfile(): Promise<{
   try {
     const url = buildBackendUrl("/auth/session");
     console.log("[Auth] Fetching profile from:", url);
+    console.log("[Auth] Current origin:", window.location.origin);
+    console.log("[Auth] Backend URL:", backendBaseUrl);
+    
     const response = await fetch(url, {
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     console.log("[Auth] Session response status:", response.status);
+    console.log("[Auth] Response headers:", Object.fromEntries(response.headers.entries()));
     
     if (response.status === 204) {
       console.log("[Auth] No session found (204 No Content)");

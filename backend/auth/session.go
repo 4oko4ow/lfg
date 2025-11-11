@@ -114,8 +114,10 @@ func (s *SessionManager) Clear(w http.ResponseWriter) {
 func (s *SessionManager) Extract(r *http.Request) (string, error) {
 	cookie, err := r.Cookie(s.cookieName)
 	if err != nil {
+		log.Printf("[Session] Cookie %s not found in request: %v", s.cookieName, err)
 		return "", err
 	}
+	log.Printf("[Session] Found cookie %s, attempting to extract session", s.cookieName)
 	decoded, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		return "", err

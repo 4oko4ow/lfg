@@ -225,10 +225,19 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) getCurrentProfile(r *http.Request) (*Profile, error) {
+	// Log all cookies for debugging
+	cookies := r.Cookies()
+	log.Printf("[Auth] Request cookies: %d cookies found", len(cookies))
+	for _, cookie := range cookies {
+		log.Printf("[Auth] Cookie: %s (Domain: %s, Path: %s)", cookie.Name, cookie.Domain, cookie.Path)
+	}
+	
 	userID, err := h.sessions.Extract(r)
 	if err != nil {
+		log.Printf("[Auth] Failed to extract session: %v", err)
 		return nil, nil
 	}
+	log.Printf("[Auth] Extracted userID from session: %s", userID)
 	return h.store.GetProfile(userID)
 }
 
@@ -552,14 +561,18 @@ func (h *Handler) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, ErrIdentityLinked) {
 			status = "steam_conflict"
 		}
+		log.Printf("[Auth] Steam identity upsert failed: %v", err)
 		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, status), http.StatusFound)
 		return
 	}
 
+	log.Printf("[Auth] Steam login successful, creating session for user: %s", profile.User.ID)
 	if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
+		log.Printf("[Auth] Failed to issue session: %v", err)
 		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
 		return
 	}
+	log.Printf("[Auth] Session issued, redirecting to frontend")
 
 	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
 }
