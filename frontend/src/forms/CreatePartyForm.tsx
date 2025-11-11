@@ -8,6 +8,7 @@ import { getGames, type GameSlug } from "../constants/games";
 import { useAuth } from "../context/AuthContext";
 import type { ContactMethodType } from "../types";
 import { contactHandleToMethod } from "../utils/contactHelpers";
+import LoginModal from "../components/modals/LoginModal";
 
 export default function CreatePartyForm() {
     const { t } = useTranslation();
@@ -19,6 +20,7 @@ export default function CreatePartyForm() {
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
     const { contactHandles, profile } = useAuth();
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const availableMethods = useMemo(
         () =>
@@ -182,7 +184,26 @@ export default function CreatePartyForm() {
                         "Выберите способы связи, которые хотите показать"
                     )}
                 </p>
-                {availableMethods.length === 0 ? (
+                {!profile ? (
+                    <div className="space-y-2">
+                        <p className="text-sm text-zinc-400">
+                            {t(
+                                "form.login_required",
+                                "Для создания пати необходимо войти в систему."
+                            )}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setShowLoginModal(true)}
+                            className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                        >
+                            {t("auth.sign_in", "Войти")}
+                        </button>
+                        {showLoginModal && (
+                            <LoginModal onClose={() => setShowLoginModal(false)} />
+                        )}
+                    </div>
+                ) : availableMethods.length === 0 ? (
                     <p className="text-sm text-zinc-400">
                         {t(
                             "form.no_contacts",

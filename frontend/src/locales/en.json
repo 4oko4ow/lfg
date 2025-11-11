@@ -84,6 +84,7 @@
     "cta": "Create Party",
     "update_cta": "Save changes",
     "contact_methods": "Choose which contact methods to show",
+    "login_required": "You need to sign in to create a party.",
     "no_contacts": "You don't have any contacts yet. Configure them in your profile.",
     "no_contacts_required": "You need to add at least one contact in your profile to create a party.",
     "select_contact_required": "Please select at least one contact method to show in your listing.",
