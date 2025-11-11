@@ -45,7 +45,7 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
         ) : (
           <>
             <input
-              className="w-full p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-white mb-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-white mb-4 transition-colors hover:border-zinc-600"
               placeholder={t(
                 "suggest_game.placeholder",
                 "Введи название игры"

@@ -152,7 +152,8 @@
     "placeholder": "Write a message…",
     "send": "Send",
     "empty": "No messages yet",
-    "online": "Online"
+    "online": "Online",
+    "login_required": "Sign in to chat"
   },
   "empty": {
     "parties": "No parties yet. Be the first to create one!"

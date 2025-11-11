@@ -67,7 +67,7 @@ export default function Header({
     <header className="w-full border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm text-white sticky top-0 z-40 shadow-sm">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link to={homePath} className="text-lg font-semibold tracking-wide hover:text-blue-400 transition-colors duration-200">
-          LFG
+          FindParty
         </Link>
         <div className="flex items-center gap-3 text-sm">
           {loading ? (

@@ -56,6 +56,13 @@ function PartyFeedPage() {
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
 
+  // Always show chat on desktop
+  useEffect(() => {
+    if (!isMobile) {
+      setChatOpen(true);
+    }
+  }, [isMobile]);
+
   const handleCloseModal = () => {
     analytics.contactClose();
     setContactModal(null);
@@ -115,10 +122,14 @@ function PartyFeedPage() {
   const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
 
   const filteredParties = useMemo(() => {
+    // Convert filter (game name) to slug for comparison
+    const selectedGame = games.find((g) => g.name === filter);
+    const selectedSlug = selectedGame?.slug;
+    
     const byGame =
       filter === ALL_LABEL
         ? parties
-        : parties.filter((p) => p.game.toLowerCase() === filter.toLowerCase());
+        : parties.filter((p) => p.game.toLowerCase() === selectedSlug?.toLowerCase());
 
     const pruned = byGame.filter((p) => {
       const isFull = p.joined >= p.slots;
@@ -144,7 +155,7 @@ function PartyFeedPage() {
       if (d !== 0) return d;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [parties, filter, ALL_LABEL]);
+  }, [parties, filter, ALL_LABEL, games]);
 
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem("no_join_survey_shown") === "true";
@@ -204,13 +215,15 @@ function PartyFeedPage() {
               <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("hero.online", { defaultValue: "Онлайн: {{count}}", count: onlineCount })}
             </span>
-            <button
-              onClick={() => setChatOpen(true)}
-              className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-zinc-800 to-zinc-700 px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition-all duration-200 hover:from-zinc-700 hover:to-zinc-600 hover:scale-105 active:scale-95 shadow-md"
-            >
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              {t("chat.title", "Чат")}
-            </button>
+            {isMobile && (
+              <button
+                onClick={() => setChatOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors hover:bg-zinc-700"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                {t("chat.title", "Чат")}
+              </button>
+            )}
           </div>
         </div>
 
@@ -266,9 +279,11 @@ function PartyFeedPage() {
         />
       )}
 
-      {isMobile
-        ? chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />
-        : chatOpen && <Chat onClose={() => setChatOpen(false)} />}
+      {isMobile ? (
+        chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />
+      ) : (
+        <Chat />
+      )}
 
       <button
         onClick={() => setSuggestModalOpen(true)}

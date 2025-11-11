@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../supabaseClient";
-import { getOrCreateAnonIdentity } from "../utils/anonIdentity";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const Chat = ({
   isMobile = false,
@@ -13,10 +15,15 @@ const Chat = ({
   onClose?: () => void;
 }) => {
   const { t, i18n } = useTranslation();
+  const { lang } = useParams();
+  const { profile } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
-  const { id, name } = getOrCreateAnonIdentity();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchMessages();
@@ -30,10 +37,8 @@ const Chat = ({
           const newMsg = payload.new;
 
           setMessages((prev) => {
-            // Уже есть по ID? — не добавляем
             if (prev.some((m) => m.id === newMsg.id)) return prev;
 
-            // Удаляем optimistic-сообщение с тем же client_msg_id (если был)
             const filtered = prev.filter(
               (m) => m.client_msg_id !== newMsg.client_msg_id
             );
@@ -51,6 +56,62 @@ const Chat = ({
     };
   }, []);
 
+  // Draggable functionality for desktop
+  useEffect(() => {
+    if (isMobile || !chatRef.current) return;
+
+    const chatElement = chatRef.current;
+    let currentIsDragging = false;
+    let currentDragOffset = { x: 0, y: 0 };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const header = target.closest('[data-drag-handle]');
+      if (!header || target.tagName === 'BUTTON') return;
+      
+      e.preventDefault();
+      currentIsDragging = true;
+      setIsDragging(true);
+      const rect = chatElement.getBoundingClientRect();
+      currentDragOffset = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+      setDragOffset(currentDragOffset);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!currentIsDragging) return;
+      
+      const newX = e.clientX - currentDragOffset.x;
+      const newY = e.clientY - currentDragOffset.y;
+      
+      // Constrain to viewport
+      const maxX = window.innerWidth - chatElement.offsetWidth;
+      const maxY = window.innerHeight - chatElement.offsetHeight;
+      
+      setPosition({
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY)),
+      });
+    };
+
+    const handleMouseUp = () => {
+      currentIsDragging = false;
+      setIsDragging(false);
+    };
+
+    chatElement.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      chatElement.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isMobile]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -62,8 +123,8 @@ const Chat = ({
   const fetchMessages = async () => {
     const { data, error } = await supabase
       .from("chat_messages")
-      .select("*")
-      .order("created_at", { ascending: false }) // последние 100
+      .select("*, user_id, user_display_name")
+      .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) {
@@ -71,7 +132,6 @@ const Chat = ({
       return;
     }
 
-    // Переворачиваем: старые сверху, новые снизу
     const ordered = (data || []).reverse();
 
     setMessages((prev) => {
@@ -81,6 +141,8 @@ const Chat = ({
   };
 
   const sendMessage = async () => {
+    if (!profile) return;
+    
     const trimmed = input.trim();
     if (!trimmed) return;
 
@@ -89,8 +151,8 @@ const Chat = ({
     const optimisticMessage = {
       id: client_msg_id,
       client_msg_id,
-      anon_id: id,
-      anon_name: name,
+      user_id: profile.id,
+      user_display_name: profile.displayName,
       message: trimmed,
       created_at: new Date().toISOString(),
       optimistic: true,
@@ -101,8 +163,8 @@ const Chat = ({
     scrollToBottom();
 
     const { error } = await supabase.from("chat_messages").insert({
-      anon_id: id,
-      anon_name: name,
+      user_id: profile.id,
+      user_display_name: profile.displayName,
       message: trimmed,
       client_msg_id,
     });
@@ -120,23 +182,38 @@ const Chat = ({
     minute: "2-digit",
   });
 
+  const displayName = (msg: any) => {
+    return msg.user_display_name || msg.user_id || t("profile.anonymous", "Player");
+  };
+
   return (
     <div
+      ref={chatRef}
       className={
         isMobile
           ? "fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden"
-          : "fixed bottom-18 right-4 w-80 h-96 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col shadow-lg overflow-hidden z-50"
+          : `fixed w-80 h-96 bg-zinc-900 border border-zinc-700/50 rounded-lg flex flex-col shadow-lg overflow-hidden z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
+      }
+      style={
+        !isMobile && position.x !== 0 && position.y !== 0
+          ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto' }
+          : !isMobile
+          ? { bottom: '1rem', right: '1rem' }
+          : {}
       }
     >
-      <div className="bg-zinc-800 p-3 text-sm font-bold border-b border-zinc-700 flex items-center justify-between">
+      <div 
+        data-drag-handle
+        className={`bg-zinc-800 p-3 text-sm font-semibold border-b border-zinc-700 flex items-center justify-between ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      >
         <div className="flex items-center gap-2">
-          {t("chat.title", "Live chat")}
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          {t("chat.title", "Chat")}
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
         </div>
         {isMobile && (
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white"
+            className="text-zinc-400 hover:text-white transition-colors"
             aria-label={t("ui.close", "Close")}
             title={t("ui.close", "Close")}
           >
@@ -145,7 +222,7 @@ const Chat = ({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-1 text-sm">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
         {messages.length === 0 ? (
           <div className="text-zinc-500 text-center py-6">
             {t("chat.empty", "No messages yet")}
@@ -154,34 +231,49 @@ const Chat = ({
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`text-sm text-white pb-2 mb-1 border-b border-zinc-800 last:border-b-0 ${msg.optimistic ? "opacity-70 italic" : ""
-                }`}
+              className={`text-sm pb-2 ${msg.optimistic ? "opacity-70 italic" : ""}`}
             >
-              <div className="flex items-center justify-between">
-                <span className="text-blue-400 font-medium">{msg.anon_name}</span>
-                <span className="text-zinc-500 text-[11px] whitespace-nowrap">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-blue-400 font-medium text-xs">
+                  {displayName(msg)}
+                </span>
+                <span className="text-zinc-500 text-[10px] whitespace-nowrap">
                   {timeFmt.format(new Date(msg.created_at))}
                 </span>
               </div>
-              <div className="pl-1 text-zinc-200 break-words">{msg.message}</div>
+              <div className="text-zinc-200 break-words text-xs">{msg.message}</div>
             </div>
           ))
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-2 border-t border-zinc-700 bg-zinc-950 pb-[calc(env(safe-area-inset-bottom,0px)+4px)]">
-        <input
-          className="w-full max-w-full text-sm p-2 bg-zinc-800 text-white rounded-md outline-none"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder={t("chat.placeholder", "Write a message…")}
-          autoFocus={isMobile}
-          onFocus={scrollToBottom}
-          inputMode="text"
-          autoComplete="off"
-        />
+      <div className="p-3 border-t border-zinc-700/50 bg-zinc-950">
+        {!profile ? (
+          <div className="text-center py-2">
+            <p className="text-xs text-zinc-400 mb-2">
+              {t("chat.login_required", "Sign in to chat")}
+            </p>
+            <Link
+              to={`/${lang ?? "en"}`}
+              className="text-xs text-blue-400 hover:text-blue-300 underline"
+            >
+              {t("auth.sign_in_prompt", "Sign in")}
+            </Link>
+          </div>
+        ) : (
+          <input
+            className="w-full text-sm p-2 bg-zinc-800 border border-zinc-700/50 text-white rounded-lg transition-colors hover:border-zinc-600"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder={t("chat.placeholder", "Write a message…")}
+            autoFocus={isMobile}
+            onFocus={scrollToBottom}
+            inputMode="text"
+            autoComplete="off"
+          />
+        )}
       </div>
     </div>
   );

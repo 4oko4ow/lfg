@@ -154,12 +154,12 @@ export default function ProfilePage() {
                     setValues((prev) => ({ ...prev, [provider.id]: e.target.value }))
                   }
                   placeholder={provider.placeholder}
-                  className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-3 text-sm font-medium text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-zinc-700/60"
+                  className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 hover:bg-zinc-900/70 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <button
                   onClick={() => handleSave(provider.id)}
                   disabled={!isLinked}
-                  className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-4 py-3 text-sm font-semibold uppercase tracking-wide transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-blue-500/50 active:scale-95 disabled:cursor-not-allowed disabled:from-zinc-700 disabled:to-zinc-700 disabled:opacity-50 disabled:hover:shadow-none"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:opacity-50"
                 >
                   {t("profile.save", "Сохранить")}
                 </button>

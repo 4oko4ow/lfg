@@ -50,14 +50,18 @@ button, input, select, textarea {
   background: #52525b;
 }
 
-/* Focus styles for accessibility */
+/* Remove all outlines */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Animation keyframes */

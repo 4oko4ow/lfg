@@ -114,10 +114,10 @@ export default function CreatePartyForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="mb-6 space-y-3 rounded-xl border border-zinc-700/50 bg-zinc-800/60 backdrop-blur-sm p-4 max-w-screen-md mx-auto shadow-lg hover:shadow-xl hover:border-zinc-600 transition-all duration-300 animate-fadeIn"
+            className="mb-6 space-y-3 rounded-lg border border-zinc-700/50 bg-zinc-800/40 p-4 max-w-screen-md mx-auto"
         >
             <h2 className="flex items-center gap-2 text-base font-semibold text-white">
-                <BoltIcon className="h-4 w-4 text-blue-500 animate-pulse" />
+                <BoltIcon className="h-4 w-4 text-blue-500" />
                 {t("form.title", "Создать пати")}
             </h2>
 
@@ -129,7 +129,7 @@ export default function CreatePartyForm() {
                     <select
                         value={game}
                         onChange={(e) => setGame(e.target.value as GameSlug)}
-                        className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-3 text-sm font-medium text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600"
+                        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white transition-colors hover:border-zinc-600 hover:bg-zinc-900/70"
                     >
                         {games.map((g) => (
                             <option key={g.slug} value={g.slug} className="bg-zinc-900">
@@ -150,7 +150,7 @@ export default function CreatePartyForm() {
                             min={2}
                             max={10}
                             onChange={(e) => setSlots(parseInt(e.target.value || "0", 10))}
-                            className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-3 pl-10 text-sm font-medium text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600"
+                            className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 pl-10 text-sm text-white transition-colors hover:border-zinc-600 hover:bg-zinc-900/70"
                             placeholder={t("form.labels.slots", "Слоты")}
                         />
                         <UserGroupIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
@@ -171,11 +171,11 @@ export default function CreatePartyForm() {
                     required
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
-                    className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-3 text-sm font-medium text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600"
+                    className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 hover:bg-zinc-900/70"
                 />
             </div>
 
-            <div className="space-y-2 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
+            <div className="space-y-2 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3">
                 <p className="text-xs text-zinc-400">
                     {t(
                         "form.contact_methods",
@@ -232,14 +232,14 @@ export default function CreatePartyForm() {
             </div>
 
             {selectedMethods.length > 0 && (
-                <div className="space-y-2 rounded-xl border-2 border-zinc-700/50 bg-zinc-900/40 backdrop-blur-sm p-4">
+                <div className="space-y-2 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3">
                     <label className="block text-xs font-medium text-zinc-400">
                         {t("form.preferred_contact", "Предпочтительный способ связи")}
                     </label>
                     <select
                         value={preferredMethod ?? selectedMethods[0] ?? ""}
                         onChange={(e) => setPreferredMethod(e.target.value as ContactMethodType)}
-                        className="w-full rounded-xl border-2 border-zinc-700/60 bg-zinc-900/70 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-zinc-900/90 transition-all duration-200 shadow-sm hover:border-zinc-600"
+                        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2 text-sm text-white transition-colors hover:border-zinc-600 hover:bg-zinc-900/70"
                     >
                         {selectedMethods.map((method) => (
                             <option key={method} value={method} className="bg-zinc-900">
@@ -257,8 +257,8 @@ export default function CreatePartyForm() {
             )}
 
             {!canSubmit && (
-                <div className="rounded-lg border-2 border-yellow-500/50 bg-yellow-500/10 p-3">
-                    <p className="text-xs font-medium text-yellow-200">
+                <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3">
+                    <p className="text-xs text-yellow-200">
                         {availableMethods.length === 0
                             ? t("form.no_contacts_required", "You need to add at least one contact in your profile to create a party.")
                             : t("form.select_contact_required", "Please select at least one contact method to show in your listing.")}
@@ -269,10 +269,10 @@ export default function CreatePartyForm() {
             <button
                 type="submit"
                 disabled={!canSubmit || !goal.trim()}
-                className={`w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 sm:w-auto ${
+                className={`w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors sm:w-auto ${
                     !canSubmit || !goal.trim()
                         ? "bg-zinc-700 cursor-not-allowed opacity-50"
-                        : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-lg hover:shadow-blue-500/50 active:scale-95"
+                        : "bg-blue-600 hover:bg-blue-500"
                 }`}
             >
                 {t("form.cta", "Создать пати")}
