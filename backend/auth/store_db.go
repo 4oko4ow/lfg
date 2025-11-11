@@ -18,11 +18,11 @@ type DBStore struct {
 
 // Custom unmarshalers for time fields (Supabase returns RFC3339 strings)
 type dbUser struct {
-	ID               string     `json:"id"`
-	DisplayName      string     `json:"display_name"`
-	PreferredContact *string    `json:"preferred_contact"`
-	CreatedAt        string     `json:"created_at"`
-	UpdatedAt        string     `json:"updated_at"`
+	ID               string  `json:"id"`
+	DisplayName      string  `json:"display_name"`
+	PreferredContact *string `json:"preferred_contact"`
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }
 
 func (u *dbUser) parseTimes() (time.Time, time.Time, error) {
@@ -38,15 +38,15 @@ func (u *dbUser) parseTimes() (time.Time, time.Time, error) {
 }
 
 type dbIdentity struct {
-	ID           int      `json:"id"`
-	UserID       string   `json:"user_id"`
-	Provider     string   `json:"provider"`
-	ProviderID   string   `json:"provider_id"`
-	Username     *string  `json:"username"`
-	URL          *string  `json:"url"`
-	AccessToken  *string  `json:"access_token"`
-	RefreshToken *string  `json:"refresh_token"`
-	LinkedAt     string   `json:"linked_at"`
+	ID           int     `json:"id"`
+	UserID       string  `json:"user_id"`
+	Provider     string  `json:"provider"`
+	ProviderID   string  `json:"provider_id"`
+	Username     *string `json:"username"`
+	URL          *string `json:"url"`
+	AccessToken  *string `json:"access_token"`
+	RefreshToken *string `json:"refresh_token"`
+	LinkedAt     string  `json:"linked_at"`
 }
 
 func (i *dbIdentity) parseLinkedAt() (time.Time, error) {
@@ -80,19 +80,19 @@ func NewDBStore() (*DBStore, error) {
 	}
 
 	store := &DBStore{client: client}
-	
+
 	// Test connection
 	_, _, testErr := client.
 		From("auth_users").
 		Select("id", "", false).
 		Execute()
-	
+
 	if testErr != nil {
 		log.Printf("[Auth] ⚠️  Warning: Could not access auth_users table: %v", testErr)
 		log.Printf("[Auth] ⚠️  Make sure the table exists. Run the migration: migrations/create_auth_users_table.sql")
 		return nil, fmt.Errorf("auth_users table not accessible: %w", testErr)
 	}
-	
+
 	log.Println("[Auth] ✅ Using database-backed user storage (users will persist across restarts)")
 	return store, nil
 }
@@ -101,13 +101,13 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 	// Check if identity already exists
 	key := string(provider) + ":" + providerID
 	existingIdentity, err := s.findIdentityByProvider(provider, providerID)
-	
+
 	var userID string
 	if err == nil && existingIdentity != nil {
 		// Identity exists, use its user_id
 		userID = existingIdentity.UserID
 		log.Printf("[Auth] Found existing identity %s -> user %s", key, userID)
-		
+
 		if linkUserID != "" && userID != linkUserID {
 			log.Printf("[Auth] ⚠️  CONFLICT: Identity %s already linked to user %s, but trying to link to %s", key, userID, linkUserID)
 			log.Printf("[Auth] ⚠️  This identity belongs to another account. User must unlink it from the other account first.")
@@ -133,7 +133,7 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 	if err != nil {
 		return nil, err
 	}
-	
+
 	now := time.Now().UTC()
 	nowStr := now.Format(time.RFC3339)
 	if user == nil {
@@ -164,10 +164,10 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 	// Upsert identity using ON CONFLICT
 	// Build the identity data map (excluding id, which is auto-generated)
 	identityData := map[string]interface{}{
-		"user_id":   userID,
-		"provider":  string(provider),
+		"user_id":     userID,
+		"provider":    string(provider),
 		"provider_id": providerID,
-		"linked_at": nowStr,
+		"linked_at":   nowStr,
 	}
 	if username != "" {
 		identityData["username"] = username
@@ -208,20 +208,31 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 		log.Printf("[Auth] ✅ Identity inserted successfully")
 	}
 
-	// Upsert contact if username provided
-	if username != "" {
+	// Upsert contact - use username if available, otherwise use provider_id
+	contactHandle := username
+	if contactHandle == "" {
+		// Fallback to provider_id if username is not available
+		contactHandle = providerID
+	}
+
+	if contactHandle != "" {
 		contact := &dbContact{
 			UserID:    userID,
 			Provider:  string(provider),
-			Handle:    username,
+			Handle:    contactHandle,
 			UpdatedAt: nowStr,
 		}
 		if url != "" {
 			contact.URL = &url
 		}
+		log.Printf("[Auth] Upserting contact: provider=%s, handle=%s for user %s", provider, contactHandle, userID)
 		if err := s.upsertContact(contact); err != nil {
 			log.Printf("[Auth] Warning: Failed to upsert contact: %v", err)
+		} else {
+			log.Printf("[Auth] ✅ Contact upserted successfully")
 		}
+	} else {
+		log.Printf("[Auth] Warning: No contact handle available for provider %s", provider)
 	}
 
 	log.Printf("[Auth] ✅ Identity upserted successfully. Fetching profile for user: %s", userID)
@@ -232,8 +243,8 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 	if profile == nil {
 		return nil, fmt.Errorf("profile not found after upserting identity")
 	}
-	log.Printf("[Auth] ✅ Profile retrieved: user=%s, identities=%d (providers: %v)", 
-		profile.User.ID, 
+	log.Printf("[Auth] ✅ Profile retrieved: user=%s, identities=%d (providers: %v)",
+		profile.User.ID,
 		len(profile.Identities),
 		func() []string {
 			providers := make([]string, len(profile.Identities))
@@ -320,7 +331,7 @@ func (s *DBStore) GetProfile(userID string) (*Profile, error) {
 func (s *DBStore) UpdateContact(userID string, provider Provider, handle, url string) (*Profile, error) {
 	now := time.Now().UTC()
 	nowStr := now.Format(time.RFC3339)
-	
+
 	if handle == "" {
 		// Delete contact
 		_, _, err := s.client.
@@ -458,7 +469,7 @@ func (s *DBStore) getIdentities(userID string) ([]dbIdentity, error) {
 		log.Printf("[Auth] Error unmarshalling identities for user %s: %v", userID, err)
 		return nil, err
 	}
-	log.Printf("[Auth] Found %d identities for user %s: %v", len(identities), userID, 
+	log.Printf("[Auth] Found %d identities for user %s: %v", len(identities), userID,
 		func() []string {
 			providers := make([]string, len(identities))
 			for i, ident := range identities {
@@ -469,8 +480,6 @@ func (s *DBStore) getIdentities(userID string) ([]dbIdentity, error) {
 	return identities, nil
 }
 
-
-
 func (s *DBStore) getContacts(userID string) ([]dbContact, error) {
 	data, _, err := s.client.
 		From("auth_contacts").
@@ -478,17 +487,38 @@ func (s *DBStore) getContacts(userID string) ([]dbContact, error) {
 		Eq("user_id", userID).
 		Execute()
 	if err != nil {
+		log.Printf("[Auth] Error fetching contacts for user %s: %v", userID, err)
 		return nil, err
 	}
 
 	var contacts []dbContact
 	if err := json.Unmarshal(data, &contacts); err != nil {
+		log.Printf("[Auth] Error unmarshalling contacts for user %s: %v", userID, err)
 		return nil, err
 	}
+	log.Printf("[Auth] Found %d contacts for user %s: %v", len(contacts), userID,
+		func() []string {
+			providers := make([]string, len(contacts))
+			for i, contact := range contacts {
+				providers[i] = fmt.Sprintf("%s:%s", contact.Provider, contact.Handle)
+			}
+			return providers
+		}())
 	return contacts, nil
 }
 
 func (s *DBStore) upsertContact(contact *dbContact) error {
+	// Build contact data map (excluding id, which is auto-generated)
+	contactData := map[string]interface{}{
+		"user_id":    contact.UserID,
+		"provider":   contact.Provider,
+		"handle":     contact.Handle,
+		"updated_at": contact.UpdatedAt,
+	}
+	if contact.URL != nil {
+		contactData["url"] = *contact.URL
+	}
+
 	// Try to find existing contact
 	data, _, err := s.client.
 		From("auth_contacts").
@@ -496,25 +526,33 @@ func (s *DBStore) upsertContact(contact *dbContact) error {
 		Eq("user_id", contact.UserID).
 		Eq("provider", contact.Provider).
 		Execute()
-	
+
 	if err == nil {
-		var existing []struct{ ID int `json:"id"` }
+		var existing []struct {
+			ID int `json:"id"`
+		}
 		if err := json.Unmarshal(data, &existing); err == nil && len(existing) > 0 {
 			// Update existing
 			_, _, err = s.client.
 				From("auth_contacts").
-				Update(contact, "", "").
+				Update(contactData, "", "").
 				Eq("id", fmt.Sprintf("%d", existing[0].ID)).
 				Execute()
+			if err != nil {
+				log.Printf("[Auth] Error updating contact: %v", err)
+			}
 			return err
 		}
 	}
 
-	// Insert new
+	// Insert new (id will be auto-generated by SERIAL)
 	_, _, err = s.client.
 		From("auth_contacts").
-		Insert(contact, false, "", "representation", "").
+		Insert(contactData, false, "", "representation", "").
 		Execute()
+	if err != nil {
+		log.Printf("[Auth] Error inserting contact: %v", err)
+	}
 	return err
 }
 
@@ -524,4 +562,3 @@ func getStringPtr(s *string) string {
 	}
 	return *s
 }
-
