@@ -99,13 +99,12 @@ export default function PartyCard({
               type="button"
               onClick={onContactClick}
               disabled={isFull}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${
-                isFull
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${isFull
                   ? "border-zinc-700/40 bg-zinc-800/30 opacity-50 cursor-not-allowed"
                   : contact.preferred
-                  ? "border-blue-500/40 bg-blue-500/10 hover:border-blue-500/60 hover:bg-blue-500/20 cursor-pointer"
-                  : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60 hover:bg-zinc-800/50 cursor-pointer"
-              }`}
+                    ? "border-blue-500/40 bg-blue-500/10 hover:border-blue-500/60 hover:bg-blue-500/20 cursor-pointer"
+                    : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60 hover:bg-zinc-800/50 cursor-pointer"
+                }`}
             >
               {content}
             </button>
@@ -122,13 +121,13 @@ export default function PartyCard({
   return (
     <div
       className={`rounded-lg p-4 border transition-colors text-white space-y-3 w-full
-      ${isPinned 
-        ? "bg-pink-950/30 border-pink-600/40 hover:border-pink-500/60" 
-        : "bg-zinc-800/50 border-zinc-700/50 hover:border-zinc-600/60"
-      }
+      ${isPinned
+          ? "bg-pink-950/30 border-pink-600/40 hover:border-pink-500/60"
+          : "bg-zinc-800/50 border-zinc-700/50 hover:border-zinc-600/60"
+        }
     `}
     >
-      
+
       <div className="flex justify-between items-start">
         <div className="space-y-1.5 flex-1">
           <h3 className="text-lg font-semibold text-white">

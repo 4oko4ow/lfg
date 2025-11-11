@@ -21,6 +21,7 @@ type SessionManager struct {
 	cookieDomain string
 	secure       bool
 	ttl          time.Duration
+	sessionStore *SessionStore // Optional: if set, use DB storage
 }
 
 func NewSessionManager(secret, cookieName, cookieDomain string, secure bool) *SessionManager {
@@ -48,12 +49,23 @@ func NewSessionManagerWithTTL(secret, cookieName, cookieDomain string, secure bo
 		// Default to 1 year if invalid TTL provided
 		ttl = 365 * 24 * time.Hour
 	}
+	
+	// Try to initialize DB session store (optional, falls back to stateless if fails)
+	sessionStore, err := NewSessionStore()
+	if err != nil {
+		log.Printf("[Session] Warning: Failed to initialize DB session store, using stateless sessions: %v", err)
+		sessionStore = nil
+	} else {
+		log.Println("[Session] Using database-backed session storage")
+	}
+	
 	return &SessionManager{
 		secret:       []byte(secret),
 		cookieName:   cookieName,
 		cookieDomain: cookieDomain,
 		secure:       secure,
 		ttl:          ttl,
+		sessionStore: sessionStore,
 	}
 }
 
@@ -68,11 +80,51 @@ func (s *SessionManager) sign(payload string) string {
 }
 
 func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Duration) error {
-	if len(s.secret) == 0 {
-		return errors.New("session secret not configured")
-	}
 	if ttl <= 0 {
 		ttl = s.ttl
+	}
+
+	var sessionID string
+	var err error
+
+	// Use DB storage if available
+	if s.sessionStore != nil {
+		sessionID, err = s.sessionStore.CreateSession(userID, ttl)
+		if err != nil {
+			log.Printf("[Session] Failed to create DB session, falling back to stateless: %v", err)
+			// Fall through to stateless mode
+		} else {
+			// Use session ID as token
+			token := sessionID
+			expires := time.Now().Add(ttl)
+
+			sameSite := http.SameSiteLaxMode
+			if s.secure {
+				sameSite = http.SameSiteNoneMode
+			}
+
+			cookie := &http.Cookie{
+				Name:     s.cookieName,
+				Value:    token,
+				Path:     "/",
+				Expires:  expires,
+				MaxAge:   int(ttl.Seconds()),
+				HttpOnly: true,
+				Secure:   s.secure,
+				SameSite: sameSite,
+			}
+			if s.cookieDomain != "" {
+				cookie.Domain = s.cookieDomain
+			}
+			http.SetCookie(w, cookie)
+			log.Printf("[Session] Issued DB-backed session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
+			return nil
+		}
+	}
+
+	// Fallback to stateless sessions
+	if len(s.secret) == 0 {
+		return errors.New("session secret not configured")
 	}
 	expires := time.Now().Add(ttl)
 	nonce := fmt.Sprintf("%08x", rand.Uint32())
@@ -80,16 +132,11 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 	signature := s.sign(payload)
 	token := base64.RawURLEncoding.EncodeToString([]byte(payload + "|" + signature))
 
-	// For cross-origin requests (frontend and backend on different domains),
-	// we need SameSite=None with Secure=true
 	sameSite := http.SameSiteLaxMode
 	if s.secure {
-		// Only use SameSite=None if Secure is true (required by browsers)
 		sameSite = http.SameSiteNoneMode
 	}
-	
-	// For cross-domain cookies, don't set Domain if it's empty or if it would restrict the cookie
-	// Empty domain means the cookie is set for the exact domain that set it
+
 	cookie := &http.Cookie{
 		Name:     s.cookieName,
 		Value:    token,
@@ -100,17 +147,20 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 		Secure:   s.secure,
 		SameSite: sameSite,
 	}
-	// Only set Domain if it's explicitly provided and not empty
-	// This allows the cookie to work for cross-domain scenarios
 	if s.cookieDomain != "" {
 		cookie.Domain = s.cookieDomain
 	}
 	http.SetCookie(w, cookie)
-	log.Printf("[Session] Issued session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
+	log.Printf("[Session] Issued stateless session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
 	return nil
 }
 
-func (s *SessionManager) Clear(w http.ResponseWriter) {
+func (s *SessionManager) Clear(w http.ResponseWriter, r *http.Request) {
+	// Try to get session ID from cookie to delete from DB
+	if cookie, err := r.Cookie(s.cookieName); err == nil && s.sessionStore != nil {
+		s.sessionStore.DeleteSession(cookie.Value)
+	}
+
 	sameSite := http.SameSiteLaxMode
 	if s.secure {
 		sameSite = http.SameSiteNoneMode
@@ -139,6 +189,19 @@ func (s *SessionManager) Extract(r *http.Request) (string, error) {
 		return "", err
 	}
 	log.Printf("[Session] Found cookie %s, attempting to extract session", s.cookieName)
+
+	// Try DB storage first if available
+	if s.sessionStore != nil {
+		session, err := s.sessionStore.GetSession(cookie.Value)
+		if err == nil {
+			log.Printf("[Session] Validated DB session for user %s", session.UserID)
+			return session.UserID, nil
+		}
+		// If DB lookup fails, try stateless as fallback (for migration period)
+		log.Printf("[Session] DB session lookup failed, trying stateless: %v", err)
+	}
+
+	// Fallback to stateless session validation
 	decoded, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		return "", err

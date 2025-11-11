@@ -276,7 +276,7 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	h.sessions.Clear(w)
+	h.sessions.Clear(w, r)
 	w.WriteHeader(http.StatusNoContent)
 }
 
