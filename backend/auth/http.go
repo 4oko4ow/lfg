@@ -391,15 +391,18 @@ func (h *Handler) handleDiscordLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[Auth] Discord callback received")
 	if h.discordConfig.clientID == "" || h.discordConfig.clientSecret == "" {
 		http.Error(w, "discord login not configured", http.StatusServiceUnavailable)
 		return
 	}
 	payload, err := h.readStateCookie(r)
 	if err != nil {
+		log.Printf("[Auth] Failed to read state cookie: %v", err)
 		http.Error(w, "missing state", http.StatusBadRequest)
 		return
 	}
+	log.Printf("[Auth] State cookie read: link=%v, redirect=%s", payload.Link, payload.Redirect)
 	h.clearStateCookie(w)
 
 	if payload.Nonce != r.URL.Query().Get("state") {
