@@ -175,6 +175,7 @@ const Chat = ({
 
     const { error } = await supabase.from("chat_messages").insert({
       user_id: profile.id,
+      user_display_name: profile.displayName,
       message: trimmed,
       client_msg_id,
     });

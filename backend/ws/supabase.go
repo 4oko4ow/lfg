@@ -32,12 +32,15 @@ func InitDB() {
 }
 
 func SavePartyToSupabase(p *Party) {
+	// Используем Upsert (Insert с ON CONFLICT) чтобы избежать дубликатов
 	_, _, err := supabaseClient.
 		From("parties").
-		Insert(p, false, "", "representation", "").
+		Upsert(p, "id", "", "representation").
 		Execute()
 	if err != nil {
-		log.Println("Error saving party to Supabase:", err)
+		log.Printf("Error saving party %s to Supabase: %v", p.ID, err)
+	} else {
+		log.Printf("✅ Successfully saved party %s to Supabase", p.ID)
 	}
 }
 

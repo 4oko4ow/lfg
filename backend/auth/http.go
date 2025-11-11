@@ -262,7 +262,16 @@ func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	log.Printf("[Auth] Returning profile for user: %s", profile.User.ID)
+	log.Printf("[Auth] Returning profile for user: %s with %d identities: %v", 
+		profile.User.ID, 
+		len(profile.Identities),
+		func() []string {
+			providers := make([]string, len(profile.Identities))
+			for i, ident := range profile.Identities {
+				providers[i] = string(ident.Provider)
+			}
+			return providers
+		}())
 	writeJSON(w, profile)
 }
 

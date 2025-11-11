@@ -39,7 +39,9 @@ func AddParty(p *Party, save bool) {
 	defer partyLock.Unlock()
 	parties[p.ID] = p
 	if save {
-		go SavePartyToSupabase(p)
+		// Сохраняем синхронно для новых объявлений, чтобы гарантировать сохранение
+		// перед возможной синхронизацией
+		SavePartyToSupabase(p)
 	}
 }
 
@@ -79,8 +81,42 @@ func SynchronizeMemoryWithSupabase() {
 	partiesFromDB := LoadPartiesFromSupabase()
 	partyLock.Lock()
 	defer partyLock.Unlock()
-	parties = make(map[string]*Party)
+	
+	// Создаем map из БД для быстрого поиска
+	dbParties := make(map[string]*Party)
 	for _, p := range partiesFromDB {
-		parties[p.ID] = p
+		dbParties[p.ID] = p
+	}
+	
+	// Объединяем: берем из БД, но сохраняем недавно созданные из памяти (младше 1 минуты)
+	// которые могут еще не успеть сохраниться в БД
+	now := time.Now()
+	for id, memParty := range parties {
+		age := now.Sub(memParty.CreatedAt)
+		// Если объявление в памяти новее 1 минуты, сохраняем его (возможно еще не сохранено в БД)
+		if age < 1*time.Minute {
+			if dbParty, exists := dbParties[id]; exists {
+				// Если есть в БД, используем данные из БД (более актуальные)
+				parties[id] = dbParty
+			} else {
+				// Если нет в БД, оставляем из памяти и пытаемся сохранить
+				go SavePartyToSupabase(memParty)
+			}
+		} else {
+			// Старые объявления берем из БД
+			if dbParty, exists := dbParties[id]; exists {
+				parties[id] = dbParty
+			} else {
+				// Если нет в БД и не новое - удаляем из памяти
+				delete(parties, id)
+			}
+		}
+	}
+	
+	// Добавляем объявления из БД, которых нет в памяти
+	for id, dbParty := range dbParties {
+		if _, exists := parties[id]; !exists {
+			parties[id] = dbParty
+		}
 	}
 }

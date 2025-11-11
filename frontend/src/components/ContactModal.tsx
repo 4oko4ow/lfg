@@ -1,5 +1,5 @@
 // components/ContactModal.tsx
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { analytics } from "../utils/analytics";
@@ -23,6 +23,8 @@ export default function ContactModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  // Флаг для отслеживания, было ли уже отправлено join для этого объявления
+  const joinSentRef = useRef(false);
 
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -30,10 +32,20 @@ export default function ContactModal({
     return () => window.removeEventListener("keydown", onEsc);
   }, [onClose]);
 
+  // Сбрасываем флаг при закрытии модального окна
+  useEffect(() => {
+    return () => {
+      joinSentRef.current = false;
+    };
+  }, []);
+
   const handleCopy = async (value: string) => {
     analytics.contactCopy();
-    // Отправляем join только при реальном действии - копировании контакта
-    sendJoinParty(partyId);
+    // Отправляем join только один раз при первом реальном действии
+    if (!joinSentRef.current) {
+      sendJoinParty(partyId);
+      joinSentRef.current = true;
+    }
     try {
       await navigator.clipboard.writeText(value);
       toast.success(t("ui.copied"), { duration: 5000 });
@@ -45,8 +57,11 @@ export default function ContactModal({
 
   const handleOpen = (url: string) => {
     analytics.contactCopy();
-    // Отправляем join только при реальном действии - открытии контакта
-    sendJoinParty(partyId);
+    // Отправляем join только один раз при первом реальном действии
+    if (!joinSentRef.current) {
+      sendJoinParty(partyId);
+      joinSentRef.current = true;
+    }
     window.open(url, "_blank", "noopener");
     toast.success(t("contact.opened", "Открываем контакт"), { duration: 4000 });
     onClose();
