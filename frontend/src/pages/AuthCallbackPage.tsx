@@ -83,6 +83,21 @@ export default function AuthCallbackPage() {
             "Этот Telegram аккаунт уже привязан к другой учетной записи"
           )
         );
+      } else if (status === "telegram_error") {
+        // For telegram_error, try refreshing profile anyway
+        // The popup might have closed before we got the message, but auth might have succeeded
+        try {
+          const profileLoaded = await refreshProfile();
+          if (profileLoaded) {
+            // Auth actually succeeded, show success
+            toast.success(t("auth.success", "Вы успешно вошли"));
+          } else {
+            toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
+          }
+        } catch (error) {
+          console.error("Failed to refresh profile on telegram_error:", error);
+          toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
+        }
       } else {
         toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
       }

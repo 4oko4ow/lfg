@@ -37,6 +37,9 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
       return;
     }
 
+    let resolved = false;
+    let rejected = false;
+
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       clearInterval(intervalId);
@@ -47,25 +50,35 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
       }
     };
 
-    const intervalId = window.setInterval(() => {
-      if (popup.closed) {
-        cleanup();
-        reject(new Error("Telegram popup closed"));
-      }
-    }, 500);
-
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== "https://oauth.telegram.org") {
         return;
       }
       const data = event.data as { event?: string; data?: TelegramAuthData };
       if (data?.event === "auth_user" && data.data) {
-        cleanup();
-        resolve(data.data);
+        if (!resolved && !rejected) {
+          resolved = true;
+          cleanup();
+          resolve(data.data);
+        }
       }
     };
 
     window.addEventListener("message", onMessage);
+
+    const intervalId = window.setInterval(() => {
+      if (popup.closed && !resolved && !rejected) {
+        // Give a short delay before rejecting to allow message to arrive
+        // Telegram sometimes closes the popup right after sending the message
+        setTimeout(() => {
+          if (!resolved && !rejected) {
+            rejected = true;
+            cleanup();
+            reject(new Error("Telegram popup closed"));
+          }
+        }, 1000);
+      }
+    }, 500);
   });
 }
 
