@@ -100,3 +100,7 @@ CREATE POLICY "Authenticated users can insert chat messages"
 -- Note: Service role key bypasses RLS, so these policies are for client-side access
 -- If you're using service role key from backend, RLS won't apply
 
+-- Refresh Supabase PostgREST schema cache after dropping columns
+-- This ensures the API layer recognizes the updated schema
+NOTIFY pgrst, 'reload schema';
+

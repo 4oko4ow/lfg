@@ -75,11 +75,12 @@ func NewHandler(store StoreInterface, sessions *SessionManager, cfg Config) *Han
 	}
 	base := cfg.BaseURL
 	if base == "" {
-		base = os.Getenv("BACKEND_URL")
+		base = strings.TrimSpace(os.Getenv("BACKEND_URL"))
 		if base == "" {
 			base = "http://localhost:8080"
 		}
 	}
+	base = strings.TrimSpace(base)
 
 	discordRedirect := cfg.Discord.RedirectPath
 	if discordRedirect == "" {
@@ -119,6 +120,8 @@ func NewHandler(store StoreInterface, sessions *SessionManager, cfg Config) *Han
 }
 
 func joinURL(base, path string) string {
+	base = strings.TrimSpace(base)
+	path = strings.TrimSpace(path)
 	if strings.HasSuffix(base, "/") {
 		base = strings.TrimSuffix(base, "/")
 	}
@@ -233,7 +236,7 @@ func (h *Handler) getCurrentProfile(r *http.Request) (*Profile, error) {
 	for _, cookie := range cookies {
 		log.Printf("[Auth] Cookie: %s (Domain: %s, Path: %s)", cookie.Name, cookie.Domain, cookie.Path)
 	}
-	
+
 	userID, err := h.sessions.Extract(r)
 	if err != nil {
 		log.Printf("[Auth] Failed to extract session: %v", err)
@@ -447,18 +450,37 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 	if payload.Link {
 		if current, err := h.sessions.Extract(r); err == nil {
 			linkUserID = current
+			log.Printf("[Auth] Linking Discord identity to existing user: %s", linkUserID)
+		} else {
+			log.Printf("[Auth] Warning: link=1 but no session found: %v", err)
 		}
+	} else {
+		log.Printf("[Auth] Creating new user for Discord identity")
 	}
 
+	log.Printf("[Auth] Upserting Discord identity: provider_id=%s, linkUserID=%s", discordUser.ID, linkUserID)
 	profile, err := h.store.UpsertIdentity(linkUserID, ProviderDiscord, discordUser.ID, handle, "https://discord.com/users/"+discordUser.ID, token.AccessToken, token.RefreshToken)
 	if err != nil {
-		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "discord_error"), http.StatusFound)
+		log.Printf("[Auth] Failed to upsert Discord identity: %v", err)
+		status := "discord_error"
+		if errors.Is(err, ErrIdentityLinked) {
+			status = "discord_conflict"
+		}
+		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, status), http.StatusFound)
 		return
 	}
+	log.Printf("[Auth] Successfully upserted Discord identity for user: %s", profile.User.ID)
 
-	if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
-		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
-		return
+	// Only issue new session if not linking (linking keeps existing session)
+	if !payload.Link {
+		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
+			log.Printf("[Auth] Failed to issue session: %v", err)
+			http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
+			return
+		}
+		log.Printf("[Auth] Session issued for new user")
+	} else {
+		log.Printf("[Auth] Linking mode: keeping existing session")
 	}
 
 	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
@@ -681,16 +703,23 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var linkUserID string
+	// Always try to link to current user if session exists (for linking from profile page)
 	if current, err := h.sessions.Extract(r); err == nil {
 		linkUserID = current
+		log.Printf("[Auth] Linking Telegram identity to existing user: %s", linkUserID)
+	} else {
+		log.Printf("[Auth] No session found, creating new user for Telegram identity")
 	}
 
 	handle := body.Username
 	if handle == "" {
 		handle = strings.TrimSpace(body.FirstName + " " + body.LastName)
 	}
+
+	log.Printf("[Auth] Upserting Telegram identity: provider_id=%s, linkUserID=%s", body.ID, linkUserID)
 	profile, err := h.store.UpsertIdentity(linkUserID, ProviderTelegram, body.ID, handle, "https://t.me/"+body.Username, "", "")
 	if err != nil {
+		log.Printf("[Auth] Failed to upsert Telegram identity: %v", err)
 		status := http.StatusInternalServerError
 		if errors.Is(err, ErrIdentityLinked) {
 			status = http.StatusConflict
@@ -698,10 +727,21 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), status)
 		return
 	}
-	if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
-		http.Error(w, "failed to issue session", http.StatusInternalServerError)
-		return
+	log.Printf("[Auth] Successfully upserted Telegram identity for user: %s", profile.User.ID)
+
+	// Only issue new session if linking to a new user (if linkUserID was empty, we created a new user)
+	// If linkUserID was set and matches profile.User.ID, we're linking to existing user, so keep existing session
+	if linkUserID == "" || linkUserID != profile.User.ID {
+		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
+			log.Printf("[Auth] Failed to issue session: %v", err)
+			http.Error(w, "failed to issue session", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("[Auth] Session issued for new/linked user")
+	} else {
+		log.Printf("[Auth] Linking to existing user: keeping existing session")
 	}
+
 	writeJSON(w, profile)
 }
 
