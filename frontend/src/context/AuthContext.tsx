@@ -48,6 +48,18 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
+const backendBaseUrl = rawBackendBaseUrl.endsWith("/")
+  ? rawBackendBaseUrl.slice(0, -1)
+  : rawBackendBaseUrl;
+
+const buildBackendUrl = (path: string): string => {
+  if (!path.startsWith("/")) {
+    throw new Error(`Backend paths must start with '/': ${path}`);
+  }
+  return backendBaseUrl ? `${backendBaseUrl}${path}` : path;
+};
+
 const getRedirectPath = () => {
   const path = `${window.location.pathname}${window.location.search}`;
   return path || "/";
@@ -109,7 +121,7 @@ async function readProfile(): Promise<{
   profile: AuthProfile | null;
   contacts: ContactHandlesMap;
 }> {
-  const response = await fetch("/auth/session", {
+  const response = await fetch(buildBackendUrl("/auth/session"), {
     credentials: "include",
   });
   if (response.status === 204) {
@@ -133,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadConfig = useCallback(async (): Promise<string | null> => {
     try {
-      const response = await fetch("/auth/config", {
+      const response = await fetch(buildBackendUrl("/auth/config"), {
         credentials: "include",
       });
       if (!response.ok) {
@@ -191,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const payload = await openTelegramAuth(botId);
-      const response = await fetch("/auth/telegram/verify", {
+      const response = await fetch(buildBackendUrl("/auth/telegram/verify"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -221,7 +233,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       const redirect = encodeURIComponent(getRedirectPath());
-      window.location.href = `/auth/${provider}/login?redirect=${redirect}`;
+      window.location.href = buildBackendUrl(
+        `/auth/${provider}/login?redirect=${redirect}`,
+      );
     },
     [handleTelegramAuth],
   );
@@ -233,13 +247,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       const redirect = encodeURIComponent(getRedirectPath());
-      window.location.href = `/auth/${provider}/login?redirect=${redirect}&link=1`;
+      window.location.href = buildBackendUrl(
+        `/auth/${provider}/login?redirect=${redirect}&link=1`,
+      );
     },
     [handleTelegramAuth],
   );
 
   const signOut = useCallback(async () => {
-    await fetch("/auth/logout", {
+    await fetch(buildBackendUrl("/auth/logout"), {
       method: "POST",
       credentials: "include",
     });
@@ -249,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateContactHandle = useCallback(
     async (provider: SocialProvider, handle: ContactHandle | null) => {
-      const response = await fetch("/auth/contact", {
+      const response = await fetch(buildBackendUrl("/auth/contact"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,7 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setPreferredContact = useCallback(
     async (provider: ContactMethodType | null) => {
-      const response = await fetch("/auth/preferred", {
+      const response = await fetch(buildBackendUrl("/auth/preferred"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
