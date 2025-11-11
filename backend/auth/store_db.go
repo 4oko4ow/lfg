@@ -109,13 +109,19 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 		log.Printf("[Auth] Found existing identity %s -> user %s", key, userID)
 		
 		if linkUserID != "" && userID != linkUserID {
-			log.Printf("[Auth] Identity %s already linked to user %s, but trying to link to %s", key, userID, linkUserID)
+			log.Printf("[Auth] ⚠️  CONFLICT: Identity %s already linked to user %s, but trying to link to %s", key, userID, linkUserID)
+			log.Printf("[Auth] ⚠️  This identity belongs to another account. User must unlink it from the other account first.")
 			return nil, ErrIdentityLinked
+		}
+		// If linkUserID matches or is empty, we're updating the existing identity
+		if linkUserID != "" {
+			log.Printf("[Auth] Updating existing identity %s for user %s", key, userID)
 		}
 	} else {
 		// New identity
 		if linkUserID != "" {
 			userID = linkUserID
+			log.Printf("[Auth] Creating new identity %s for existing user %s", key, userID)
 		} else {
 			userID = uuid.NewString()
 			log.Printf("[Auth] Creating new user ID: %s for identity %s", userID, key)
@@ -218,7 +224,25 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 		}
 	}
 
-	return s.GetProfile(userID)
+	log.Printf("[Auth] ✅ Identity upserted successfully. Fetching profile for user: %s", userID)
+	profile, err := s.GetProfile(userID)
+	if err != nil {
+		return nil, err
+	}
+	if profile == nil {
+		return nil, fmt.Errorf("profile not found after upserting identity")
+	}
+	log.Printf("[Auth] ✅ Profile retrieved: user=%s, identities=%d (providers: %v)", 
+		profile.User.ID, 
+		len(profile.Identities),
+		func() []string {
+			providers := make([]string, len(profile.Identities))
+			for i, ident := range profile.Identities {
+				providers[i] = string(ident.Provider)
+			}
+			return providers
+		}())
+	return profile, nil
 }
 
 func (s *DBStore) GetProfile(userID string) (*Profile, error) {
@@ -425,22 +449,39 @@ func (s *DBStore) getIdentities(userID string) ([]dbIdentity, error) {
 		Eq("user_id", userID).
 		Execute()
 	if err != nil {
+		log.Printf("[Auth] Error fetching identities for user %s: %v", userID, err)
 		return nil, err
 	}
 
 	var identities []dbIdentity
 	if err := json.Unmarshal(data, &identities); err != nil {
+		log.Printf("[Auth] Error unmarshalling identities for user %s: %v", userID, err)
 		return nil, err
 	}
+	log.Printf("[Auth] Found %d identities for user %s: %v", len(identities), userID, 
+		func() []string {
+			providers := make([]string, len(identities))
+			for i, ident := range identities {
+				providers[i] = ident.Provider
+			}
+			return providers
+		}())
 	return identities, nil
 }
 
 func (s *DBStore) createIdentity(identity *dbIdentity) error {
+	log.Printf("[Auth] Creating identity: provider=%s, provider_id=%s, user_id=%s", 
+		identity.Provider, identity.ProviderID, identity.UserID)
 	_, _, err := s.client.
 		From("auth_identities").
 		Insert(identity, false, "", "representation", "").
 		Execute()
-	return err
+	if err != nil {
+		log.Printf("[Auth] ❌ Error creating identity: %v", err)
+		return fmt.Errorf("failed to create identity: %w", err)
+	}
+	log.Printf("[Auth] ✅ Identity created successfully")
+	return nil
 }
 
 

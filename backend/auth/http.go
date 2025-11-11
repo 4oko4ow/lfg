@@ -470,6 +470,14 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	log.Printf("[Auth] Successfully upserted Discord identity for user: %s", profile.User.ID)
+	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
+		func() []string {
+			providers := make([]string, len(profile.Identities))
+			for i, ident := range profile.Identities {
+				providers[i] = string(ident.Provider)
+			}
+			return providers
+		}())
 
 	// Only issue new session if not linking (linking keeps existing session)
 	if !payload.Link {
@@ -480,7 +488,11 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		}
 		log.Printf("[Auth] Session issued for new user")
 	} else {
-		log.Printf("[Auth] Linking mode: keeping existing session")
+		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
+		// Verify that the session user matches the profile user
+		if linkUserID != profile.User.ID {
+			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
+		}
 	}
 
 	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
@@ -728,6 +740,14 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("[Auth] Successfully upserted Telegram identity for user: %s", profile.User.ID)
+	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
+		func() []string {
+			providers := make([]string, len(profile.Identities))
+			for i, ident := range profile.Identities {
+				providers[i] = string(ident.Provider)
+			}
+			return providers
+		}())
 
 	// Only issue new session if linking to a new user (if linkUserID was empty, we created a new user)
 	// If linkUserID was set and matches profile.User.ID, we're linking to existing user, so keep existing session
@@ -739,7 +759,11 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("[Auth] Session issued for new/linked user")
 	} else {
-		log.Printf("[Auth] Linking to existing user: keeping existing session")
+		log.Printf("[Auth] Linking to existing user: keeping existing session (user: %s)", linkUserID)
+		// Verify that the session user matches the profile user
+		if linkUserID != profile.User.ID {
+			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
+		}
 	}
 
 	writeJSON(w, profile)

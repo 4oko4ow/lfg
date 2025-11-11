@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 const statusToMessageKey: Record<string, { key: string; type: "success" | "error" }> = {
   success: { key: "auth.success", type: "success" },
   discord_error: { key: "auth.error", type: "error" },
+  discord_conflict: { key: "auth.discord_conflict", type: "error" },
   steam_error: { key: "auth.error", type: "error" },
   session_error: { key: "auth.error", type: "error" },
   steam_conflict: { key: "auth.steam_conflict", type: "error" },
@@ -29,6 +30,13 @@ export default function AuthCallbackPage() {
     };
 
     const finalize = async () => {
+      // Always try to refresh profile, even on errors (to show current state)
+      try {
+        await refreshProfile();
+      } catch (error) {
+        console.warn("Failed to refresh profile:", error);
+      }
+
       if (messageMeta.type === "success") {
         try {
           // Retry logic: try to refresh profile multiple times with increasing delays

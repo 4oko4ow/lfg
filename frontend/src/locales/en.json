@@ -118,6 +118,7 @@
     "error": "Failed to authenticate",
     "success": "Signed in",
     "steam_conflict": "This Steam account is already linked to another profile",
+    "discord_conflict": "This Discord account is already linked to another profile",
     "telegram_conflict": "This Telegram account is already linked to another profile",
     "sign_in_prompt": "Sign in with:",
     "sign_in": "Sign in",
