@@ -2,17 +2,23 @@ package ws
 
 import (
 	"encoding/json"
-	"github.com/supabase-community/supabase-go"
 	"log"
 	"math/rand"
+	"os"
 	"time"
+
+	"github.com/supabase-community/supabase-go"
 )
 
 var supabaseClient *supabase.Client
 
 func InitDB() {
-	url := "https://wvwoqhzkggzelffqpxii.supabase.co"
-	key := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2d29xaHprZ2d6ZWxmZnFweGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyMjk3MDIsImV4cCI6MjA2NzgwNTcwMn0.JPaQczjXAJ60wr_lmtVSuBGfb7Oig8lYeCIo07WLidg"
+	url := os.Getenv("SUPABASE_URL")
+	key := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+	if url == "" || key == "" {
+		log.Fatal("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set")
+	}
 
 	client, err := supabase.NewClient(url, key, nil)
 	if err != nil {

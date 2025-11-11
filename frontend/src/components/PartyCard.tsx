@@ -1,12 +1,13 @@
-import type { Party } from "../types";
+import type { ReactNode } from "react";
+import type { ContactMethod, Party } from "../types";
 import {
   UserGroupIcon,
-  PhoneIcon,
   BoltIcon,
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { analytics } from "../utils/analytics";
 import { useTranslation } from "react-i18next";
 import {getGameName} from "../constants/games.ts";
@@ -42,12 +43,27 @@ function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
   });
 }
 
+const CONTACT_ICONS: Record<string, { icon: ReactNode; label: string }> = {
+  steam: {
+    icon: <Gamepad2 className="h-4 w-4" />,
+    label: "Steam",
+  },
+  discord: {
+    icon: <MessageCircle className="h-4 w-4" />,
+    label: "Discord",
+  },
+  telegram: {
+    icon: <Send className="h-4 w-4" />,
+    label: "Telegram",
+  },
+};
+
 export default function PartyCard({
   party,
   onJoin,
 }: {
   party: Party;
-  onJoin: (contact: string) => void;
+  onJoin: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -57,7 +73,31 @@ export default function PartyCard({
 
   const handleJoinClick = () => {
     analytics.joinPartyClick(party.game);
-    onJoin(party.contact || "");
+    onJoin();
+  };
+
+  const renderContacts = (contacts?: ContactMethod[]) => {
+    if (!contacts || contacts.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+        {contacts.map((contact) => {
+          const config = CONTACT_ICONS[contact.type] ?? {
+            icon: <MessageCircle className="h-4 w-4" />,
+            label: contact.type,
+          };
+          return (
+            <span
+              key={`${contact.type}-${contact.handle}`}
+              className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/60 px-3 py-1"
+            >
+              {config.icon}
+              <span className="font-medium text-zinc-200">{config.label}</span>
+              <span className="text-zinc-400">{contact.handle}</span>
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   const createdAgoMinutes =
@@ -108,12 +148,7 @@ export default function PartyCard({
         <p>{party.goal}</p>
       </div>
 
-      {party.contact && (
-        <div className="flex flex-wrap items-start gap-2 text-sm text-zinc-400">
-          <PhoneIcon className="w-4 h-4 text-green-400 shrink-0" />
-          <span className="break-all min-w-0">{party.contact}</span>
-        </div>
-      )}
+      {renderContacts(party.contacts)}
 
       <div className="flex items-center justify-between text-sm text-zinc-400">
         <div className="flex items-center gap-1">

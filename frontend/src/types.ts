@@ -1,3 +1,18 @@
+export type ContactMethodType = "steam" | "discord" | "telegram";
+
+export type ContactMethod = {
+  type: ContactMethodType;
+  handle: string;
+  url?: string;
+};
+
+export type ContactHandle = {
+  handle: string;
+  url?: string;
+};
+
+export type ContactHandlesMap = Partial<Record<ContactMethodType, ContactHandle>>;
+
 export type Party = {
   id: string;
   game: string;
@@ -5,7 +20,7 @@ export type Party = {
   slots: number;
   joined: number;
   created_at: string;
-  contact?: string;
+  contacts?: ContactMethod[];
   pinned?: boolean;
 };
 
@@ -24,7 +39,7 @@ export type OutgoingMessage =
         game: string;
         goal: string;
         slots: number;
-        contact?: string;
+        contacts?: ContactMethod[];
       };
     }
   | {
