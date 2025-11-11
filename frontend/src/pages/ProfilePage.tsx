@@ -14,25 +14,25 @@ const PROVIDERS: {
   description: string;
   placeholder: string;
 }[] = [
-  {
-    id: "steam",
-    title: "Steam",
-    description: "profile.steam_description",
-    placeholder: "https://steamcommunity.com/id/username",
-  },
-  {
-    id: "discord",
-    title: "Discord",
-    description: "profile.discord_description",
-    placeholder: "username или @username",
-  },
-  {
-    id: "telegram",
-    title: "Telegram",
-    description: "profile.telegram_description",
-    placeholder: "@username",
-  },
-];
+    {
+      id: "steam",
+      title: "Steam",
+      description: "profile.steam_description",
+      placeholder: "https://steamcommunity.com/id/username",
+    },
+    {
+      id: "discord",
+      title: "Discord",
+      description: "profile.discord_description",
+      placeholder: "username или @username",
+    },
+    {
+      id: "telegram",
+      title: "Telegram",
+      description: "profile.telegram_description",
+      placeholder: "@username",
+    },
+  ];
 
 export default function ProfilePage() {
   const { lang } = useParams();

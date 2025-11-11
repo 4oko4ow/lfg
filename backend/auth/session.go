@@ -58,6 +58,13 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 	signature := s.sign(payload)
 	token := base64.RawURLEncoding.EncodeToString([]byte(payload + "|" + signature))
 
+	// For cross-origin requests (frontend and backend on different domains),
+	// we need SameSite=None with Secure=true
+	sameSite := http.SameSiteLaxMode
+	if s.secure {
+		// Only use SameSite=None if Secure is true (required by browsers)
+		sameSite = http.SameSiteNoneMode
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.cookieName,
 		Value:    token,
@@ -67,12 +74,16 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 		MaxAge:   int(ttl.Seconds()),
 		HttpOnly: true,
 		Secure:   s.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: sameSite,
 	})
 	return nil
 }
 
 func (s *SessionManager) Clear(w http.ResponseWriter) {
+	sameSite := http.SameSiteLaxMode
+	if s.secure {
+		sameSite = http.SameSiteNoneMode
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.cookieName,
 		Value:    "",
@@ -82,7 +93,7 @@ func (s *SessionManager) Clear(w http.ResponseWriter) {
 		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   s.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: sameSite,
 	})
 }
 

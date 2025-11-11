@@ -159,6 +159,10 @@ func (h *Handler) writeStateCookie(w http.ResponseWriter, payload statePayload) 
 	if err != nil {
 		return err
 	}
+	sameSite := http.SameSiteLaxMode
+	if h.sessions.secure {
+		sameSite = http.SameSiteNoneMode
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     stateCookieName,
 		Value:    url.QueryEscape(string(encoded)),
@@ -166,7 +170,7 @@ func (h *Handler) writeStateCookie(w http.ResponseWriter, payload statePayload) 
 		MaxAge:   600,
 		HttpOnly: true,
 		Secure:   h.sessions.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: sameSite,
 	})
 	return nil
 }
@@ -188,6 +192,10 @@ func (h *Handler) readStateCookie(r *http.Request) (*statePayload, error) {
 }
 
 func (h *Handler) clearStateCookie(w http.ResponseWriter) {
+	sameSite := http.SameSiteLaxMode
+	if h.sessions.secure {
+		sameSite = http.SameSiteNoneMode
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     stateCookieName,
 		Value:    "",
@@ -196,7 +204,7 @@ func (h *Handler) clearStateCookie(w http.ResponseWriter) {
 		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   h.sessions.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: sameSite,
 	})
 }
 

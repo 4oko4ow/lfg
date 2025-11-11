@@ -30,8 +30,16 @@ export default function AuthCallbackPage() {
 
     const finalize = async () => {
       if (messageMeta.type === "success") {
-        await refreshProfile();
-        toast.success(t(messageMeta.key, "Вы успешно вошли"));
+        try {
+          // Add a small delay to ensure cookie is set after redirect
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          await refreshProfile();
+          toast.success(t(messageMeta.key, "Вы успешно вошли"));
+        } catch (error) {
+          console.error("Failed to refresh profile after auth:", error);
+          // Still show success message and navigate, profile might load on next page
+          toast.success(t(messageMeta.key, "Вы успешно вошли"));
+        }
       } else if (status === "steam_conflict") {
         toast.error(
           t(
