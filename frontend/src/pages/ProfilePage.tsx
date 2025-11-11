@@ -61,7 +61,9 @@ export default function ProfilePage() {
   }, [contactHandles]);
 
   useEffect(() => {
-    if (!loading && !profile) {
+    // Only redirect if we've finished loading and there's no profile
+    // Don't redirect while still loading
+    if (loading === false && !profile) {
       navigate(`/${lang ?? "en"}`, { replace: true });
     }
   }, [profile, loading, lang, navigate]);

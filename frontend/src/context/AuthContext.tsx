@@ -57,7 +57,13 @@ const buildBackendUrl = (path: string): string => {
   if (!path.startsWith("/")) {
     throw new Error(`Backend paths must start with '/': ${path}`);
   }
-  return backendBaseUrl ? `${backendBaseUrl}${path}` : path;
+  // If backend URL is not configured, use relative path (assumes same origin)
+  // This works for development and same-domain deployments
+  if (!backendBaseUrl) {
+    console.warn("VITE_BACKEND_URL is not set, using relative paths. This may cause CORS issues if frontend and backend are on different domains.");
+    return path;
+  }
+  return `${backendBaseUrl}${path}`;
 };
 
 const getRedirectPath = () => {
@@ -121,20 +127,30 @@ async function readProfile(): Promise<{
   profile: AuthProfile | null;
   contacts: ContactHandlesMap;
 }> {
-  const response = await fetch(buildBackendUrl("/auth/session"), {
-    credentials: "include",
-  });
-  if (response.status === 204) {
+  try {
+    const response = await fetch(buildBackendUrl("/auth/session"), {
+      credentials: "include",
+    });
+    if (response.status === 204) {
+      return { profile: null, contacts: {} };
+    }
+    if (!response.ok) {
+      // Don't throw for 401/403 - just return no profile
+      if (response.status === 401 || response.status === 403) {
+        return { profile: null, contacts: {} };
+      }
+      throw new Error(`Failed to load session: ${response.status}`);
+    }
+    const data = (await response.json()) as RawProfile;
+    if (!data?.user) {
+      return { profile: null, contacts: {} };
+    }
+    return mapProfile(data);
+  } catch (error) {
+    // Network errors or other failures - log but don't crash
+    console.error("Failed to read profile:", error);
     return { profile: null, contacts: {} };
   }
-  if (!response.ok) {
-    throw new Error(`Failed to load session: ${response.status}`);
-  }
-  const data = (await response.json()) as RawProfile;
-  if (!data?.user) {
-    return { profile: null, contacts: {} };
-  }
-  return mapProfile(data);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -170,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(mapped);
       setContactHandles(contacts);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to refresh profile:", error);
       setProfile(null);
       setContactHandles({});
     } finally {
@@ -203,13 +219,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const payload = await openTelegramAuth(botId);
+      // Convert id from number to string as backend expects string
+      const requestBody = {
+        id: String(payload.id),
+        first_name: payload.first_name,
+        last_name: payload.last_name,
+        username: payload.username,
+        photo_url: payload.photo_url,
+        auth_date: payload.auth_date,
+        hash: payload.hash,
+      };
       const response = await fetch(buildBackendUrl("/auth/telegram/verify"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
