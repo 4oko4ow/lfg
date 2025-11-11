@@ -31,9 +31,22 @@ export default function AuthCallbackPage() {
     const finalize = async () => {
       if (messageMeta.type === "success") {
         try {
-          // Add a small delay to ensure cookie is set after redirect
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          await refreshProfile();
+          // Retry logic: try to refresh profile multiple times with increasing delays
+          // This handles cases where the cookie might not be immediately available
+          // especially in cross-domain scenarios
+          const maxRetries = 3;
+          const delays = [300, 600, 1000]; // Progressive delays
+
+          for (let attempt = 0; attempt < maxRetries; attempt++) {
+            await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+
+            try {
+              await refreshProfile();
+            } catch (error) {
+              console.warn(`Failed to refresh profile (attempt ${attempt + 1}/${maxRetries}):`, error);
+            }
+          }
+
           toast.success(t(messageMeta.key, "Вы успешно вошли"));
         } catch (error) {
           console.error("Failed to refresh profile after auth:", error);
