@@ -46,23 +46,23 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		switch message.Type {
-		case "create_party":
-			var payload CreatePartyPayload
-			if err := parsePayload(message.Payload, &payload); err != nil {
-				log.Println("invalid create payload:", err)
-				continue
-			}
+                switch message.Type {
+                case "create_party":
+                        var payload CreatePartyPayload
+                        if err := parsePayload(message.Payload, &payload); err != nil {
+                                log.Println("invalid create payload:", err)
+                                continue
+                        }
 
-			p := &Party{
-				ID:        generateID(),
-				Game:      payload.Game,
-				Goal:      payload.Goal,
-				Slots:     payload.Slots,
-				Joined:    1,
-				CreatedAt: time.Now(),
-				Contact:   payload.Contact,
-			}
+                        p := &Party{
+                                ID:        generateID(),
+                                Game:      payload.Game,
+                                Goal:      payload.Goal,
+                                Slots:     payload.Slots,
+                                Joined:    1,
+                                CreatedAt: time.Now(),
+                                Contacts:  payload.Contacts,
+                        }
 
 			AddParty(p, true)
 			Broadcast(Message{Type: "new_party", Payload: p})
