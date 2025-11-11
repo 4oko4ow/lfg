@@ -5,11 +5,57 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"lfg/auth"
 	"lfg/ws"
 )
+
+var allowedOrigins = []string{
+	"https://findparty.online",
+	"https://www.findparty.online",
+	// при необходимости: превью Vercel
+	// "https://*.vercel.app", // для wildcard сделай проверку вручную ниже
+}
+
+func allowOrigin(o string) bool {
+	o = strings.ToLower(o)
+	for _, a := range allowedOrigins {
+		if a == o {
+			return true
+		}
+		// прим.: простая поддержка *.vercel.app
+		if strings.HasPrefix(a, "https://*.") && strings.HasSuffix(o, strings.TrimPrefix(a, "https://*")) {
+			return true
+		}
+	}
+	return false
+}
+
+func cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin != "" && allowOrigin(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+			// Если используешь cookie/Authorization — держи обе строки:
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			// опционально: сколько кэшировать preflight
+			w.Header().Set("Access-Control-Max-Age", "86400")
+		}
+
+		// Preflight
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 
@@ -60,5 +106,5 @@ func main() {
 	//go ws.StartPartyCleanupLoop()
 
 	log.Println("Server started on :8080")
-	http.ListenAndServe(":8080", mux)
+	http.ListenAndServe(":8080", cors(mux))
 }
