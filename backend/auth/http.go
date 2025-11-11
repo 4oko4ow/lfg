@@ -85,10 +85,12 @@ func NewHandler(store StoreInterface, sessions *SessionManager, cfg Config) *Han
 	if discordRedirect == "" {
 		discordRedirect = "/auth/discord/callback"
 	}
+	discordRedirectURL := joinURL(base, discordRedirect)
+	log.Printf("[Auth] Discord redirect URL configured: %s (base: %s, path: %s)", discordRedirectURL, base, discordRedirect)
 	discordConfig := discordSettings{
 		clientID:     cfg.Discord.ClientID,
 		clientSecret: cfg.Discord.ClientSecret,
-		redirectURL:  joinURL(base, discordRedirect),
+		redirectURL:  discordRedirectURL,
 		scopes:       append([]string{"identify"}, cfg.Discord.Scopes...),
 	}
 
@@ -380,6 +382,8 @@ func (h *Handler) handleDiscordLogin(w http.ResponseWriter, r *http.Request) {
 		"state":         {state},
 	}
 	authURL := "https://discord.com/oauth2/authorize?" + params.Encode()
+	log.Printf("[Auth] Discord OAuth URL: redirect_uri=%s", h.discordConfig.redirectURL)
+	log.Printf("[Auth] Full Discord auth URL: %s", authURL)
 	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
@@ -476,20 +480,26 @@ func (h *Handler) exchangeDiscordCode(ctx context.Context, code string) (*discor
 		"code":          {code},
 		"redirect_uri":  {h.discordConfig.redirectURL},
 	}
+	log.Printf("[Auth] Exchanging Discord code, redirect_uri=%s", h.discordConfig.redirectURL)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "https://discord.com/api/oauth2/token", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		log.Printf("[Auth] Discord token exchange request failed: %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("discord token exchange failed: %s", resp.Status)
+		log.Printf("[Auth] Discord token exchange failed: status=%d, body=%s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("discord token exchange failed: %s, body: %s", resp.Status, string(body))
 	}
 	var token discordToken
-	if err := json.NewDecoder(resp.Body).Decode(&token); err != nil {
+	if err := json.Unmarshal(body, &token); err != nil {
+		log.Printf("[Auth] Failed to decode Discord token response: %v, body: %s", err, string(body))
 		return nil, err
 	}
+	log.Printf("[Auth] Discord token exchange successful")
 	return &token, nil
 }
 
