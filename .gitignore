@@ -1,2 +1,9 @@
 .idea
 /.idea/lfg-mvp.iml
+node_modules
+dist
+.DS_Store
+.env*
+!.env.example
+!*/.env.example
+backend/data/
