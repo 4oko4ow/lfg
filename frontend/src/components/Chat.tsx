@@ -4,8 +4,8 @@ import { supabase } from "../supabaseClient";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import LoginModal from "./modals/LoginModal";
 
 const Chat = ({
   isMobile = false,
@@ -25,6 +25,7 @@ const Chat = ({
   const chatRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     fetchMessages();
@@ -258,12 +259,15 @@ const Chat = ({
             <p className="text-xs text-zinc-400 mb-2">
               {t("chat.login_required", "Sign in to chat")}
             </p>
-            <Link
-              to={`/${lang ?? "en"}`}
+            <button
+              onClick={() => setShowLoginModal(true)}
               className="text-xs text-blue-400 hover:text-blue-300 underline"
             >
-              {t("auth.sign_in_prompt", "Sign in")}
-            </Link>
+              {t("auth.sign_in", "Sign in")}
+            </button>
+            {showLoginModal && (
+              <LoginModal onClose={() => setShowLoginModal(false)} />
+            )}
           </div>
         ) : (
           <input

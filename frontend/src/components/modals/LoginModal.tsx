@@ -42,11 +42,11 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-zinc-900/95 backdrop-blur-md p-6 rounded-xl w-full max-w-md text-white shadow-2xl border border-zinc-700/50 animate-slideIn"
+        className="bg-zinc-900/95 backdrop-blur-md p-6 rounded-xl w-full max-w-md text-white shadow-2xl border border-zinc-700/50 animate-slideIn my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
