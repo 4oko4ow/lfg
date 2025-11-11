@@ -116,10 +116,10 @@ export default function PartyCard({
               href={contact.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition hover:border-blue-500 hover:bg-blue-500/10 ${
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/10 hover:scale-105 active:scale-95 ${
                 contact.preferred
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-zinc-700 bg-zinc-800/60"
+                  ? "border-blue-500/50 bg-blue-500/10 shadow-md shadow-blue-500/20"
+                  : "border-zinc-700/50 bg-zinc-800/40 hover:border-zinc-600"
               }`}
             >
               {content}
@@ -129,10 +129,10 @@ export default function PartyCard({
               key={`${contact.type}-${contact.handle}`}
               type="button"
               onClick={() => handleCopy(contact.handle)}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition hover:border-blue-500 hover:bg-blue-500/10 ${
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/10 hover:scale-105 active:scale-95 ${
                 contact.preferred
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-zinc-700 bg-zinc-800/60"
+                  ? "border-blue-500/50 bg-blue-500/10 shadow-md shadow-blue-500/20"
+                  : "border-zinc-700/50 bg-zinc-800/40 hover:border-zinc-600"
               }`}
             >
               {content}
@@ -149,8 +149,11 @@ export default function PartyCard({
 
   return (
     <div
-      className={`rounded-xl p-4 shadow-sm hover:shadow-md transition text-white space-y-3 w-full
-      ${isPinned ? "bg-pink-950 border border-pink-600" : "bg-zinc-800 border border-zinc-700"}
+      className={`rounded-xl p-4 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 text-white space-y-3 w-full animate-fadeIn
+      ${isPinned 
+        ? "bg-gradient-to-br from-pink-950/50 to-pink-900/30 border border-pink-600/50 hover:border-pink-500 hover:scale-[1.01]" 
+        : "bg-zinc-800/80 backdrop-blur-sm border border-zinc-700/50 hover:border-zinc-600 hover:bg-zinc-800 hover:scale-[1.01]"
+      }
     `}
     >
       <div className="flex justify-between items-start">
@@ -211,9 +214,9 @@ export default function PartyCard({
         <button
           disabled={isFull}
           onClick={handleJoinClick}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition duration-150 ${isFull
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${isFull
               ? "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg hover:shadow-blue-500/50 active:scale-95"
             }`}
         >
           {isFull ? (

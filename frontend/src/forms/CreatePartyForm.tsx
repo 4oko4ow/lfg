@@ -101,10 +101,10 @@ export default function CreatePartyForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="mb-6 space-y-3 rounded-xl border border-zinc-700 bg-zinc-800 p-4 max-w-screen-md mx-auto"
+            className="mb-6 space-y-3 rounded-xl border border-zinc-700/50 bg-zinc-800/60 backdrop-blur-sm p-4 max-w-screen-md mx-auto shadow-lg hover:shadow-xl hover:border-zinc-600 transition-all duration-300 animate-fadeIn"
         >
             <h2 className="flex items-center gap-2 text-base font-semibold text-white">
-                <BoltIcon className="h-4 w-4 text-blue-500" />
+                <BoltIcon className="h-4 w-4 text-blue-500 animate-pulse" />
                 {t("form.title", "Создать пати")}
             </h2>
 
@@ -112,7 +112,7 @@ export default function CreatePartyForm() {
                 <select
                     value={game}
                     onChange={(e) => setGame(e.target.value as GameSlug)}
-                    className="flex-1 min-w-[200px] rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                    className="flex-1 min-w-[200px] rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 >
                     {games.map((g) => (
                         <option key={g.slug} value={g.slug}>
@@ -128,7 +128,7 @@ export default function CreatePartyForm() {
                         min={2}
                         max={10}
                         onChange={(e) => setSlots(parseInt(e.target.value || "0", 10))}
-                        className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 pl-8 text-sm text-white"
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 pl-8 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         placeholder={t("form.labels.slots", "Слоты")}
                     />
                     <UserGroupIcon className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-zinc-500" />
@@ -144,7 +144,7 @@ export default function CreatePartyForm() {
                 required
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
 
             <div className="space-y-2 rounded-lg border border-zinc-700 bg-zinc-900/50 p-3">
@@ -231,10 +231,10 @@ export default function CreatePartyForm() {
             <button
                 type="submit"
                 disabled={availableMethods.length > 0 && selectedMethods.length === 0}
-                className={`w-full rounded px-4 py-2 text-sm font-medium text-white transition sm:w-auto ${
+                className={`w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 sm:w-auto ${
                     availableMethods.length > 0 && selectedMethods.length === 0
-                        ? "bg-zinc-700 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                        ? "bg-zinc-700 cursor-not-allowed opacity-50"
+                        : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-lg hover:shadow-blue-500/50 active:scale-95"
                 }`}
             >
                 {t("form.cta", "Создать пати")}

@@ -189,10 +189,10 @@ function PartyFeedPage() {
               <button
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`rounded-full px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition ${
+                className={`rounded-full px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition-all duration-200 ${
                   filter === option
-                    ? "bg-blue-600 text-white"
-                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30 scale-105"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:scale-105 active:scale-95"
                 }`}
               >
                 {option}
@@ -206,7 +206,7 @@ function PartyFeedPage() {
             </span>
             <button
               onClick={() => setChatOpen(true)}
-              className="flex items-center gap-1.5 sm:gap-2 rounded bg-zinc-800 px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition hover:bg-zinc-700"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-zinc-800 to-zinc-700 px-2.5 py-1 sm:px-3 text-[10px] sm:text-xs uppercase tracking-wide transition-all duration-200 hover:from-zinc-700 hover:to-zinc-600 hover:scale-105 active:scale-95 shadow-md"
             >
               <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("chat.title", "Чат")}
@@ -215,21 +215,37 @@ function PartyFeedPage() {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-sm text-zinc-400">
-            {t("ui.loading", "Загружаем объявления...")}
+          <div className="py-20 text-center">
+            <div className="inline-flex items-center gap-2 text-sm text-zinc-400">
+              <div className="h-4 w-4 border-2 border-zinc-600 border-t-blue-500 rounded-full animate-spin"></div>
+              {t("ui.loading", "Загружаем объявления...")}
+            </div>
           </div>
         ) : filteredParties.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-zinc-700 p-10 text-center text-sm text-zinc-400">
-            <Search className="mx-auto mb-3 h-6 w-6 text-zinc-500" />
-            {t(
-              "filters.empty",
-              "Пока нет объявлений. Стань первым и создай своё!"
-            )}
+          <div className="rounded-xl border border-dashed border-zinc-700/50 bg-zinc-900/30 backdrop-blur-sm p-10 text-center animate-fadeIn">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-800/50 mb-4">
+              <Search className="h-8 w-8 text-zinc-500" />
+            </div>
+            <p className="text-sm text-zinc-400 mb-2">
+              {t(
+                "filters.empty",
+                "Пока нет объявлений. Стань первым и создай своё!"
+              )}
+            </p>
+            <p className="text-xs text-zinc-500">
+              {t("filters.empty_hint", "Создай своё объявление выше 👆")}
+            </p>
           </div>
         ) : (
           <div className="space-y-3 max-w-screen-md mx-auto">
-            {filteredParties.map((party) => (
-              <PartyCard key={party.id} party={party} onJoin={() => handleJoinClick(party)} />
+            {filteredParties.map((party, index) => (
+              <div 
+                key={party.id} 
+                className="animate-fadeIn"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <PartyCard party={party} onJoin={() => handleJoinClick(party)} />
+              </div>
             ))}
           </div>
         )}
@@ -256,7 +272,7 @@ function PartyFeedPage() {
 
       <button
         onClick={() => setSuggestModalOpen(true)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 flex items-center gap-2 rounded-full bg-pink-600 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-lg transition hover:bg-pink-500 z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-600 to-pink-500 px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-pink-500/50 transition-all duration-200 hover:from-pink-500 hover:to-pink-400 hover:shadow-xl hover:shadow-pink-500/60 hover:scale-105 active:scale-95 z-50 animate-fadeIn"
       >
         <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         <span className="hidden sm:inline">{t("hero.suggest_game", "Нет нужной игры?")}</span>

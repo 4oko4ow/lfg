@@ -27,12 +27,33 @@ func NewSessionManager(secret, cookieName, cookieDomain string, secure bool) *Se
 	if cookieName == "" {
 		cookieName = "lfg_session"
 	}
+	// Default to 1 year (365 days) for long-lived sessions
+	// Users can stay logged in for a very long time
+	defaultTTL := 365 * 24 * time.Hour
 	return &SessionManager{
 		secret:       []byte(secret),
 		cookieName:   cookieName,
 		cookieDomain: cookieDomain,
 		secure:       secure,
-		ttl:          30 * 24 * time.Hour,
+		ttl:          defaultTTL,
+	}
+}
+
+// NewSessionManagerWithTTL creates a session manager with a custom TTL
+func NewSessionManagerWithTTL(secret, cookieName, cookieDomain string, secure bool, ttl time.Duration) *SessionManager {
+	if cookieName == "" {
+		cookieName = "lfg_session"
+	}
+	if ttl <= 0 {
+		// Default to 1 year if invalid TTL provided
+		ttl = 365 * 24 * time.Hour
+	}
+	return &SessionManager{
+		secret:       []byte(secret),
+		cookieName:   cookieName,
+		cookieDomain: cookieDomain,
+		secure:       secure,
+		ttl:          ttl,
 	}
 }
 

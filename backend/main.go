@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -77,7 +78,18 @@ func main() {
 	defer store.Close()
 
 	secureCookie := os.Getenv("AUTH_COOKIE_SECURE") == "true"
-	sessionManager := auth.NewSessionManager(secret, os.Getenv("AUTH_COOKIE_NAME"), os.Getenv("AUTH_COOKIE_DOMAIN"), secureCookie)
+	
+	// Parse session TTL from environment variable (in days, default: 365 days = 1 year)
+	sessionTTLDays := 365
+	if ttlStr := os.Getenv("AUTH_SESSION_TTL_DAYS"); ttlStr != "" {
+		if parsed, err := strconv.Atoi(ttlStr); err == nil && parsed > 0 {
+			sessionTTLDays = parsed
+		}
+	}
+	sessionTTL := time.Duration(sessionTTLDays) * 24 * time.Hour
+	log.Printf("Session TTL set to %d days (%v)", sessionTTLDays, sessionTTL)
+	
+	sessionManager := auth.NewSessionManagerWithTTL(secret, os.Getenv("AUTH_COOKIE_NAME"), os.Getenv("AUTH_COOKIE_DOMAIN"), secureCookie, sessionTTL)
 
 	handler := auth.NewHandler(store, sessionManager, auth.Config{
 		FrontendURL: os.Getenv("FRONTEND_URL"),
