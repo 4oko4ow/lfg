@@ -78,11 +78,19 @@ export default function CreatePartyForm() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
+        console.log("📝 Form submit triggered");
+        console.log("   goal:", goal);
+        console.log("   canSubmit:", canSubmit);
+        console.log("   availableMethods:", availableMethods);
+        console.log("   selectedMethods:", selectedMethods);
+        
         if (!goal.trim()) {
+            console.warn("⚠️  Goal is empty, not submitting");
             return;
         }
 
         if (!canSubmit) {
+            console.warn("⚠️  Cannot submit:", { availableMethods: availableMethods.length, selectedMethods: selectedMethods.length });
             return;
         }
 
@@ -103,10 +111,14 @@ export default function CreatePartyForm() {
             )
             .filter((contact): contact is NonNullable<typeof contact> => Boolean(contact));
 
+        console.log("   contacts:", contacts);
+        
         if (contacts.length === 0) {
+            console.warn("⚠️  No contacts generated, not submitting");
             return;
         }
 
+        console.log("✅ Sending create_party:", { game, goal, slots, contacts });
         sendCreateParty({ game, goal, slots, contacts });
         setGoal("");
         setSelectedMethods(availableMethods);
