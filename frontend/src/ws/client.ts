@@ -49,6 +49,10 @@ export function sendCreateParty(payload: {
   if (socket.readyState === WebSocket.CONNECTING) {
     // Ждем подключения
     socket.addEventListener("open", () => {
+      if (!socket) {
+        console.error("❌ WebSocket not initialized in open handler");
+        return;
+      }
       const msg: OutgoingMessage = {
         type: "create_party",
         payload,

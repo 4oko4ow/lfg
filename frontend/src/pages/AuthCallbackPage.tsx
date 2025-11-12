@@ -77,6 +77,13 @@ export default function AuthCallbackPage() {
           // Still show success message and navigate, profile might load on next page
           toast.success(t(messageMeta.key, "Вы успешно вошли"));
         }
+      } else if (status === "discord_conflict") {
+        toast.error(
+          t(
+            messageMeta.key,
+            "Этот Discord аккаунт уже привязан к другой учетной записи"
+          )
+        );
       } else if (status === "steam_conflict") {
         toast.error(
           t(

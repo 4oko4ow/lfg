@@ -464,7 +464,9 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 			linkUserID = current
 			log.Printf("[Auth] Linking Discord identity to existing user: %s", linkUserID)
 		} else {
-			log.Printf("[Auth] Warning: link=1 but no session found: %v", err)
+			log.Printf("[Auth] Warning: link=1 but no session found: %v. Will create new user instead.", err)
+			// If link was requested but no session exists, we'll create a new user
+			// This can happen if session expired or was cleared
 		}
 	} else {
 		log.Printf("[Auth] Creating new user for Discord identity")
@@ -622,13 +624,31 @@ func (h *Handler) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("[Auth] Steam login successful, creating session for user: %s", profile.User.ID)
-	if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
-		log.Printf("[Auth] Failed to issue session: %v", err)
-		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
-		return
+	log.Printf("[Auth] Steam login successful for user: %s", profile.User.ID)
+	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
+		func() []string {
+			providers := make([]string, len(profile.Identities))
+			for i, ident := range profile.Identities {
+				providers[i] = string(ident.Provider)
+			}
+			return providers
+		}())
+
+	// Only issue new session if not linking (linking keeps existing session)
+	if !payload.Link {
+		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
+			log.Printf("[Auth] Failed to issue session: %v", err)
+			http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
+			return
+		}
+		log.Printf("[Auth] Session issued for new user")
+	} else {
+		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
+		// Verify that the session user matches the profile user
+		if linkUserID != "" && linkUserID != profile.User.ID {
+			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
+		}
 	}
-	log.Printf("[Auth] Session issued, redirecting to frontend")
 
 	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
 }
@@ -727,12 +747,15 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var linkUserID string
-	// Always try to link to current user if session exists (for linking from profile page)
+	// Check if we have an existing session (for linking from profile page)
+	// If session exists, we're in linking mode
+	hasSession := false
 	if current, err := h.sessions.Extract(r); err == nil {
 		linkUserID = current
-		log.Printf("[Auth] Linking Telegram identity to existing user: %s", linkUserID)
+		hasSession = true
+		log.Printf("[Auth] Found existing session, linking Telegram identity to user: %s", linkUserID)
 	} else {
-		log.Printf("[Auth] No session found, creating new user for Telegram identity")
+		log.Printf("[Auth] No session found, will create new user for Telegram identity")
 	}
 
 	handle := body.Username
@@ -740,7 +763,7 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		handle = strings.TrimSpace(body.FirstName + " " + body.LastName)
 	}
 
-	log.Printf("[Auth] Upserting Telegram identity: provider_id=%s, linkUserID=%s", body.ID, linkUserID)
+	log.Printf("[Auth] Upserting Telegram identity: provider_id=%s, linkUserID=%s, hasSession=%v", body.ID, linkUserID, hasSession)
 	profile, err := h.store.UpsertIdentity(linkUserID, ProviderTelegram, body.ID, handle, "https://t.me/"+body.Username, "", "")
 	if err != nil {
 		log.Printf("[Auth] Failed to upsert Telegram identity: %v", err)
@@ -761,15 +784,21 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 			return providers
 		}())
 
-	// Only issue new session if linking to a new user (if linkUserID was empty, we created a new user)
-	// If linkUserID was set and matches profile.User.ID, we're linking to existing user, so keep existing session
-	if linkUserID == "" || linkUserID != profile.User.ID {
+	// Only issue new session if:
+	// 1. We didn't have a session (new user created)
+	// 2. OR the identity was already linked to a different user (linkUserID was set but profile.User.ID is different)
+	// If we had a session and profile.User.ID matches linkUserID, we're linking to existing user, so keep existing session
+	if !hasSession || (linkUserID != "" && linkUserID != profile.User.ID) {
 		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
 			log.Printf("[Auth] Failed to issue session: %v", err)
 			http.Error(w, "failed to issue session", http.StatusInternalServerError)
 			return
 		}
-		log.Printf("[Auth] Session issued for new/linked user")
+		if !hasSession {
+			log.Printf("[Auth] Session issued for new user")
+		} else {
+			log.Printf("[Auth] Session issued for user (identity was linked to different user)")
+		}
 	} else {
 		log.Printf("[Auth] Linking to existing user: keeping existing session (user: %s)", linkUserID)
 		// Verify that the session user matches the profile user
