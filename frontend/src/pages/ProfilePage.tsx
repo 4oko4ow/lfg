@@ -26,12 +26,13 @@ const PROVIDERS: {
       description: "profile.discord_description",
       placeholder: "username или @username",
     },
-    {
-      id: "telegram",
-      title: "Telegram",
-      description: "profile.telegram_description",
-      placeholder: "@username",
-    },
+    // Temporarily hidden
+    // {
+    //   id: "telegram",
+    //   title: "Telegram",
+    //   description: "profile.telegram_description",
+    //   placeholder: "@username",
+    // },
   ];
 
 export default function ProfilePage() {

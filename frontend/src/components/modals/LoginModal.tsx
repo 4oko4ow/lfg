@@ -25,13 +25,14 @@ const PROVIDERS: {
     hoverColor: "hover:bg-[#4752C4]",
     textColor: "text-white",
   },
-  {
-    id: "telegram",
-    label: "Telegram",
-    brandColor: "bg-[#0088cc]",
-    hoverColor: "hover:bg-[#006699]",
-    textColor: "text-white",
-  },
+  // Temporarily hidden
+  // {
+  //   id: "telegram",
+  //   label: "Telegram",
+  //   brandColor: "bg-[#0088cc]",
+  //   hoverColor: "hover:bg-[#006699]",
+  //   textColor: "text-white",
+  // },
 ];
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
