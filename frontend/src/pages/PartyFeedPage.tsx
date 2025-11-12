@@ -19,7 +19,6 @@ import ChatDrawer from "../components/ChatDrawer";
 import SuggestGameModal from "../components/modals/SuggestGameModal";
 import { NoJoinSurvey } from "../components/NoJoinSurvey";
 import { DynamicMeta } from "../components/DynamicMeta";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 
 import { getGames } from "../constants/games";
 
@@ -179,16 +178,13 @@ function PartyFeedPage() {
     <>
       <DynamicMeta />
       <main className="mx-auto w-full max-w-5xl px-4 py-4 sm:py-6 text-white">
-        <section className="mb-4 sm:mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">
-              {t("hero.title", "Найди команду для игры")}
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-400">
-              {t("hero.subtitle", "Вступай в готовые пати или создай своё объявление")}
-            </p>
-          </div>
-          <LanguageSwitcher />
+        <section className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold">
+            {t("hero.title", "Найди команду для игры")}
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400">
+            {t("hero.subtitle", "Вступай в готовые пати или создай своё объявление")}
+          </p>
         </section>
 
         <CreatePartyForm />

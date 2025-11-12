@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./modals/LoginModal";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Header({
   currentLang,
@@ -38,6 +39,7 @@ export default function Header({
           FindParty
         </Link>
         <div className="flex items-center gap-3 text-sm">
+          <LanguageSwitcher />
           {loading ? (
             <span className="text-zinc-400">
               {t("auth.loading", "Загрузка...")}
