@@ -266,7 +266,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      console.log("[Telegram Auth] Opening Telegram OAuth popup...");
       const payload = await openTelegramAuth(botId.trim());
+      console.log("[Telegram Auth] Received payload from Telegram:", payload);
+      
       // Convert id from number to string as backend expects string
       const requestBody = {
         id: String(payload.id),
@@ -277,6 +280,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         auth_date: payload.auth_date,
         hash: payload.hash,
       };
+      
+      console.log("[Telegram Auth] Sending verification request to backend...");
       const response = await fetch(buildBackendUrl("/auth/telegram/verify"), {
         method: "POST",
         headers: {
@@ -286,23 +291,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(requestBody),
       });
 
+      console.log("[Telegram Auth] Backend response status:", response.status);
+      
       if (response.ok) {
+        const profile = await response.json();
+        console.log("[Telegram Auth] Verification successful, profile:", profile);
         redirectToCallback("success", redirect);
         return;
       }
 
+      const errorText = await response.text().catch(() => "unknown error");
+      console.error("[Telegram Auth] Backend verification failed:", response.status, errorText);
+      
       const status =
         response.status === 409 ? "telegram_conflict" : "telegram_error";
       redirectToCallback(status, redirect);
     } catch (error) {
-      console.error("Telegram auth failed", error);
+      console.error("[Telegram Auth] Error during authentication:", error);
+      
       // Если ошибка связана с bot ID, показываем более понятное сообщение
       if (error instanceof Error && error.message.includes("bot ID")) {
         console.error("Telegram bot ID is missing or invalid. Please check backend configuration (TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_ID).");
+        redirectToCallback("telegram_error", redirect);
+        return;
       }
+      
+      // Если ошибка "popup closed", возможно auth все-таки прошел
+      // Проверим профиль перед редиректом на ошибку
+      if (error instanceof Error && (error.message.includes("popup closed") || error.message.includes("cancelled"))) {
+        console.log("[Telegram Auth] Popup closed/cancelled, checking if auth succeeded anyway...");
+        try {
+          // Дадим немного времени для обработки на бэкенде
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          // Проверим, обновился ли профиль
+          const profileLoaded = await refreshProfile();
+          if (profileLoaded) {
+            console.log("[Telegram Auth] Profile loaded successfully despite popup error - auth succeeded!");
+            redirectToCallback("success", redirect);
+            return;
+          }
+        } catch (refreshError) {
+          console.warn("[Telegram Auth] Failed to refresh profile after popup error:", refreshError);
+        }
+      }
+      
       redirectToCallback("telegram_error", redirect);
     }
-  }, [redirectToCallback, telegramBotId, loadConfig]);
+  }, [redirectToCallback, telegramBotId, loadConfig, refreshProfile]);
 
   const signIn = useCallback(
     (provider: SocialProvider) => {

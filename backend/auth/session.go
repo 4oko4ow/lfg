@@ -49,7 +49,7 @@ func NewSessionManagerWithTTL(secret, cookieName, cookieDomain string, secure bo
 		// Default to 1 year if invalid TTL provided
 		ttl = 365 * 24 * time.Hour
 	}
-	
+
 	// Try to initialize DB session store (optional, falls back to stateless if fails)
 	sessionStore, err := NewSessionStore()
 	if err != nil {
@@ -60,7 +60,7 @@ func NewSessionManagerWithTTL(secret, cookieName, cookieDomain string, secure bo
 	} else {
 		log.Println("[Session] ✅ Using database-backed session storage (sessions will persist across restarts)")
 	}
-	
+
 	return &SessionManager{
 		secret:       []byte(secret),
 		cookieName:   cookieName,

@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -36,12 +37,31 @@ func GetParties() []*Party {
 
 func AddParty(p *Party, save bool) {
 	partyLock.Lock()
-	defer partyLock.Unlock()
 	parties[p.ID] = p
+	partyLock.Unlock()
+	
 	if save {
 		// Сохраняем синхронно для новых объявлений, чтобы гарантировать сохранение
 		// перед возможной синхронизацией
-		SavePartyToSupabase(p)
+		maxRetries := 3
+		retryDelay := 100 * time.Millisecond
+		var lastErr error
+		for i := 0; i < maxRetries; i++ {
+			if err := SavePartyToSupabase(p); err != nil {
+				lastErr = err
+				if i < maxRetries-1 {
+					time.Sleep(retryDelay)
+					retryDelay *= 2 // exponential backoff
+					continue
+				}
+			} else {
+				return // успешно сохранено
+			}
+		}
+		// Если все попытки не удались, логируем ошибку
+		if lastErr != nil {
+			log.Printf("❌ Failed to save party %s after %d retries: %v", p.ID, maxRetries, lastErr)
+		}
 	}
 }
 
@@ -88,19 +108,24 @@ func SynchronizeMemoryWithSupabase() {
 		dbParties[p.ID] = p
 	}
 	
-	// Объединяем: берем из БД, но сохраняем недавно созданные из памяти (младше 1 минуты)
+	// Объединяем: берем из БД, но сохраняем недавно созданные из памяти
 	// которые могут еще не успеть сохраниться в БД
 	now := time.Now()
 	for id, memParty := range parties {
 		age := now.Sub(memParty.CreatedAt)
-		// Если объявление в памяти новее 1 минуты, сохраняем его (возможно еще не сохранено в БД)
-		if age < 1*time.Minute {
+		// Если объявление в памяти новее 5 минут, сохраняем его (возможно еще не сохранено в БД)
+		// Увеличили время с 1 минуты до 5 минут, чтобы дать больше времени на сохранение
+		if age < 5*time.Minute {
 			if dbParty, exists := dbParties[id]; exists {
 				// Если есть в БД, используем данные из БД (более актуальные)
 				parties[id] = dbParty
 			} else {
-				// Если нет в БД, оставляем из памяти и пытаемся сохранить
-				go SavePartyToSupabase(memParty)
+				// Если нет в БД, оставляем из памяти и пытаемся сохранить синхронно
+				// Используем синхронное сохранение, чтобы убедиться, что оно выполнилось
+				if err := SavePartyToSupabase(memParty); err != nil {
+					log.Printf("⚠️  Failed to save party %s during sync: %v", id, err)
+					// Не удаляем из памяти, если сохранение не удалось - попробуем в следующий раз
+				}
 			}
 		} else {
 			// Старые объявления берем из БД
@@ -108,7 +133,9 @@ func SynchronizeMemoryWithSupabase() {
 				parties[id] = dbParty
 			} else {
 				// Если нет в БД и не новое - удаляем из памяти
+				// Только если объявление старше 5 минут и его нет в БД
 				delete(parties, id)
+				log.Printf("🗑️  Removed party %s from memory (not found in DB, age: %v)", id, age)
 			}
 		}
 	}

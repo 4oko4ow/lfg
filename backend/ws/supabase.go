@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/supabase-community/supabase-go"
@@ -31,7 +32,7 @@ func InitDB() {
 	log.Println("✅ Initial sync done. Server ready.")
 }
 
-func SavePartyToSupabase(p *Party) {
+func SavePartyToSupabase(p *Party) error {
 	// Преобразуем Party в map для правильной сериализации
 	partyData := map[string]interface{}{
 		"id":         p.ID,
@@ -48,11 +49,13 @@ func SavePartyToSupabase(p *Party) {
 		contactsJSON, err := json.Marshal(p.Contacts)
 		if err != nil {
 			log.Printf("Error marshalling contacts for party %s: %v", p.ID, err)
+			return err
 		} else {
 			// Преобразуем JSON bytes в interface{} для Supabase
 			var contactsInterface interface{}
 			if err := json.Unmarshal(contactsJSON, &contactsInterface); err != nil {
 				log.Printf("Error unmarshalling contacts JSON for party %s: %v", p.ID, err)
+				return err
 			} else {
 				partyData["contacts"] = contactsInterface
 			}
@@ -65,6 +68,30 @@ func SavePartyToSupabase(p *Party) {
 		Insert(partyData, false, "", "representation", "").
 		Execute()
 	
+	// Если Insert не удался из-за отсутствия колонки contacts, пробуем без неё
+	if err != nil && containsContactsError(err) {
+		log.Printf("⚠️  Insert failed for party %s due to contacts column issue, trying without contacts: %v", p.ID, err)
+		// Создаем копию без contacts
+		partyDataWithoutContacts := map[string]interface{}{
+			"id":         p.ID,
+			"game":       p.Game,
+			"goal":       p.Goal,
+			"slots":      p.Slots,
+			"joined":     p.Joined,
+			"created_at": p.CreatedAt.Format(time.RFC3339),
+			"pinned":     p.Pinned,
+		}
+		_, _, err = supabaseClient.
+			From("parties").
+			Insert(partyDataWithoutContacts, false, "", "representation", "").
+			Execute()
+		if err == nil {
+			log.Printf("✅ Successfully saved party %s to Supabase (without contacts column)", p.ID)
+			log.Printf("⚠️  WARNING: contacts column is missing in database! Please run migration: add_contacts_column_to_parties.sql")
+			return nil
+		}
+	}
+	
 	// Если Insert не удался (возможно запись уже существует), пробуем Upsert
 	if err != nil {
 		log.Printf("⚠️  Insert failed for party %s, trying Upsert: %v", p.ID, err)
@@ -72,15 +99,51 @@ func SavePartyToSupabase(p *Party) {
 			From("parties").
 			Upsert(partyData, "id", "", "representation").
 			Execute()
+		// Если Upsert тоже не удался из-за contacts, пробуем без неё
+		if err != nil && containsContactsError(err) {
+			log.Printf("⚠️  Upsert failed for party %s due to contacts column issue, trying without contacts: %v", p.ID, err)
+			partyDataWithoutContacts := map[string]interface{}{
+				"id":         p.ID,
+				"game":       p.Game,
+				"goal":       p.Goal,
+				"slots":      p.Slots,
+				"joined":     p.Joined,
+				"created_at": p.CreatedAt.Format(time.RFC3339),
+				"pinned":     p.Pinned,
+			}
+			_, _, err = supabaseClient.
+				From("parties").
+				Upsert(partyDataWithoutContacts, "id", "", "representation").
+				Execute()
+			if err == nil {
+				log.Printf("✅ Successfully saved party %s to Supabase (without contacts column)", p.ID)
+				log.Printf("⚠️  WARNING: contacts column is missing in database! Please run migration: add_contacts_column_to_parties.sql")
+				return nil
+			}
+		}
 		if err != nil {
 			log.Printf("❌ Error saving party %s to Supabase (both Insert and Upsert failed): %v", p.ID, err)
 			log.Printf("   Party data: %+v", partyData)
+			return err
 		} else {
 			log.Printf("✅ Successfully saved party %s to Supabase (via Upsert)", p.ID)
 		}
 	} else {
 		log.Printf("✅ Successfully saved party %s to Supabase (via Insert)", p.ID)
 	}
+	return nil
+}
+
+// containsContactsError проверяет, связана ли ошибка с отсутствием колонки contacts
+func containsContactsError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "contacts") && 
+		(strings.Contains(errStr, "not found") || 
+		 strings.Contains(errStr, "pgrst204") || 
+		 strings.Contains(errStr, "schema cache"))
 }
 
 func LoadPartiesFromSupabase() []*Party {
