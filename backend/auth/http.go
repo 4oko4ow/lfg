@@ -501,6 +501,12 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		log.Printf("[Auth] Session issued for new user")
+		// Log Set-Cookie header to verify it's being set
+		if setCookie := w.Header().Get("Set-Cookie"); setCookie != "" {
+			log.Printf("[Auth] Set-Cookie header present in response (length: %d)", len(setCookie))
+		} else {
+			log.Printf("[Auth] ⚠️  WARNING: Set-Cookie header NOT present in response!")
+		}
 	} else {
 		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
 		// Verify that the session user matches the profile user
@@ -509,7 +515,9 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
+	redirectURL := h.frontendRedirect(payload.Redirect, "success")
+	log.Printf("[Auth] Redirecting to: %s", redirectURL)
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
 type discordToken struct {
@@ -642,6 +650,12 @@ func (h *Handler) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("[Auth] Session issued for new user")
+		// Log Set-Cookie header to verify it's being set
+		if setCookie := w.Header().Get("Set-Cookie"); setCookie != "" {
+			log.Printf("[Auth] Set-Cookie header present in response (length: %d)", len(setCookie))
+		} else {
+			log.Printf("[Auth] ⚠️  WARNING: Set-Cookie header NOT present in response!")
+		}
 	} else {
 		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
 		// Verify that the session user matches the profile user
@@ -650,7 +664,9 @@ func (h *Handler) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success"), http.StatusFound)
+	redirectURL := h.frontendRedirect(payload.Redirect, "success")
+	log.Printf("[Auth] Redirecting to: %s", redirectURL)
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
 func (h *Handler) verifySteamResponse(r *http.Request) error {
