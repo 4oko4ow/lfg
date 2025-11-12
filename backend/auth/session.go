@@ -115,11 +115,14 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 				Secure:   s.secure,
 				SameSite: sameSite,
 			}
+			// For cross-domain cookies, don't set Domain if it's empty
+			// Setting Domain to empty allows the cookie to be set for the current domain
+			// and will be sent with requests to that domain from other origins
 			if s.cookieDomain != "" {
 				cookie.Domain = s.cookieDomain
 			}
 			http.SetCookie(w, cookie)
-			log.Printf("[Session] Issued DB-backed session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
+			log.Printf("[Session] Issued DB-backed session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v, CookieString: %s)", userID, s.cookieDomain, s.secure, sameSite, cookie.String())
 			return nil
 		}
 	}
@@ -149,11 +152,14 @@ func (s *SessionManager) Issue(w http.ResponseWriter, userID string, ttl time.Du
 		Secure:   s.secure,
 		SameSite: sameSite,
 	}
+	// For cross-domain cookies, don't set Domain if it's empty
+	// Setting Domain to empty allows the cookie to be set for the current domain
+	// and will be sent with requests to that domain from other origins
 	if s.cookieDomain != "" {
 		cookie.Domain = s.cookieDomain
 	}
 	http.SetCookie(w, cookie)
-	log.Printf("[Session] Issued stateless session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v)", userID, s.cookieDomain, s.secure, sameSite)
+	log.Printf("[Session] Issued stateless session cookie for user %s (Domain: %q, Secure: %v, SameSite: %v, CookieString: %s)", userID, s.cookieDomain, s.secure, sameSite, cookie.String())
 	return nil
 }
 
