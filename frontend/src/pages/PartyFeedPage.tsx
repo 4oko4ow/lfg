@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   Search,
   HelpCircle,
-  Sparkles,
+  MessageCircle,
 } from "lucide-react";
 
 import { connectWS, onMessage, socket } from "../ws/client";
@@ -209,17 +209,6 @@ function PartyFeedPage() {
               </button>
             ))}
           </div>
-          {isMobile && (
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => setChatOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-zinc-800 px-2.5 py-1 text-[10px] uppercase tracking-wide transition-colors hover:bg-zinc-700"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {t("chat.title", "Чат")}
-              </button>
-            </div>
-          )}
         </div>
 
         {loading ? (
@@ -278,6 +267,17 @@ function PartyFeedPage() {
         chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />
       ) : (
         <Chat onlineCount={onlineCount} />
+      )}
+
+      {/* Mobile chat button - floating on the left */}
+      {isMobile && (
+        <button
+          onClick={() => setChatOpen(true)}
+          className="fixed bottom-4 left-4 sm:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:from-blue-500 hover:to-blue-400 hover:shadow-xl hover:shadow-blue-500/60 hover:scale-110 active:scale-95 z-50 animate-fadeIn"
+          aria-label={t("chat.title", "Чат")}
+        >
+          <MessageCircle className="h-6 w-6" />
+        </button>
       )}
 
       <button
