@@ -246,8 +246,8 @@ export default function CreatePartyForm({
                                             setGameSearchQuery("");
                                         }}
                                         className={`relative group rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${isSelected
-                                                ? "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/40 border border-blue-400/50"
-                                                : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 border border-zinc-700/50 hover:border-zinc-600/70"
+                                            ? "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/40 border border-blue-400/50"
+                                            : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 border border-zinc-700/50 hover:border-zinc-600/70"
                                             }`}
                                     >
                                         {isSelected && (
@@ -257,8 +257,8 @@ export default function CreatePartyForm({
                                             {g.name}
                                             {count > 0 && (
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected
-                                                        ? "bg-white/20 text-white"
-                                                        : "bg-zinc-700/50 text-zinc-400"
+                                                    ? "bg-white/20 text-white"
+                                                    : "bg-zinc-700/50 text-zinc-400"
                                                     }`}>
                                                     {count}
                                                 </span>
@@ -332,8 +332,8 @@ export default function CreatePartyForm({
                                                         setGameSearchQuery("");
                                                     }}
                                                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSelected
-                                                            ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 border border-blue-500/30"
-                                                            : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white"
+                                                        ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 border border-blue-500/30"
+                                                        : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white"
                                                         }`}
                                                 >
                                                     {g.name}
@@ -402,8 +402,8 @@ export default function CreatePartyForm({
                             }
                         }}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${expirationEnabled
-                                ? "bg-gradient-to-r from-blue-600 to-blue-500"
-                                : "bg-zinc-700"
+                            ? "bg-gradient-to-r from-blue-600 to-blue-500"
+                            : "bg-zinc-700"
                             }`}
                     >
                         <span
@@ -421,8 +421,8 @@ export default function CreatePartyForm({
                                     type="button"
                                     onClick={() => setExpirationHours(hours)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${expirationHours === hours
-                                            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
-                                            : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 hover:scale-105 active:scale-95"
+                                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
+                                        : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 hover:scale-105 active:scale-95"
                                         }`}
                                 >
                                     {hours < 24
@@ -490,8 +490,8 @@ export default function CreatePartyForm({
                             <div key={method} className="flex items-center gap-2">
                                 <label
                                     className={`cursor-pointer rounded-xl border-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${selectedMethods.includes(method)
-                                            ? "border-blue-500/60 bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 scale-105"
-                                            : "border-zinc-700/60 bg-zinc-800/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/70 hover:scale-105 active:scale-95"
+                                        ? "border-blue-500/60 bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 scale-105"
+                                        : "border-zinc-700/60 bg-zinc-800/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/70 hover:scale-105 active:scale-95"
                                         }`}
                                 >
                                     <input
@@ -555,8 +555,8 @@ export default function CreatePartyForm({
                 type="submit"
                 disabled={!canSubmit || !goal.trim()}
                 className={`w-full rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${!canSubmit || !goal.trim()
-                        ? "bg-zinc-700 cursor-not-allowed opacity-50"
-                        : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-lg hover:shadow-blue-500/40 border border-blue-400/30"
+                    ? "bg-zinc-700 cursor-not-allowed opacity-50"
+                    : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-lg hover:shadow-blue-500/40 border border-blue-400/30"
                     }`}
             >
                 <span className="flex items-center justify-center gap-2">
