@@ -1,19 +1,33 @@
 -- Create auth_sessions table for persistent session storage
--- If table already exists, drop it first (use with caution in production!)
-DROP TABLE IF EXISTS auth_sessions CASCADE;
+-- Safe migration: only creates table if it doesn't exist
 
-CREATE TABLE auth_sessions (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+DO $$
+BEGIN
+    -- Check if table exists
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'auth_sessions'
+    ) THEN
+        -- Create table if it doesn't exist
+        CREATE TABLE auth_sessions (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            expires_at TIMESTAMPTZ NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
 
--- Create index on user_id for faster lookups
-CREATE INDEX idx_auth_sessions_user_id ON auth_sessions(user_id);
+        -- Create index on user_id for faster lookups
+        CREATE INDEX idx_auth_sessions_user_id ON auth_sessions(user_id);
 
--- Create index on expires_at for cleanup queries
-CREATE INDEX idx_auth_sessions_expires_at ON auth_sessions(expires_at);
+        -- Create index on expires_at for cleanup queries
+        CREATE INDEX idx_auth_sessions_expires_at ON auth_sessions(expires_at);
+
+        RAISE NOTICE '✅ Created auth_sessions table';
+    ELSE
+        RAISE NOTICE '✅ auth_sessions table already exists';
+    END IF;
+END $$;
 
 -- Note: Row Level Security is optional
 -- Service role key bypasses RLS, so policy is not strictly necessary
