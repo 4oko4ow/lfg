@@ -72,9 +72,9 @@ PostgreSQL port. Only needed if using docker-compose with `local-db` profile.
 Backend API URL for frontend build. This is **baked into the frontend at build time**, not runtime.
 
 **Examples:**
-- Production: `https://findparty.online`
+- Production: `https://lfg.findparty.online` (backend subdomain)
 - Local dev: `http://localhost:8080`
-- Staging: `https://staging.findparty.online`
+- Staging: `https://lfg.staging.findparty.online`
 
 **Notes:**
 - Must include protocol (`http://` or `https://`)
@@ -183,7 +183,7 @@ Frontend URL for OAuth redirects after authentication.
 Backend URL for OAuth callbacks.
 
 **Examples:**
-- Production: `https://findparty.online`
+- Production: `https://lfg.findparty.online` (backend subdomain)
 - Local: `http://localhost:8080`
 
 **Notes:**
@@ -309,9 +309,9 @@ GIN_MODE=debug
 
 ```bash
 DATABASE_URL=postgresql://user:pass@db.example.com:5432/lfg_mvp?sslmode=require
-VITE_BACKEND_URL=https://findparty.online
+VITE_BACKEND_URL=https://lfg.findparty.online
 FRONTEND_URL=https://findparty.online
-BACKEND_URL=https://findparty.online
+BACKEND_URL=https://lfg.findparty.online
 AUTH_COOKIE_SECURE=true
 AUTH_COOKIE_DOMAIN=.findparty.online
 GIN_MODE=release

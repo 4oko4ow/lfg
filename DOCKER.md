@@ -26,7 +26,7 @@ This project is dockerized for deployment on a VPS with Traefik reverse proxy.
 - **Port**: 8080 (internal)
 - **Health endpoint**: `/healthz`
 - **WebSocket endpoint**: `/ws`
-- Exposed via Traefik on `findparty.online`
+- Exposed via Traefik on `lfg.findparty.online`
 
 ### Frontend
 - **Container**: `lfg-mvp-frontend`
@@ -97,7 +97,9 @@ docker-compose down -v
 The services are configured to work with Traefik reverse proxy. Make sure:
 
 1. Traefik network exists: `docker network create traefik` (if not exists)
-2. Update domain names in `docker-compose.yml` labels if your domain differs from `findparty.online`
+2. Update domain names in `docker-compose.yml` labels:
+   - Frontend: `findparty.online`
+   - Backend: `lfg.findparty.online`
 3. Traefik should have Let's Encrypt certificate resolver configured (`le`)
 
 ## Notes

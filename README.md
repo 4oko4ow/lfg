@@ -51,9 +51,9 @@ Looking For Group (LFG) MVP - A platform for finding gaming parties.
    ```
 
 4. **Access the application**
-   - Frontend: `http://localhost` (or your configured domain)
-   - Backend API: `http://localhost:8080`
-   - Health check: `http://localhost:8080/healthz`
+   - Frontend: `http://localhost` (or `https://findparty.online` in production)
+   - Backend API: `http://localhost:8080` (or `https://lfg.findparty.online` in production)
+   - Health check: `http://localhost:8080/healthz` (or `https://lfg.findparty.online/healthz` in production)
 
 ## Documentation
 
@@ -86,10 +86,10 @@ See **[ENV.md](./ENV.md)** for complete documentation.
 
 **Required variables:**
 - `DATABASE_URL` - PostgreSQL connection string
-- `VITE_BACKEND_URL` - Backend URL for frontend
+- `VITE_BACKEND_URL` - Backend URL for frontend (e.g., `https://lfg.findparty.online`)
 - `AUTH_JWT_SECRET` - Session secret (generate with `openssl rand -hex 32`)
-- `FRONTEND_URL` - Frontend URL
-- `BACKEND_URL` - Backend URL
+- `FRONTEND_URL` - Frontend URL (e.g., `https://findparty.online`)
+- `BACKEND_URL` - Backend URL (e.g., `https://lfg.findparty.online`)
 - OAuth credentials (Discord, Steam, Telegram)
 
 ## Project Structure

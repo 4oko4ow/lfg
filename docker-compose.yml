@@ -55,7 +55,7 @@ services:
       AUTH_SESSION_TTL_DAYS: ${AUTH_SESSION_TTL_DAYS:-365}
       # OAuth configuration
       FRONTEND_URL: ${FRONTEND_URL:-https://findparty.online}
-      BACKEND_URL: ${BACKEND_URL:-https://findparty.online}
+      BACKEND_URL: ${BACKEND_URL:-https://lfg.findparty.online}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
       STEAM_WEB_API_KEY: ${STEAM_WEB_API_KEY}
@@ -83,39 +83,39 @@ services:
       - "traefik.http.middlewares.lfg-redirect-https.redirectscheme.scheme=https"
       - "traefik.http.middlewares.lfg-redirect-https.redirectscheme.permanent=true"
 
-      # === HTTPS API на /api (без strip prefix, backend ожидает /api если нужно) ===
-      - "traefik.http.routers.lfg-api.rule=Host(`findparty.online`) && PathPrefix(`/api`)"
+      # === HTTPS API на /api ===
+      - "traefik.http.routers.lfg-api.rule=Host(`lfg.findparty.online`) && PathPrefix(`/api`)"
       - "traefik.http.routers.lfg-api.entrypoints=websecure"
       - "traefik.http.routers.lfg-api.tls.certresolver=le"
       - "traefik.http.routers.lfg-api.service=lfg-api"
       - "traefik.http.services.lfg-api.loadbalancer.server.port=8080"
 
       # === HTTP -> HTTPS редирект для /api ===
-      - "traefik.http.routers.lfg-api-redirect.rule=Host(`findparty.online`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.lfg-api-redirect.rule=Host(`lfg.findparty.online`) && PathPrefix(`/api`)"
       - "traefik.http.routers.lfg-api-redirect.entrypoints=web"
       - "traefik.http.routers.lfg-api-redirect.middlewares=lfg-redirect-https"
 
       # === WebSocket endpoint ===
-      - "traefik.http.routers.lfg-ws.rule=Host(`findparty.online`) && Path(`/ws`)"
+      - "traefik.http.routers.lfg-ws.rule=Host(`lfg.findparty.online`) && Path(`/ws`)"
       - "traefik.http.routers.lfg-ws.entrypoints=websecure"
       - "traefik.http.routers.lfg-ws.tls.certresolver=le"
       - "traefik.http.routers.lfg-ws.service=lfg-ws"
       - "traefik.http.services.lfg-ws.loadbalancer.server.port=8080"
 
       # === HTTP -> HTTPS редирект для /ws ===
-      - "traefik.http.routers.lfg-ws-redirect.rule=Host(`findparty.online`) && Path(`/ws`)"
+      - "traefik.http.routers.lfg-ws-redirect.rule=Host(`lfg.findparty.online`) && Path(`/ws`)"
       - "traefik.http.routers.lfg-ws-redirect.entrypoints=web"
       - "traefik.http.routers.lfg-ws-redirect.middlewares=lfg-redirect-https"
 
       # === Health endpoint ===
-      - "traefik.http.routers.lfg-health.rule=Host(`findparty.online`) && Path(`/healthz`)"
+      - "traefik.http.routers.lfg-health.rule=Host(`lfg.findparty.online`) && Path(`/healthz`)"
       - "traefik.http.routers.lfg-health.entrypoints=websecure"
       - "traefik.http.routers.lfg-health.tls.certresolver=le"
       - "traefik.http.routers.lfg-health.service=lfg-health"
       - "traefik.http.services.lfg-health.loadbalancer.server.port=8080"
 
       # === HTTP -> HTTPS редирект для /healthz ===
-      - "traefik.http.routers.lfg-health-redirect.rule=Host(`findparty.online`) && Path(`/healthz`)"
+      - "traefik.http.routers.lfg-health-redirect.rule=Host(`lfg.findparty.online`) && Path(`/healthz`)"
       - "traefik.http.routers.lfg-health-redirect.entrypoints=web"
       - "traefik.http.routers.lfg-health-redirect.middlewares=lfg-redirect-https"
 
@@ -124,7 +124,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-https://findparty.online}
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-https://lfg.findparty.online}
     container_name: lfg-mvp-frontend
     networks:
       - traefik
