@@ -28,19 +28,19 @@ const PROVIDERS: {
   description: string;
   placeholder: string;
 }[] = [
-  {
-    id: "steam",
-    title: "Steam",
-    description: "profile.steam_description",
-    placeholder: "https://steamcommunity.com/id/username",
-  },
-  {
-    id: "discord",
-    title: "Discord",
-    description: "profile.discord_description",
-    placeholder: "username или @username",
-  },
-];
+    {
+      id: "steam",
+      title: "Steam",
+      description: "profile.steam_description",
+      placeholder: "https://steamcommunity.com/id/username",
+    },
+    {
+      id: "discord",
+      title: "Discord",
+      description: "profile.discord_description",
+      placeholder: "username или @username",
+    },
+  ];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
@@ -200,31 +200,28 @@ export default function ProfilePage() {
       <div className="mb-6 flex gap-2 border-b border-zinc-800">
         <button
           onClick={() => setActiveTab("stats")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "stats"
+          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "stats"
               ? "border-b-2 border-blue-500 text-blue-400"
               : "text-zinc-400 hover:text-zinc-200"
-          }`}
+            }`}
         >
           {t("profile.tabs.stats", "Stats & Achievements")}
         </button>
         <button
           onClick={() => setActiveTab("parties")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "parties"
+          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "parties"
               ? "border-b-2 border-blue-500 text-blue-400"
               : "text-zinc-400 hover:text-zinc-200"
-          }`}
+            }`}
         >
           {t("profile.tabs.parties", "My Parties")} ({userParties.length})
         </button>
         <button
           onClick={() => setActiveTab("contacts")}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "contacts"
+          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "contacts"
               ? "border-b-2 border-blue-500 text-blue-400"
               : "text-zinc-400 hover:text-zinc-200"
-          }`}
+            }`}
         >
           {t("profile.tabs.contacts", "Contacts")}
         </button>
@@ -375,7 +372,7 @@ export default function ProfilePage() {
                   className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
                 >
                   <div className="mb-3">
-                    <PartyCard party={party} onContactClick={() => {}} />
+                    <PartyCard party={party} onContactClick={() => { }} />
                   </div>
                   <div className="flex gap-2 border-t border-zinc-800 pt-3">
                     <button
