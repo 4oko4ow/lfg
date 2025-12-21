@@ -61,7 +61,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
         return;
       }
       const data = event.data as { event?: string; data?: TelegramAuthData };
-      
+
       // Handle auth_user event (successful authentication)
       if (data?.event === "auth_user" && data.data) {
         if (!resolved && !rejected) {
@@ -72,7 +72,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
         }
         return;
       }
-      
+
       // Handle auth_cancel event (user cancelled)
       if (data?.event === "auth_cancel") {
         if (!resolved && !rejected) {
@@ -83,7 +83,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
         }
         return;
       }
-      
+
       // Log other events for debugging
       if (data?.event) {
         console.log("[Telegram Auth] Received event:", data.event, data);

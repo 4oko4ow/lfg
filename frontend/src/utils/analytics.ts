@@ -1,40 +1,93 @@
 // src/utils/analytics.ts
-// Analytics removed - all methods are no-ops
+// Umami Analytics integration
+
+declare global {
+  interface Window {
+    umami?: {
+      track: (eventName: string, eventData?: Record<string, string | number>) => void;
+    };
+  }
+}
+
+// Helper function to safely track events with Umami
+const track = (eventName: string, eventData?: Record<string, string | number>) => {
+  if (typeof window !== "undefined" && window.umami) {
+    try {
+      window.umami.track(eventName, eventData);
+    } catch (error) {
+      console.warn("Analytics tracking error:", error);
+    }
+  }
+};
 
 export const analytics = {
   // Track pageviews manually if needed
-  trackPageView: () => {},
+  trackPageView: (url?: string) => {
+    track("pageview", url ? { url } : undefined);
+  },
 
   // Automatically track pageviews on navigation (for SPAs)
-  enableAutoPageviews: () => {},
+  // Umami automatically tracks pageviews, but we can enable manual tracking if needed
+  enableAutoPageviews: () => {
+    // Umami automatically tracks pageviews with the script tag
+    // This is a no-op but kept for API compatibility
+  },
 
   // Custom events
-  createPartySubmit: (_game: string) => {},
+  createPartySubmit: (game: string) => {
+    track("create_party_submit", { game });
+  },
 
-  joinPartyClick: (_game: string) => {},
+  joinPartyClick: (game: string) => {
+    track("join_party_click", { game });
+  },
 
-  filterSelect: (_game: string) => {},
+  filterSelect: (game: string) => {
+    track("filter_select", { game });
+  },
 
-  contactCopy: () => {},
+  contactCopy: () => {
+    track("contact_copy");
+  },
 
-  contactClose: () => {},
+  contactClose: () => {
+    track("contact_close");
+  },
 
-  feedbackClick: () => {},
+  feedbackClick: () => {
+    track("feedback_click");
+  },
 
   // Chat-related events:
-  chatOpened: () => {},
+  chatOpened: () => {
+    track("chat_opened");
+  },
 
-  chatMessageSent: () => {},
+  chatMessageSent: () => {
+    track("chat_message_sent");
+  },
 
-  chatMessageTyped: (_length: number) => {},
+  chatMessageTyped: (length: number) => {
+    track("chat_message_typed", { length });
+  },
 
-  chatMobile: () => {},
+  chatMobile: () => {
+    track("chat_mobile");
+  },
 
-  suggestGame: (_game: string) => {},
+  suggestGame: (game: string) => {
+    track("suggest_game", { game });
+  },
 
-  suggestGameClick: () => {},
+  suggestGameClick: () => {
+    track("suggest_game_click");
+  },
 
-  noJoinFeedback: (_reason: string) => {},
+  noJoinFeedback: (reason: string) => {
+    track("no_join_feedback", { reason });
+  },
 
-  noJoinSurveyShown: () => {},
+  noJoinSurveyShown: () => {
+    track("no_join_survey_shown");
+  },
 };  
