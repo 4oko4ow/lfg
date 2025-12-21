@@ -11,6 +11,7 @@ type Party struct {
 	CreatedAt time.Time       `json:"created_at"`
 	Contacts  []ContactMethod `json:"contacts,omitempty"`
 	Pinned    bool            `json:"pinned"`
+	UserID    string          `json:"user_id,omitempty"`
 }
 
 type ContactMethod struct {

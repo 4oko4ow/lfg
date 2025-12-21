@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"lfg/auth"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -14,6 +16,12 @@ var upgrader = websocket.Upgrader{
 }
 
 var clients = make(map[*websocket.Conn]bool)
+var sessionManager *auth.SessionManager
+
+// SetSessionManager sets the session manager for WebSocket connections
+func SetSessionManager(sm *auth.SessionManager) {
+	sessionManager = sm
+}
 
 // HandleConnections управляет новым WebSocket-соединением
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +62,14 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
                                 continue
                         }
 
+                        // Extract user_id from session if available
+                        var userID string
+                        if sessionManager != nil {
+                                if uid, err := sessionManager.Extract(r); err == nil {
+                                        userID = uid
+                                }
+                        }
+
                         p := &Party{
                                 ID:        generateID(),
                                 Game:      payload.Game,
@@ -62,6 +78,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
                                 Joined:    1,
                                 CreatedAt: time.Now(),
                                 Contacts:  payload.Contacts,
+                                UserID:    userID,
                         }
 
 			AddParty(p, true)

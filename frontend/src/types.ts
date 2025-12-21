@@ -23,6 +23,23 @@ export type Party = {
   created_at: string;
   contacts?: ContactMethod[];
   pinned?: boolean;
+  user_id?: string;
+};
+
+export type UserStats = {
+  parties_created: number;
+  parties_joined: number;
+  total_xp: number;
+  level: number;
+  current_streak: number;
+  longest_streak: number;
+  achievements: Achievement[];
+};
+
+export type Achievement = {
+  type: string;
+  name: string;
+  unlocked_at: string;
 };
 
 export type Message =

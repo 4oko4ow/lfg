@@ -51,8 +51,8 @@ func SavePartyToDatabase(p *Party) error {
 
 	// Try INSERT first, then UPDATE on conflict
 	query := `
-		INSERT INTO parties (id, game, goal, slots, joined, created_at, contacts, pinned)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO parties (id, game, goal, slots, joined, created_at, contacts, pinned, user_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		ON CONFLICT (id) DO UPDATE SET
 			game = EXCLUDED.game,
 			goal = EXCLUDED.goal,
@@ -60,7 +60,8 @@ func SavePartyToDatabase(p *Party) error {
 			joined = EXCLUDED.joined,
 			created_at = EXCLUDED.created_at,
 			contacts = EXCLUDED.contacts,
-			pinned = EXCLUDED.pinned
+			pinned = EXCLUDED.pinned,
+			user_id = EXCLUDED.user_id
 	`
 
 	_, err = db.Exec(query,
@@ -72,6 +73,7 @@ func SavePartyToDatabase(p *Party) error {
 		p.CreatedAt,
 		string(contactsJSON),
 		p.Pinned,
+		p.UserID,
 	)
 
 	if err != nil {
@@ -84,7 +86,7 @@ func SavePartyToDatabase(p *Party) error {
 }
 
 func LoadPartiesFromDatabase() []*Party {
-	query := `SELECT id, game, goal, slots, joined, created_at, contacts, pinned FROM parties ORDER BY created_at DESC`
+	query := `SELECT id, game, goal, slots, joined, created_at, contacts, pinned, user_id FROM parties ORDER BY created_at DESC`
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Printf("Error loading parties from database: %v", err)
@@ -98,6 +100,7 @@ func LoadPartiesFromDatabase() []*Party {
 		var contactsJSON sql.NullString
 		var pinned sql.NullBool
 		var createdAt time.Time
+		var userID sql.NullString
 
 		err := rows.Scan(
 			&p.ID,
@@ -108,6 +111,7 @@ func LoadPartiesFromDatabase() []*Party {
 			&createdAt,
 			&contactsJSON,
 			&pinned,
+			&userID,
 		)
 		if err != nil {
 			log.Printf("Error scanning party: %v", err)
@@ -116,6 +120,9 @@ func LoadPartiesFromDatabase() []*Party {
 
 		p.CreatedAt = createdAt
 		p.Pinned = pinned.Valid && pinned.Bool
+		if userID.Valid {
+			p.UserID = userID.String
+		}
 
 		// Parse contacts JSON if present
 		if contactsJSON.Valid && contactsJSON.String != "" {

@@ -150,6 +150,8 @@ func main() {
 	mux := http.NewServeMux()
 	handler.RegisterRoutes(mux)
 
+	// Set session manager for WebSocket
+	ws.SetSessionManager(sessionManager)
 	mux.HandleFunc("/ws", ws.HandleConnections)
 
 	// API endpoints
@@ -157,9 +159,16 @@ func main() {
 	if db != nil {
 		chatHandler := api.NewChatHandler(db)
 		gamesHandler := api.NewGamesHandler(db)
+		userStatsHandler := api.NewUserStatsHandler(db, sessionManager)
+		partiesHandler := api.NewPartiesHandler(db, sessionManager)
+		
 		mux.HandleFunc("/api/chat/messages", chatHandler.GetMessages)
 		mux.HandleFunc("/api/chat/messages/create", chatHandler.CreateMessage)
 		mux.HandleFunc("/api/games/suggest", gamesHandler.SuggestGame)
+		mux.HandleFunc("/api/user/stats", userStatsHandler.GetStats)
+		mux.HandleFunc("/api/user/parties", partiesHandler.GetUserParties)
+		mux.HandleFunc("/api/parties/delete", partiesHandler.DeleteParty)
+		mux.HandleFunc("/api/parties/update", partiesHandler.UpdateParty)
 	}
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

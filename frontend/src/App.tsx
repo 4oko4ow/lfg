@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import RedirectOnRoot from "./components/RedirectOnRoot";
 import LangSync from "./components/LangSync";
 import Header from "./components/Header";
+import LandingPage from "./pages/LandingPage";
 import PartyFeedPage from "./pages/PartyFeedPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
@@ -40,8 +41,9 @@ function App() {
       <Header currentLang={currentLang} />
       <Routes>
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/:lang" element={<LandingPage />} />
+        <Route path="/:lang/feed" element={<PartyFeedPage />} />
         <Route path="/:lang/profile" element={<ProfilePage />} />
-        <Route path="/:lang/*" element={<PartyFeedPage />} />
         <Route
           path="*"
           element={<Navigate to={`/${currentLang}`} replace />}

@@ -233,6 +233,83 @@
     "close": "Close",
     "saving": "Saving…"
   },
+  "landing": {
+    "hero": {
+      "title": "Find Your Gaming Squad",
+      "subtitle": "Connect with players, join parties, and level up your gaming experience. No registration required."
+    },
+    "cta": {
+      "browse": "Browse Parties",
+      "create": "Create Your First Party"
+    },
+    "stats": {
+      "online": "Online Now",
+      "parties": "Active Parties",
+      "growing": "Growing Fast"
+    },
+    "features": {
+      "title": "Why Choose FindParty?",
+      "fast": {
+        "title": "Lightning Fast",
+        "desc": "Find or create a party in seconds. No lengthy signups or complicated forms."
+      },
+      "gamified": {
+        "title": "Gamified Experience",
+        "desc": "Earn XP, unlock achievements, and climb the leaderboard as you play and create parties."
+      },
+      "community": {
+        "title": "Active Community",
+        "desc": "Join live chat, connect with players, and build your gaming network."
+      }
+    },
+    "cta_section": {
+      "title": "Ready to Find Your Squad?",
+      "subtitle": "Join thousands of players finding their perfect gaming partners.",
+      "button": "Get Started Now"
+    }
+  },
+  "profile": {
+    "link": "Profile",
+    "anonymous": "Player",
+    "title": "Your profile",
+    "description": "Connect messaging platforms and choose which ones to show in your ads.",
+    "steam_description": "Link your Steam account to share your profile.",
+    "discord_description": "Link Discord so players can reach you by username or profile.",
+    "telegram_description": "Connect Telegram to share your handle.",
+    "relink": "Reconnect",
+    "connect": "Connect",
+    "contact_label": "Contact for ads",
+    "save": "Save",
+    "link_required": "Connect the account first to set up the contact.",
+    "saved": "Saved",
+    "tabs": {
+      "stats": "Stats & Achievements",
+      "parties": "My Parties",
+      "contacts": "Contacts"
+    },
+    "stats": {
+      "created": "Created",
+      "joined": "Joined",
+      "xp": "Total XP",
+      "level": "Level",
+      "current_streak": "Current Streak",
+      "longest_streak": "Longest Streak",
+      "days": "days",
+      "no_stats": "No stats yet. Create your first party to get started!",
+      "create_first": "Create Your First Party"
+    },
+    "achievements": {
+      "title": "Achievements"
+    },
+    "parties": {
+      "title": "My Parties",
+      "empty": "You haven't created any parties yet.",
+      "create_first": "Create Your First Party",
+      "create_new": "Create New Party",
+      "delete_confirm": "Are you sure you want to delete this party?",
+      "deleted": "Party deleted"
+    }
+  },
   "feedback.label": "Something not working?",
   "games": {
     "abioticfactor": {
