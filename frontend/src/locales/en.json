@@ -455,6 +455,21 @@
     },
     "haloinfinite": {
       "name": "Halo Infinite"
+    },
+    "rvthereyet": {
+      "name": "RV There Yet?"
+    },
+    "cuphead": {
+      "name": "Cuphead"
+    },
+    "projectzomboid": {
+      "name": "Project Zomboid"
+    },
+    "brawlstars": {
+      "name": "Brawl Stars"
+    },
+    "mobilelegends": {
+      "name": "Mobile Legends"
     }
   }
 }

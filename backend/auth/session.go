@@ -205,18 +205,29 @@ func (s *SessionManager) Extract(r *http.Request) (string, error) {
 			log.Printf("[Session] Validated DB session for user %s", session.UserID)
 			return session.UserID, nil
 		}
-		// If DB lookup fails, try stateless as fallback (for migration period)
-		log.Printf("[Session] DB session lookup failed, trying stateless: %v", err)
+		// If DB lookup fails, check if cookie value looks like a UUID (DB session ID)
+		// UUIDs are 36 chars with dashes, or 32 hex chars. If it looks like a UUID,
+		// don't try stateless fallback - the session is invalid.
+		cookieValue := cookie.Value
+		isLikelyUUID := (len(cookieValue) == 36 && strings.Count(cookieValue, "-") == 4) ||
+			(len(cookieValue) == 32 && isHexString(cookieValue))
+		if isLikelyUUID {
+			log.Printf("[Session] DB session lookup failed for UUID-like value, session invalid: %v", err)
+			return "", fmt.Errorf("session not found: %w", err)
+		}
+		// If DB lookup fails but doesn't look like UUID, try stateless as fallback (for migration period)
+		log.Printf("[Session] DB session lookup failed, trying stateless fallback: %v", err)
 	}
 
 	// Fallback to stateless session validation
 	decoded, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		return "", err
+		log.Printf("[Session] Failed to decode cookie as base64 (not a stateless token): %v", err)
+		return "", fmt.Errorf("invalid session token: %w", err)
 	}
 	parts := strings.Split(string(decoded), "|")
 	if len(parts) != 4 {
-		return "", errors.New("invalid token")
+		return "", errors.New("invalid token format")
 	}
 	payload := strings.Join(parts[:3], "|")
 	if s.sign(payload) != parts[3] {
@@ -224,10 +235,21 @@ func (s *SessionManager) Extract(r *http.Request) (string, error) {
 	}
 	expiry, err := strconv.ParseInt(parts[1], 10, 64)
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid expiry time")
 	}
 	if time.Now().After(time.Unix(expiry, 0)) {
 		return "", errors.New("session expired")
 	}
+	log.Printf("[Session] Validated stateless session for user %s", parts[0])
 	return parts[0], nil
+}
+
+// isHexString checks if a string contains only hexadecimal characters
+func isHexString(s string) bool {
+	for _, c := range s {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+			return false
+		}
+	}
+	return true
 }

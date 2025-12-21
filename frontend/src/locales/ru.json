@@ -356,6 +356,11 @@
     "tf2": { "name": "Team Fortress 2" },
     "codmw3": { "name": "Call of Duty: Modern Warfare III" },
     "bf2042": { "name": "Battlefield 2042" },
-    "haloinfinite": { "name": "Halo Infinite" }
+    "haloinfinite": { "name": "Halo Infinite" },
+    "rvthereyet": { "name": "RV There Yet?" },
+    "cuphead": { "name": "Cuphead" },
+    "projectzomboid": { "name": "Project Zomboid" },
+    "brawlstars": { "name": "Brawl Stars" },
+    "mobilelegends": { "name": "Mobile Legends" }
   }
 }

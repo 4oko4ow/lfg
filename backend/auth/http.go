@@ -240,10 +240,22 @@ func (h *Handler) getCurrentProfile(r *http.Request) (*Profile, error) {
 	userID, err := h.sessions.Extract(r)
 	if err != nil {
 		log.Printf("[Auth] Failed to extract session: %v", err)
-		return nil, nil
+		return nil, nil // No session - return nil profile, no error (will result in 204)
 	}
 	log.Printf("[Auth] Extracted userID from session: %s", userID)
-	return h.store.GetProfile(userID)
+	profile, err := h.store.GetProfile(userID)
+	if err != nil {
+		log.Printf("[Auth] Error getting profile for user %s: %v", userID, err)
+		return nil, err // Database error - return error (will result in 500)
+	}
+	if profile == nil {
+		log.Printf("[Auth] WARNING: Session valid for user %s but profile not found - data inconsistency!", userID)
+		// Session is valid but user doesn't exist - this is a data inconsistency
+		// Return nil profile but no error (will result in 204)
+		// This can happen if user was deleted but session still exists
+		return nil, nil
+	}
+	return profile, nil
 }
 
 func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
@@ -272,6 +284,7 @@ func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
 			}
 			return providers
 		}())
+	w.WriteHeader(http.StatusOK)
 	writeJSON(w, profile)
 }
 
@@ -370,6 +383,7 @@ func (h *Handler) handlePreferred(w http.ResponseWriter, r *http.Request) {
 
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
+	// Note: If WriteHeader hasn't been called yet, writing will auto-set 200 OK
 	json.NewEncoder(w).Encode(v)
 }
 

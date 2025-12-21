@@ -49,7 +49,12 @@ export const GAME_SLUGS = [
   "tf2",
   "codmw3",
   "bf2042",
-  "haloinfinite"
+  "haloinfinite",
+  "rvthereyet",
+  "cuphead",
+  "projectzomboid",
+  "brawlstars",
+  "mobilelegends"
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
@@ -104,7 +109,12 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   tf2: "Team Fortress 2",
   codmw3: "Call of Duty: Modern Warfare III",
   bf2042: "Battlefield 2042",
-  haloinfinite: "Halo Infinite"
+  haloinfinite: "Halo Infinite",
+  rvthereyet: "RV There Yet?",
+  cuphead: "Cuphead",
+  projectzomboid: "Project Zomboid",
+  brawlstars: "Brawl Stars",
+  mobilelegends: "Mobile Legends"
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })
