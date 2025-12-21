@@ -7,76 +7,78 @@ RUN apk add --no-cache postgresql-client
 COPY migrations /migrations
 
 # Create a script to run migrations
-# Note: DATABASE_URL format: postgresql://user:password@host:port/dbname?sslmode=disable
-RUN echo '#!/bin/sh\n\
-set -e\n\
-if [ -z "$DATABASE_URL" ]; then\n\
-  echo "ERROR: DATABASE_URL is not set"\n\
-  exit 1\n\
-fi\n\
-\n\
-# Parse DATABASE_URL\n\
-# Format: postgresql://user:password@host:port/dbname?sslmode=disable\n\
-DB_URL="$DATABASE_URL"\n\
-\n\
-# Extract components (simple parsing)\n\
-DB_HOST=$(echo "$DB_URL" | sed -n "s|.*@\\([^:]*\\):.*|\\1|p")\n\
-DB_PORT=$(echo "$DB_URL" | sed -n "s|.*@[^:]*:\\([0-9]*\\)/.*|\\1|p")\n\
-DB_NAME=$(echo "$DB_URL" | sed -n "s|.*/\\([^?]*\\).*|\\1|p")\n\
-DB_USER=$(echo "$DB_URL" | sed -n "s|postgresql://\\([^:]*\\):.*|\\1|p")\n\
-DB_PASS=$(echo "$DB_URL" | sed -n "s|postgresql://[^:]*:\\([^@]*\\)@.*|\\1|p")\n\
-\n\
-# Set defaults\n\
-DB_HOST=${DB_HOST:-postgres}\n\
-DB_PORT=${DB_PORT:-5432}\n\
-DB_USER=${DB_USER:-postgres}\n\
-\n\
-echo "========================================="\n\
-echo "Running Database Migrations"\n\
-echo "========================================="\n\
-echo "Database: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"\n\
-echo ""\n\
-\n\
-# Wait for database to be ready (with timeout)\n\
-MAX_WAIT=60\n\
-WAIT_COUNT=0\n\
-echo "Waiting for database to be ready..."\n\
-until PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
-  if [ $WAIT_COUNT -ge $MAX_WAIT ]; then\n\
-    echo "ERROR: Database not ready after ${MAX_WAIT} seconds"\n\
-    exit 1\n\
-  fi\n\
-  echo "  Waiting... ($WAIT_COUNT/$MAX_WAIT seconds)"\n\
-  sleep 2\n\
-  WAIT_COUNT=$((WAIT_COUNT + 2))\n\
-done\n\
-echo "✅ Database is ready!"\n\
-echo ""\n\
-\n\
-# Run migrations in alphabetical order\n\
-MIGRATION_COUNT=0\n\
-for file in $(ls /migrations/*.sql 2>/dev/null | sort); do\n\
-  if [ -f "$file" ]; then\n\
-    MIGRATION_COUNT=$((MIGRATION_COUNT + 1))\n\
-    echo "[$MIGRATION_COUNT] Running $(basename $file)..."\n\
-    if PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$file"; then\n\
-      echo "  ✅ Completed $(basename $file)"\n\
-    else\n\
-      echo "  ❌ Failed to run $(basename $file)"\n\
-      exit 1\n\
-    fi\n\
-    echo ""\n\
-  fi\n\
-done\n\
-\n\
-if [ $MIGRATION_COUNT -eq 0 ]; then\n\
-  echo "⚠️  No migration files found in /migrations/"\n\
-else\n\
-  echo "========================================="\n\
-  echo "✅ All migrations completed successfully!"\n\
-  echo "   Total: $MIGRATION_COUNT migration(s)"\n\
-  echo "========================================="\n\
-fi\n\
-' > /run-migrations.sh && chmod +x /run-migrations.sh
+RUN cat > /run-migrations.sh << 'SCRIPT_END'
+#!/bin/sh
+set -e
+if [ -z "$DATABASE_URL" ]; then
+  echo "ERROR: DATABASE_URL is not set"
+  exit 1
+fi
+
+# Parse DATABASE_URL
+# Format: postgresql://user:password@host:port/dbname?sslmode=disable
+DB_URL="$DATABASE_URL"
+
+# Extract components (simple parsing)
+DB_HOST=$(echo "$DB_URL" | sed -n "s|.*@\\([^:]*\\):.*|\\1|p")
+DB_PORT=$(echo "$DB_URL" | sed -n "s|.*@[^:]*:\\([0-9]*\\)/.*|\\1|p")
+DB_NAME=$(echo "$DB_URL" | sed -n "s|.*/\\([^?]*\\).*|\\1|p")
+DB_USER=$(echo "$DB_URL" | sed -n "s|postgresql://\\([^:]*\\):.*|\\1|p")
+DB_PASS=$(echo "$DB_URL" | sed -n "s|postgresql://[^:]*:\\([^@]*\\)@.*|\\1|p")
+
+# Set defaults
+DB_HOST=${DB_HOST:-postgres}
+DB_PORT=${DB_PORT:-5432}
+DB_USER=${DB_USER:-postgres}
+
+echo "========================================="
+echo "Running Database Migrations"
+echo "========================================="
+echo "Database: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
+echo ""
+
+# Wait for database to be ready (with timeout)
+MAX_WAIT=60
+WAIT_COUNT=0
+echo "Waiting for database to be ready..."
+until PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do
+  if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+    echo "ERROR: Database not ready after ${MAX_WAIT} seconds"
+    exit 1
+  fi
+  echo "  Waiting... ($WAIT_COUNT/$MAX_WAIT seconds)"
+  sleep 2
+  WAIT_COUNT=$((WAIT_COUNT + 2))
+done
+echo "✅ Database is ready!"
+echo ""
+
+# Run migrations in alphabetical order
+MIGRATION_COUNT=0
+for file in $(ls /migrations/*.sql 2>/dev/null | sort); do
+  if [ -f "$file" ]; then
+    MIGRATION_COUNT=$((MIGRATION_COUNT + 1))
+    echo "[$MIGRATION_COUNT] Running $(basename $file)..."
+    if PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$file"; then
+      echo "  ✅ Completed $(basename $file)"
+    else
+      echo "  ❌ Failed to run $(basename $file)"
+      exit 1
+    fi
+    echo ""
+  fi
+done
+
+if [ $MIGRATION_COUNT -eq 0 ]; then
+  echo "⚠️  No migration files found in /migrations/"
+else
+  echo "========================================="
+  echo "✅ All migrations completed successfully!"
+  echo "   Total: $MIGRATION_COUNT migration(s)"
+  echo "========================================="
+fi
+SCRIPT_END
+
+RUN chmod +x /run-migrations.sh
 
 CMD ["/run-migrations.sh"]
