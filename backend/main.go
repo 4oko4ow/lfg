@@ -14,23 +14,34 @@ import (
 	"lfg/ws"
 )
 
-var allowedOrigins = []string{
-	"https://findparty.online",
-	"https://www.findparty.online",
-	"https://lfg.findparty.online", // backend domain
-	"http://localhost:5173", // for local development
-	"http://localhost:3000", // for local development
-	// при необходимости: превью Vercel
-	// "https://*.vercel.app", // для wildcard сделай проверку вручную ниже
+func getAllowedOrigins() []string {
+	// Get from environment variable first
+	if envOrigins := os.Getenv("ALLOWED_ORIGINS"); envOrigins != "" {
+		origins := strings.Split(envOrigins, ",")
+		// Trim whitespace
+		for i := range origins {
+			origins[i] = strings.TrimSpace(origins[i])
+		}
+		return origins
+	}
+	// Default fallback
+	return []string{
+		"https://findparty.online",
+		"https://www.findparty.online",
+		"https://lfg.findparty.online", // backend domain
+		"http://localhost:5173",        // for local development
+		"http://localhost:3000",        // for local development
+	}
 }
 
-func allowOrigin(o string) bool {
-	o = strings.ToLower(o)
+func allowOrigin(o string, allowedOrigins []string) bool {
+	o = strings.ToLower(strings.TrimSpace(o))
 	for _, a := range allowedOrigins {
+		a = strings.ToLower(strings.TrimSpace(a))
 		if a == o {
 			return true
 		}
-		// прим.: простая поддержка *.vercel.app
+		// Support wildcard patterns like *.vercel.app
 		if strings.HasPrefix(a, "https://*.") && strings.HasSuffix(o, strings.TrimPrefix(a, "https://*")) {
 			return true
 		}
@@ -38,28 +49,35 @@ func allowOrigin(o string) bool {
 	return false
 }
 
-func cors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin != "" && allowOrigin(origin) {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Vary", "Origin")
-			// Если используешь cookie/Authorization — держи обе строки:
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-			// опционально: сколько кэшировать preflight
-			w.Header().Set("Access-Control-Max-Age", "86400")
-		}
+func cors(allowedOrigins []string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			
+			// Handle preflight requests
+			if r.Method == http.MethodOptions {
+				if origin != "" && allowOrigin(origin, allowedOrigins) {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					w.Header().Set("Vary", "Origin")
+					w.Header().Set("Access-Control-Allow-Credentials", "true")
+					w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+					w.Header().Set("Access-Control-Max-Age", "86400")
+				}
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
 
-		// Preflight
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+			// Handle actual requests
+			if origin != "" && allowOrigin(origin, allowedOrigins) {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
+			}
 
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func main() {
@@ -141,6 +159,10 @@ func main() {
 	// 🧹 Включаем автоочистку старых пати
 	//go ws.StartPartyCleanupLoop()
 
+	// Get allowed origins and apply CORS middleware
+	allowedOrigins := getAllowedOrigins()
+	log.Printf("CORS allowed origins: %v", allowedOrigins)
+	
 	log.Println("Server started on :8080")
-	http.ListenAndServe(":8080", cors(mux))
+	http.ListenAndServe(":8080", cors(allowedOrigins)(mux))
 }
