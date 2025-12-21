@@ -18,8 +18,11 @@ This project is dockerized for deployment on a VPS with Traefik reverse proxy.
 
 ### Migrate
 - **Container**: `lfg-mvp-migrate`
-- Runs database migrations before the API starts
-- Only runs if PostgreSQL service is available
+- **Runs automatically** before the API starts
+- Works with both local PostgreSQL (via `--profile local-db`) and external databases
+- Waits for database to be ready (up to 60 seconds)
+- Runs all migrations in alphabetical order from `backend/migrations/`
+- API service waits for migrations to complete before starting
 
 ### API
 - **Container**: `lfg-mvp-api`

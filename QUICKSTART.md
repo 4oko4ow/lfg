@@ -39,23 +39,26 @@ If you're NOT using Traefik, you'll need to:
 
 ### Option A: With Local PostgreSQL (Recommended for first time)
 
-This will start PostgreSQL, run migrations, then start API and frontend:
+This will start PostgreSQL, run migrations automatically, then start API:
 
 ```bash
 docker-compose --profile local-db up -d --build
 ```
+
+Migrations will run automatically before the API starts!
 
 ### Option B: With External PostgreSQL
 
 If you have your own PostgreSQL database:
 
 1. Set `DATABASE_URL` in `.env` to point to your database
-2. Run migrations manually or skip if already done
-3. Start services:
+2. Start services (migrations will run automatically):
 
 ```bash
 docker-compose up -d --build
 ```
+
+**Note:** Migrations run automatically before the API starts. No manual steps needed!
 
 ## Step 4: Verify Services Are Running
 
