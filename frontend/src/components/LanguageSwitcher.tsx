@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
+import { analytics } from "../utils/analytics";
 
 function getPathWithoutLangPrefix(pathname: string) {
     return pathname.replace(/^\/(en|ru)(?=\/|$)/i, "");
@@ -19,6 +20,8 @@ export default function LanguageSwitcher() {
     const switchTo = useCallback(
         (newLang: "en" | "ru") => {
             if (newLang === current) return;
+
+            analytics.languageSwitch(current, newLang);
 
             // обновим i18n и <html lang>
             i18n.changeLanguage(newLang);

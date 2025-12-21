@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { connectWS, onMessage, socket } from "../ws/client";
+import { analytics } from "../utils/analytics";
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function LandingPage() {
   const hasReceivedDataRef = useRef(false);
 
   useEffect(() => {
+    analytics.landingPageView();
     connectWS();
 
     // Таймаут на случай, если данные не придут

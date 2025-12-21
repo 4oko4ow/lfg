@@ -11,7 +11,13 @@ import type { ContactMethodType, Party } from "../types";
 import { contactHandleToMethod } from "../utils/contactHelpers";
 import LoginModal from "../components/modals/LoginModal";
 
-export default function CreatePartyForm({ parties = [] }: { parties?: Party[] }) {
+export default function CreatePartyForm({ 
+    parties = [], 
+    onSuccess 
+}: { 
+    parties?: Party[];
+    onSuccess?: () => void;
+}) {
     const { t } = useTranslation();
     const { lang } = useParams();
     const tt = useCallback((key: string, opts?: { defaultValue?: string }) => t(key, opts), [t]);
@@ -186,12 +192,17 @@ export default function CreatePartyForm({ parties = [] }: { parties?: Party[] })
         setGoal("");
         setSelectedMethods(availableMethods);
         setPreferredMethod(availableMethods[0] ?? null);
+        
+        // Call onSuccess callback if provided (e.g., to close modal)
+        if (onSuccess) {
+            onSuccess();
+        }
     };
 
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-3 rounded-xl border border-zinc-700/60 bg-gradient-to-br from-zinc-800/60 via-zinc-800/40 to-zinc-900/60 p-4 sm:p-5 max-w-2xl mx-auto backdrop-blur-sm shadow-xl shadow-zinc-900/50"
+            className="space-y-3"
         >
             <div className="flex items-center gap-3 mb-1">
                 <div className="relative">

@@ -13,6 +13,7 @@ import type {
   ContactMethodType,
 } from "../types";
 import { openTelegramAuth } from "../utils/telegramAuth";
+import { analytics } from "../utils/analytics";
 
 export type SocialProvider = ContactMethodType;
 
@@ -342,6 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     (provider: SocialProvider) => {
+      analytics.loginAttempt(provider);
       if (provider === "telegram") {
         void handleTelegramAuth();
         return;
@@ -356,6 +358,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const linkProvider = useCallback(
     (provider: SocialProvider) => {
+      analytics.providerLink(provider);
       if (provider === "telegram") {
         void handleTelegramAuth();
         return;
@@ -369,6 +372,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    analytics.logout();
     await fetch(buildBackendUrl("/auth/logout"), {
       method: "POST",
       credentials: "include",

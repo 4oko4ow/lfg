@@ -1,5 +1,6 @@
 // src/ws/client.ts
 import type { ContactMethod, Message, OutgoingMessage } from "../types";
+import { analytics } from "../utils/analytics";
 
 export let socket: WebSocket | null = null; // <-- экспортируем
 
@@ -28,6 +29,7 @@ export function connectWS() {
 
   socket.onopen = () => {
     console.log("✅ WebSocket connected");
+    analytics.wsConnected();
   };
 
   socket.onmessage = (event) => {
@@ -41,10 +43,12 @@ export function connectWS() {
 
   socket.onerror = (error) => {
     console.error("❌ WebSocket error:", error);
+    analytics.wsError("connection_error");
   };
 
   socket.onclose = () => {
     console.warn("WebSocket closed, retrying in 2s");
+    analytics.wsDisconnected();
     setTimeout(connectWS, 2000);
   };
 }

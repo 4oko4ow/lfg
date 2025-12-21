@@ -13,13 +13,13 @@ import { connectWS, onMessage, socket } from "../ws/client";
 import PartyCard from "../components/PartyCard";
 import PartyCardSkeleton from "../components/PartyCardSkeleton";
 import type { ContactMethod, Message, Party } from "../types";
-import CreatePartyForm from "../forms/CreatePartyForm";
 import FeedbackButton from "../components/FeedbackButton";
 import { analytics } from "../utils/analytics";
 import ContactModal from "../components/ContactModal";
 import Chat from "../components/Chat";
 import ChatDrawer from "../components/ChatDrawer";
 import SuggestGameModal from "../components/modals/SuggestGameModal";
+import CreatePartyModal from "../components/modals/CreatePartyModal";
 import { NoJoinSurvey } from "../components/NoJoinSurvey";
 import { DynamicMeta } from "../components/DynamicMeta";
 import { useOnlineCount } from "../context/OnlineCountContext";
@@ -106,6 +106,7 @@ function PartyFeedPage() {
   const [contactPartyId, setContactPartyId] = useState<string>("");
   const [chatOpen, setChatOpen] = useState(false);
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
+  const [createPartyModalOpen, setCreatePartyModalOpen] = useState(false);
   const { onlineCount, setOnlineCount } = useOnlineCount();
   const [loading, setLoading] = useState(true);
   const [showSurvey, setShowSurvey] = useState(false);
@@ -147,6 +148,9 @@ function PartyFeedPage() {
           }
           break;
         case "new_party":
+          // Track party creation success
+          const newParty = msg.payload as Party;
+          analytics.partyCreated(newParty.game, newParty.slots);
           setParties((prev) => {
             const updated = [msg.payload, ...prev];
             // Update cache
@@ -191,6 +195,7 @@ function PartyFeedPage() {
       }
     });
     analytics.enableAutoPageviews();
+    analytics.feedPageView();
 
     return () => clearTimeout(fallbackTimeout);
   }, []);
@@ -286,6 +291,10 @@ function PartyFeedPage() {
 
   const handleContactClick = (party: Party) => {
     analytics.joinPartyClick(party.game);
+    analytics.contactModalOpened(party.game, party.id);
+    if (party.joined >= party.slots) {
+      analytics.partyFullClick(party.game);
+    }
     setJoinClicked(true);
     setContactPartyId(party.id);
     setContactModal(party.contacts ?? []);
@@ -297,19 +306,22 @@ function PartyFeedPage() {
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
         {/* Hero Section */}
         <section className="mb-8">
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-4">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
             {t("hero.title", "Найди команду для игры")}
           </h1>
             <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
             {t("hero.subtitle", "Вступай в готовые пати или создай своё объявление")}
           </p>
+            <button
+              onClick={() => setCreatePartyModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60 mt-2"
+            >
+              <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+              {t("hero.create_party", "Создать объявление")}
+            </button>
           </div>
         </section>
-
-        <div className="mb-8">
-          <CreatePartyForm parties={parties} />
-        </div>
 
         {/* Game Filter Section */}
         <div className="mb-8">
@@ -523,9 +535,13 @@ function PartyFeedPage() {
                 "Пока нет объявлений. Стань первым и создай своё!"
               )}
             </p>
-            <p className="text-sm text-zinc-500">
-              {t("filters.empty_hint", "Создай своё объявление выше 👆")}
-            </p>
+            <button
+              onClick={() => setCreatePartyModalOpen(true)}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
+            >
+              <Sparkles className="h-4 w-4" />
+              {t("hero.create_party", "Создать объявление")}
+            </button>
           </div>
         ) : (
           <div className="space-y-4 max-w-2xl mx-auto">
@@ -546,6 +562,12 @@ function PartyFeedPage() {
         <FeedbackButton />
         {suggestModalOpen && (
           <SuggestGameModal onClose={() => setSuggestModalOpen(false)} />
+        )}
+        {createPartyModalOpen && (
+          <CreatePartyModal 
+            onClose={() => setCreatePartyModalOpen(false)} 
+            parties={parties}
+          />
         )}
       </main>
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { analytics } from "../utils/analytics";
 
 const statusToMessageKey: Record<string, { key: string; type: "success" | "error" }> = {
   success: { key: "auth.success", type: "success" },
@@ -51,12 +52,15 @@ export default function AuthCallbackPage() {
 
             try {
               profileLoaded = await refreshProfile();
-              if (profileLoaded) {
-                console.log(`Profile loaded successfully on attempt ${attempt + 1}`);
-                break;
-              } else {
-                console.warn(`Profile not loaded yet (attempt ${attempt + 1}/${maxRetries})`);
-              }
+          if (profileLoaded) {
+            console.log(`Profile loaded successfully on attempt ${attempt + 1}`);
+            // Determine provider from redirect URL or status
+            const provider = redirect.includes("steam") ? "steam" : redirect.includes("discord") ? "discord" : redirect.includes("telegram") ? "telegram" : "unknown";
+            analytics.loginSuccess(provider);
+            break;
+          } else {
+            console.warn(`Profile not loaded yet (attempt ${attempt + 1}/${maxRetries})`);
+          }
             } catch (error) {
               console.warn(`Failed to refresh profile (attempt ${attempt + 1}/${maxRetries}):`, error);
             }
@@ -78,6 +82,7 @@ export default function AuthCallbackPage() {
           toast.success(t(messageMeta.key, "Вы успешно вошли"));
         }
       } else if (status === "discord_conflict") {
+        analytics.loginError("discord", "conflict");
         toast.error(
           t(
             messageMeta.key,
@@ -85,6 +90,7 @@ export default function AuthCallbackPage() {
           )
         );
       } else if (status === "steam_conflict") {
+        analytics.loginError("steam", "conflict");
         toast.error(
           t(
             messageMeta.key,
@@ -92,6 +98,7 @@ export default function AuthCallbackPage() {
           )
         );
       } else if (status === "telegram_conflict") {
+        analytics.loginError("telegram", "conflict");
         toast.error(
           t(
             messageMeta.key,
@@ -124,15 +131,20 @@ export default function AuthCallbackPage() {
 
           if (profileLoaded) {
             // Auth actually succeeded, show success
+            analytics.loginSuccess("telegram");
             toast.success(t("auth.success", "Вы успешно вошли"));
           } else {
+            analytics.loginError("telegram", "error");
             toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
           }
         } catch (error) {
           console.error("Failed to refresh profile on telegram_error:", error);
+          analytics.loginError("telegram", "error");
           toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
         }
       } else {
+        const provider = status.includes("discord") ? "discord" : status.includes("steam") ? "steam" : status.includes("telegram") ? "telegram" : "unknown";
+        analytics.loginError(provider, status);
         toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
       }
       navigate(redirect, { replace: true });
