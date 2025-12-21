@@ -98,6 +98,18 @@ services:
       - "traefik.http.routers.lfg-api-redirect.entrypoints=web"
       - "traefik.http.routers.lfg-api-redirect.middlewares=lfg-redirect-https"
 
+      # === HTTPS Auth endpoints ===
+      - "traefik.http.routers.lfg-auth.rule=Host(`lfg.findparty.online`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.lfg-auth.entrypoints=websecure"
+      - "traefik.http.routers.lfg-auth.tls.certresolver=le"
+      - "traefik.http.routers.lfg-auth.service=lfg-auth"
+      - "traefik.http.services.lfg-auth.loadbalancer.server.port=8080"
+
+      # === HTTP -> HTTPS редирект для /auth ===
+      - "traefik.http.routers.lfg-auth-redirect.rule=Host(`lfg.findparty.online`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.lfg-auth-redirect.entrypoints=web"
+      - "traefik.http.routers.lfg-auth-redirect.middlewares=lfg-redirect-https"
+
       # === WebSocket endpoint ===
       - "traefik.http.routers.lfg-ws.rule=Host(`lfg.findparty.online`) && Path(`/ws`)"
       - "traefik.http.routers.lfg-ws.entrypoints=websecure"

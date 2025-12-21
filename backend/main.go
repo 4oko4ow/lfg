@@ -56,23 +56,34 @@ func cors(allowedOrigins []string) func(http.Handler) http.Handler {
 			
 			// Handle preflight requests
 			if r.Method == http.MethodOptions {
-				if origin != "" && allowOrigin(origin, allowedOrigins) {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					w.Header().Set("Vary", "Origin")
-					w.Header().Set("Access-Control-Allow-Credentials", "true")
-					w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-					w.Header().Set("Access-Control-Max-Age", "86400")
+				if origin != "" {
+					if allowOrigin(origin, allowedOrigins) {
+						w.Header().Set("Access-Control-Allow-Origin", origin)
+						w.Header().Set("Vary", "Origin")
+						w.Header().Set("Access-Control-Allow-Credentials", "true")
+						w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+						w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+						w.Header().Set("Access-Control-Max-Age", "86400")
+						log.Printf("[CORS] Preflight allowed for origin: %s", origin)
+					} else {
+						log.Printf("[CORS] Preflight rejected for origin: %s (not in allowed list)", origin)
+					}
+				} else {
+					log.Printf("[CORS] Preflight request with no Origin header")
 				}
 				w.WriteHeader(http.StatusNoContent)
 				return
 			}
 
 			// Handle actual requests
-			if origin != "" && allowOrigin(origin, allowedOrigins) {
-				w.Header().Set("Access-Control-Allow-Origin", origin)
-				w.Header().Set("Vary", "Origin")
-				w.Header().Set("Access-Control-Allow-Credentials", "true")
+			if origin != "" {
+				if allowOrigin(origin, allowedOrigins) {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					w.Header().Set("Vary", "Origin")
+					w.Header().Set("Access-Control-Allow-Credentials", "true")
+				} else {
+					log.Printf("[CORS] Request rejected for origin: %s (not in allowed list)", origin)
+				}
 			}
 
 			next.ServeHTTP(w, r)
