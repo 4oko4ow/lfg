@@ -36,43 +36,24 @@ This project is dockerized for deployment on a VPS with Traefik reverse proxy.
 
 ## Environment Variables
 
-Create a `.env` file in the project root with the following variables:
+1. Copy `.env.example` to `.env` in the project root:
+   ```bash
+   cp .env.example .env
+   ```
 
-```bash
-# Database (required)
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_secure_password
-POSTGRES_DB=lfg_mvp
-POSTGRES_PORT=5432
-DATABASE_URL=postgresql://postgres:your_secure_password@postgres:5432/lfg_mvp?sslmode=disable
+2. Fill in all required variables (marked with ⚠️ in `.env.example`)
 
-# Frontend Backend URL (required for build)
-VITE_BACKEND_URL=https://findparty.online
+3. For detailed documentation, see:
+   - **[ENV.md](./ENV.md)** - Complete environment variable reference
+   - **[backend/README.md](./backend/README.md)** - Backend-specific configuration
 
-# Auth Configuration
-AUTH_JWT_SECRET=your_long_random_secret
-AUTH_DB_PATH=/data/auth.json
-AUTH_COOKIE_NAME=lfg_session
-AUTH_COOKIE_DOMAIN=.findparty.online
-AUTH_COOKIE_SECURE=true
-AUTH_SESSION_TTL_DAYS=365
-
-# OAuth
-FRONTEND_URL=https://findparty.online
-BACKEND_URL=https://findparty.online
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-STEAM_WEB_API_KEY=your_steam_api_key
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_BOT_ID=your_telegram_bot_id
-
-# CORS
-ALLOWED_ORIGINS=https://findparty.online,https://www.findparty.online
-
-# Server
-PORT=8080
-GIN_MODE=release
-```
+**Quick Start - Required Variables:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `VITE_BACKEND_URL` - Backend URL for frontend build
+- `AUTH_JWT_SECRET` - Secret key for sessions (generate with `openssl rand -hex 32`)
+- `FRONTEND_URL` - Frontend URL for OAuth redirects
+- `BACKEND_URL` - Backend URL for OAuth callbacks
+- OAuth credentials (Discord, Steam, Telegram)
 
 ## Usage
 
