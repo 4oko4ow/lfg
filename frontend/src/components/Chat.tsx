@@ -144,21 +144,30 @@ const Chat = ({
       }
 
       const data = await response.json();
-      const ordered = (data || []).reverse();
+      // Backend returns messages in chronological order (oldest -> newest) after reverse
+      // Sort to ensure correct order
+      const serverMessages = (data || []).sort((a: any, b: any) => {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
 
       setMessages((prev) => {
-        // Only update if we have new messages or different message count
-        // This prevents unnecessary re-renders
-        const withoutOptimistic = prev.filter((m) => !m.optimistic);
-        const prevIds = new Set(withoutOptimistic.map((m) => m.id));
-        const newMessages = ordered.filter((m: any) => !prevIds.has(m.id));
+        // Keep optimistic messages that haven't been confirmed by server yet
+        const optimistic = prev.filter((m) => {
+          if (!m.optimistic) return false;
+          // Check if this optimistic message was already confirmed by server
+          const confirmed = serverMessages.some((sm: any) => 
+            sm.client_msg_id === m.client_msg_id || sm.id === m.id
+          );
+          return !confirmed;
+        });
         
-        // If no new messages and count matches, don't update
-        if (newMessages.length === 0 && withoutOptimistic.length === ordered.length) {
-          return prev;
-        }
+        // Combine server messages with pending optimistic messages
+        // Sort all by timestamp to maintain chronological order
+        const allMessages = [...serverMessages, ...optimistic].sort((a: any, b: any) => {
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        });
         
-        return [...withoutOptimistic, ...ordered];
+        return allMessages;
       });
     } catch (error) {
       console.error("Chat load error:", error);
