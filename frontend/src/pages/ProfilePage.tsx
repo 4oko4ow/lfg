@@ -13,14 +13,12 @@ import {
   TrendingUp,
   Users,
   Gamepad2,
-  Edit,
   Trash2,
   Flame,
   Star,
   Award,
 } from "lucide-react";
 import PartyCard from "../components/PartyCard";
-import CreatePartyForm from "../forms/CreatePartyForm";
 
 const PROVIDERS: {
   id: SocialProvider;
@@ -64,7 +62,6 @@ export default function ProfilePage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [userParties, setUserParties] = useState<Party[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [editingParty, setEditingParty] = useState<Party | null>(null);
   const [activeTab, setActiveTab] = useState<"contacts" | "parties" | "stats">("stats");
 
   useEffect(() => {
@@ -201,8 +198,8 @@ export default function ProfilePage() {
         <button
           onClick={() => setActiveTab("stats")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "stats"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-zinc-400 hover:text-zinc-200"
+            ? "border-b-2 border-blue-500 text-blue-400"
+            : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
           {t("profile.tabs.stats", "Stats & Achievements")}
@@ -210,8 +207,8 @@ export default function ProfilePage() {
         <button
           onClick={() => setActiveTab("parties")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "parties"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-zinc-400 hover:text-zinc-200"
+            ? "border-b-2 border-blue-500 text-blue-400"
+            : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
           {t("profile.tabs.parties", "My Parties")} ({userParties.length})
@@ -219,8 +216,8 @@ export default function ProfilePage() {
         <button
           onClick={() => setActiveTab("contacts")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "contacts"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-zinc-400 hover:text-zinc-200"
+            ? "border-b-2 border-blue-500 text-blue-400"
+            : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
           {t("profile.tabs.contacts", "Contacts")}
