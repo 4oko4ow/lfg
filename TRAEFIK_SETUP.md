@@ -171,7 +171,44 @@ openssl s_client -connect lfg.findparty.online:443 -servername lfg.findparty.onl
 # Should show valid certificate from "Let's Encrypt"
 ```
 
-## Quick Fix for Now
+## Why You're Getting ERR_CERT_AUTHORITY_INVALID
+
+This error is **completely normal** when you've just added a domain to DNS! Here's why:
+
+### Timeline:
+1. **DNS Propagation** (5 minutes to 48 hours, usually 5-30 minutes)
+   - Your DNS changes need to propagate globally
+   - Check with: `dig lfg.findparty.online` (should show your VPS IP)
+   - Until DNS propagates, Let's Encrypt can't verify domain ownership
+
+2. **Let's Encrypt Certificate Issuance** (1-5 minutes after DNS is ready)
+   - Traefik automatically requests certificate
+   - Let's Encrypt verifies domain via HTTP challenge (needs port 80)
+   - Certificate gets issued and stored
+
+3. **Total Wait Time**: Usually 10-30 minutes, sometimes up to 48 hours
+
+### What to Check:
+
+```bash
+# 1. Check DNS propagation
+dig lfg.findparty.online
+# Should show your VPS IP address
+
+# 2. Check Traefik logs for certificate status
+docker logs traefik | grep -i "certificate\|acme\|lfg.findparty.online"
+
+# Look for:
+# - "Obtaining certificate" = in progress
+# - "Certificate obtained" = success! ✅
+# - "Unable to obtain certificate" = error (check DNS/ports)
+
+# 3. Check if port 80 is accessible
+curl -I http://lfg.findparty.online
+# Should return HTTP response (not connection refused)
+```
+
+### Quick Fix for Now
 
 If you need to test immediately and can't wait for Let's Encrypt:
 
@@ -184,5 +221,5 @@ If you need to test immediately and can't wait for Let's Encrypt:
 2. **Or wait for certificate** (recommended):
    - Check Traefik logs: `docker logs traefik -f`
    - Look for "Certificate obtained" message
-   - Usually takes 1-5 minutes after first request
+   - Usually takes 1-5 minutes after DNS propagates
 

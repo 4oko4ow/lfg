@@ -10,8 +10,8 @@ RUN go build -v -o /run-app .
 
 FROM debian:bookworm
 
-# ✅ Установим сертификаты
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# ✅ Установим сертификаты и wget для healthcheck
+RUN apt-get update && apt-get install -y ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /run-app /usr/local/bin/
 
