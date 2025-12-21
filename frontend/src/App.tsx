@@ -45,6 +45,7 @@ function App() {
         <Route path="/:lang/profile" element={<ProfilePage />} />
         <Route path="/:lang" element={<LandingPage />} />
         <Route
+        
           path="*"
           element={<Navigate to={`/${currentLang}`} replace />}
         />
