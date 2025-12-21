@@ -40,16 +40,16 @@ func NewSessionStore() (*SessionStore, error) {
 
 	store := &SessionStore{db: db}
 
-	// Test connection
+	// Test connection - table must exist for database-backed sessions
 	var count int
 	err = db.QueryRow("SELECT COUNT(*) FROM auth_sessions").Scan(&count)
 	if err != nil {
 		log.Printf("[Session] ⚠️  Warning: Could not access auth_sessions table: %v", err)
 		log.Printf("[Session] ⚠️  Make sure the table exists. Run the migration: migrations/create_sessions_table.sql")
-		// Don't fail completely - table might be created later
-	} else {
-		log.Println("[Session] ✅ Successfully connected to auth_sessions table")
+		// Return error so system falls back to stateless sessions
+		return nil, fmt.Errorf("auth_sessions table not accessible: %w", err)
 	}
+	log.Println("[Session] ✅ Successfully connected to auth_sessions table")
 
 	// Cleanup expired sessions on startup
 	go store.cleanupExpiredSessions()
