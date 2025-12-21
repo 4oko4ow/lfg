@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
@@ -20,17 +20,32 @@ export default function LandingPage() {
   const { profile } = useAuth();
   const { onlineCount, setOnlineCount } = useOnlineCount();
   const [partiesCount, setPartiesCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const hasReceivedDataRef = useRef(false);
 
   useEffect(() => {
     connectWS();
+
+    // Таймаут на случай, если данные не придут
+    const timeoutId = setTimeout(() => {
+      if (!hasReceivedDataRef.current) {
+        setIsLoading(false);
+      }
+    }, 5000);
 
     onMessage((msg) => {
       switch (msg.type) {
         case "initial_state":
           setPartiesCount((msg.payload as any[]).length);
+          hasReceivedDataRef.current = true;
+          setIsLoading(false);
           break;
         case "online_count":
           setOnlineCount(msg.payload as number);
+          if (!hasReceivedDataRef.current) {
+            hasReceivedDataRef.current = true;
+            setIsLoading(false);
+          }
           break;
         case "new_party":
           setPartiesCount((prev) => prev + 1);
@@ -42,11 +57,12 @@ export default function LandingPage() {
     });
 
     return () => {
+      clearTimeout(timeoutId);
       if (socket) {
         socket.close();
       }
     };
-  }, []);
+  }, [setOnlineCount]);
 
   const currentLang = window.location.pathname.match(/^\/(en|ru)(\/|$)/i)?.[1]?.toLowerCase() || "en";
   const feedPath = `/${currentLang}/feed`;
@@ -96,7 +112,11 @@ export default function LandingPage() {
                   {t("landing.stats.online", "Online Now")}
                 </span>
               </div>
-              <p className="text-3xl font-bold">{onlineCount}</p>
+              {isLoading ? (
+                <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
+              ) : (
+                <p className="text-3xl font-bold">{onlineCount}</p>
+              )}
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
               <div className="mb-2 flex items-center gap-2 text-purple-400">
@@ -105,7 +125,11 @@ export default function LandingPage() {
                   {t("landing.stats.parties", "Active Parties")}
                 </span>
               </div>
-              <p className="text-3xl font-bold">{partiesCount}</p>
+              {isLoading ? (
+                <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
+              ) : (
+                <p className="text-3xl font-bold">{partiesCount}</p>
+              )}
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
               <div className="mb-2 flex items-center gap-2 text-pink-400">

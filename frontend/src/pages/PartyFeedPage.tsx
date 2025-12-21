@@ -365,7 +365,15 @@ function PartyFeedPage() {
                   )}
                   <span className="relative flex items-center gap-1.5">
                     {game.name}
-                    {count > 0 && (
+                    {loading ? (
+                      <span className={`px-1.5 py-0.5 rounded-md ${
+                        isSelected
+                          ? "bg-white/20"
+                          : "bg-zinc-700/60"
+                      }`}>
+                        <div className="h-3 w-4 animate-pulse rounded bg-zinc-600/50"></div>
+                      </span>
+                    ) : count > 0 ? (
                       <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
                         isSelected
                           ? "bg-white/20 text-white"
@@ -373,7 +381,7 @@ function PartyFeedPage() {
                       }`}>
                         {count}
                       </span>
-                    )}
+                    ) : null}
                   </span>
                 </button>
               );

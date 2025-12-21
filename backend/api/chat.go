@@ -52,10 +52,11 @@ func (h *ChatHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var msg ChatMessage
 		var clientMsgID sql.NullString
+		var userDisplayName sql.NullString
 		err := rows.Scan(
 			&msg.ID,
 			&msg.UserID,
-			&msg.UserDisplayName,
+			&userDisplayName,
 			&msg.Message,
 			&clientMsgID,
 			&msg.CreatedAt,
@@ -63,6 +64,9 @@ func (h *ChatHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error scanning message: %v", err)
 			continue
+		}
+		if userDisplayName.Valid {
+			msg.UserDisplayName = userDisplayName.String
 		}
 		if clientMsgID.Valid {
 			msg.ClientMsgID = clientMsgID.String
@@ -106,6 +110,7 @@ func (h *ChatHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 
 	var msg ChatMessage
 	var clientMsgID sql.NullString
+	var userDisplayName sql.NullString
 	err = h.db.QueryRow(`
 		SELECT id, user_id, user_display_name, message, client_msg_id, created_at
 		FROM chat_messages
@@ -113,11 +118,14 @@ func (h *ChatHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	`, id).Scan(
 		&msg.ID,
 		&msg.UserID,
-		&msg.UserDisplayName,
+		&userDisplayName,
 		&msg.Message,
 		&clientMsgID,
 		&msg.CreatedAt,
 	)
+	if userDisplayName.Valid {
+		msg.UserDisplayName = userDisplayName.String
+	}
 	if clientMsgID.Valid {
 		msg.ClientMsgID = clientMsgID.String
 	}
