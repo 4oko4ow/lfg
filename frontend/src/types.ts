@@ -21,6 +21,7 @@ export type Party = {
   slots: number;
   joined: number;
   created_at: string;
+  expires_at?: string;
   contacts?: ContactMethod[];
   pinned?: boolean;
   user_id?: string;
@@ -57,6 +58,7 @@ export type OutgoingMessage =
         game: string;
         goal: string;
         slots: number;
+        expires_at?: string;
         contacts?: ContactMethod[];
       };
     }

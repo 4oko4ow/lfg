@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n.ts'
 import { AuthProvider } from './context/AuthContext.tsx'
+import { OnlineCountProvider } from './context/OnlineCountContext.tsx'
 
 
 
@@ -16,9 +17,11 @@ createRoot(document.getElementById('root')!).render(
 
 
       <AuthProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <OnlineCountProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </OnlineCountProvider>
       </AuthProvider>
     </I18nextProvider>
     <Toaster position="top-right" />

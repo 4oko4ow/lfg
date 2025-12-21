@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+import { MessageCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./modals/LoginModal";
 
@@ -46,17 +47,20 @@ const Chat = ({
   useEffect(() => {
     fetchMessages();
 
-    // Poll for new messages every 2 seconds
-    const pollInterval = setInterval(() => {
-      fetchMessages();
-    }, 2000);
-
     if (isMobile) analytics.chatMobile();
+
+    // Poll for new messages every 10 seconds (reduced from 2s to prevent constant reloading)
+    // Only poll when chat is visible and not collapsed
+    const pollInterval = setInterval(() => {
+      if (!isCollapsed) {
+        fetchMessages();
+      }
+    }, 10000);
 
     return () => {
       clearInterval(pollInterval);
     };
-  }, []);
+  }, [isCollapsed]);
 
   // Draggable functionality for desktop
   useEffect(() => {
@@ -143,7 +147,17 @@ const Chat = ({
       const ordered = (data || []).reverse();
 
       setMessages((prev) => {
+        // Only update if we have new messages or different message count
+        // This prevents unnecessary re-renders
         const withoutOptimistic = prev.filter((m) => !m.optimistic);
+        const prevIds = new Set(withoutOptimistic.map((m) => m.id));
+        const newMessages = ordered.filter((m: any) => !prevIds.has(m.id));
+        
+        // If no new messages and count matches, don't update
+        if (newMessages.length === 0 && withoutOptimistic.length === ordered.length) {
+          return prev;
+        }
+        
         return [...withoutOptimistic, ...ordered];
       });
     } catch (error) {
@@ -193,8 +207,10 @@ const Chat = ({
       } else {
         analytics.chatMessageSent();
         analytics.chatMessageTyped(trimmed.length);
-        // Refresh messages to get the server-generated ID
-        fetchMessages();
+        // Refresh messages after a short delay to get the server-generated ID
+        setTimeout(() => {
+          fetchMessages();
+        }, 500);
       }
     } catch (error) {
       console.error("Chat send error:", error);
@@ -219,10 +235,10 @@ const Chat = ({
       ref={chatRef}
       className={
         isMobile
-          ? "fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden"
+          ? "fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 overflow-hidden"
           : isCollapsed
-          ? `fixed w-80 bg-zinc-900 border border-zinc-700/50 rounded-lg flex flex-col shadow-lg overflow-hidden z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
-          : `fixed w-80 h-96 bg-zinc-900 border border-zinc-700/50 rounded-lg flex flex-col shadow-lg overflow-hidden z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
+          ? `fixed w-72 sm:w-80 bg-gradient-to-br from-zinc-900/95 to-zinc-950/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
+          : `fixed w-72 sm:w-80 h-80 sm:h-96 bg-gradient-to-br from-zinc-900/95 to-zinc-950/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
       }
       style={
         !isMobile && position.x !== 0 && position.y !== 0
@@ -234,11 +250,14 @@ const Chat = ({
     >
       <div 
         data-drag-handle
-        className={`bg-zinc-800 p-3 text-sm font-semibold border-b border-zinc-700 flex items-center justify-between ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        className={`bg-gradient-to-r from-zinc-800/90 to-zinc-900/90 p-3 text-sm font-semibold border-b border-zinc-700/60 flex items-center justify-between backdrop-blur-sm ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
       >
-        <div className="flex items-center gap-2">
-          {t("chat.title", "Chat")}
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <span className="text-white font-bold">{t("chat.title", "Chat")}</span>
+          <div className="relative">
+            <div className="absolute inset-0 bg-green-500/30 blur-md rounded-full animate-pulse"></div>
+            <span className="relative inline-flex h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green-500 border border-green-400/50" />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {!isMobile && (
@@ -275,42 +294,46 @@ const Chat = ({
 
       {!isCollapsed && (
         <>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm bg-gradient-to-b from-zinc-950/50 to-transparent">
             {messages.length === 0 ? (
-              <div className="text-zinc-500 text-center py-6">
-                {t("chat.empty", "No messages yet")}
+              <div className="text-zinc-500 text-center py-6 sm:py-8">
+                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800/50 mb-3 border border-zinc-700/50">
+                  <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 text-zinc-600" />
+                </div>
+                <p className="text-xs sm:text-sm font-medium">{t("chat.empty", "No messages yet")}</p>
+                <p className="text-[10px] sm:text-xs text-zinc-600 mt-1">Be the first to say something!</p>
               </div>
             ) : (
               messages.map((msg) => (
                 <div
-                  key={msg.id}
-                  className={`text-sm pb-2 ${msg.optimistic ? "opacity-70 italic" : ""}`}
+                  key={msg.id || msg.client_msg_id}
+                  className={`group rounded-lg p-2.5 sm:p-3 transition-all duration-200 ${msg.optimistic ? "opacity-70 italic bg-zinc-800/20" : "bg-zinc-800/30 hover:bg-zinc-800/40 border border-zinc-700/30"}`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-blue-400 font-medium text-xs">
+                  <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
+                    <span className="text-blue-400 font-semibold text-[10px] sm:text-xs bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent truncate">
                       {displayName(msg)}
                     </span>
-                    <span className="text-zinc-500 text-[10px] whitespace-nowrap">
+                    <span className="text-zinc-500 text-[9px] sm:text-[10px] whitespace-nowrap font-medium flex-shrink-0">
                       {timeFmt.format(new Date(msg.created_at))}
                     </span>
                   </div>
-                  <div className="text-zinc-200 break-words text-xs">{msg.message}</div>
+                  <div className="text-zinc-200 break-words text-xs sm:text-sm leading-relaxed">{msg.message}</div>
                 </div>
               ))
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-3 border-t border-zinc-700/50 bg-zinc-950">
+          <div className="p-4 border-t border-zinc-700/60 bg-gradient-to-b from-zinc-950 to-zinc-900/95 backdrop-blur-sm">
             {!profile ? (
-              <div className="text-center py-2">
-                <p className="text-xs text-zinc-400 mb-2">
+              <div className="text-center py-2 sm:py-3">
+                <p className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3 font-medium">
                   {t("chat.login_required", "Sign in to chat")}
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowLoginModal(true)}
-                  className="text-xs text-blue-400 hover:text-blue-300 underline"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
                 >
                   {t("auth.sign_in", "Sign in")}
                 </button>
@@ -320,7 +343,7 @@ const Chat = ({
               </div>
             ) : (
               <input
-                className="w-full text-sm p-2 bg-zinc-800 border border-zinc-700/50 text-white rounded-lg transition-colors hover:border-zinc-600"
+                className="w-full text-sm p-3 bg-zinc-800/60 border border-zinc-700/50 text-white rounded-lg transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-800/80 placeholder:text-zinc-500"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}

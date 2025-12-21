@@ -77,6 +77,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
                                 Slots:     payload.Slots,
                                 Joined:    1,
                                 CreatedAt: time.Now(),
+                                ExpiresAt: payload.ExpiresAt,
                                 Contacts:  payload.Contacts,
                                 UserID:    userID,
                         }

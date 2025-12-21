@@ -29,8 +29,13 @@ func generateID() string {
 func GetParties() []*Party {
 	partyLock.Lock()
 	defer partyLock.Unlock()
+	now := time.Now()
 	list := make([]*Party, 0, len(parties))
 	for _, p := range parties {
+		// Filter out expired parties
+		if p.ExpiresAt != nil && now.After(*p.ExpiresAt) {
+			continue
+		}
 		list = append(list, p)
 	}
 	return list
@@ -92,11 +97,22 @@ func StartPartyCleanupLoop() {
 	for range ticker.C {
 		now := time.Now()
 		partyLock.Lock()
+		var expiredIDs []string
 		for id, p := range parties {
-			if now.Sub(p.CreatedAt) > 5*time.Hour {
-				delete(parties, id)
-				Broadcast(Message{Type: "party_remove", Payload: map[string]string{"id": id}})
+			// Check if party has expired
+			if p.ExpiresAt != nil && now.After(*p.ExpiresAt) {
+				expiredIDs = append(expiredIDs, id)
+				continue
 			}
+			// Old cleanup logic (5 hours)
+			if now.Sub(p.CreatedAt) > 5*time.Hour {
+				expiredIDs = append(expiredIDs, id)
+			}
+		}
+		// Remove expired parties
+		for _, id := range expiredIDs {
+			delete(parties, id)
+			Broadcast(Message{Type: "party_remove", Payload: map[string]string{"id": id}})
 		}
 		partyLock.Unlock()
 	}

@@ -57,6 +57,7 @@ export function sendCreateParty(payload: {
   game: string;
   goal: string;
   slots: number;
+  expires_at?: string;
   contacts?: ContactMethod[];
 }) {
   if (!socket) {

@@ -9,6 +9,7 @@ type Party struct {
 	Slots     int             `json:"slots"`
 	Joined    int             `json:"joined"`
 	CreatedAt time.Time       `json:"created_at"`
+	ExpiresAt *time.Time      `json:"expires_at,omitempty"`
 	Contacts  []ContactMethod `json:"contacts,omitempty"`
 	Pinned    bool            `json:"pinned"`
 	UserID    string          `json:"user_id,omitempty"`
@@ -27,10 +28,11 @@ type Message struct {
 }
 
 type CreatePartyPayload struct {
-	Game     string          `json:"game"`
-	Goal     string          `json:"goal"`
-	Slots    int             `json:"slots"`
-	Contacts []ContactMethod `json:"contacts,omitempty"`
+	Game      string          `json:"game"`
+	Goal      string          `json:"goal"`
+	Slots     int             `json:"slots"`
+	ExpiresAt *time.Time      `json:"expires_at,omitempty"`
+	Contacts  []ContactMethod `json:"contacts,omitempty"`
 }
 
 type JoinPartyPayload struct {

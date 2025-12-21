@@ -6,6 +6,7 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
+import { Timer } from "lucide-react";
 import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getGameName } from "../constants/games";
@@ -73,21 +74,21 @@ export default function PartyCard({
   const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
     return (
-      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-zinc-300">
         {contacts.map((contact) => {
           const config = CONTACT_ICONS[contact.type] ?? {
-            icon: <MessageCircle className="h-4 w-4" />,
+            icon: <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />,
             label: contact.type,
           };
           const content = (
             <>
               {config.icon}
-              <span className="font-medium text-zinc-200">{config.label}</span>
-              <span className="text-zinc-400">{contact.handle}</span>
+              <span className="font-medium text-zinc-200 hidden sm:inline">{config.label}</span>
+              <span className="text-zinc-400 truncate max-w-[100px] sm:max-w-none">{contact.handle}</span>
               {contact.preferred && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-0.5 text-[10px] font-semibold uppercase text-blue-200">
-                  <StarIcon className="h-3 w-3" />
-                  {t("party.preferred", "Основной")}
+                <span className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full bg-blue-500/20 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase text-blue-200">
+                  <StarIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  <span className="hidden sm:inline">{t("party.preferred", "Основной")}</span>
                 </span>
               )}
             </>
@@ -99,11 +100,11 @@ export default function PartyCard({
               type="button"
               onClick={onContactClick}
               disabled={isFull}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${isFull
+              className={`inline-flex items-center gap-1 sm:gap-2 rounded-full border-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${isFull
                   ? "border-zinc-700/40 bg-zinc-800/30 opacity-50 cursor-not-allowed"
                   : contact.preferred
-                    ? "border-blue-500/40 bg-blue-500/10 hover:border-blue-500/60 hover:bg-blue-500/20 cursor-pointer"
-                    : "border-zinc-700/40 bg-zinc-800/30 hover:border-zinc-600/60 hover:bg-zinc-800/50 cursor-pointer"
+                    ? "border-blue-500/50 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105 active:scale-95 cursor-pointer"
+                    : "border-zinc-700/50 bg-zinc-800/40 hover:border-zinc-600/70 hover:bg-zinc-800/60 hover:shadow-md hover:scale-105 active:scale-95 cursor-pointer"
                 }`}
             >
               {content}
@@ -118,68 +119,117 @@ export default function PartyCard({
     (Date.now() - new Date(party.created_at).getTime()) / 60000;
   const isNewlyCreated = createdAgoMinutes < 30;
 
+  // Calculate time until expiration
+  const getTimeUntilExpiration = () => {
+    if (!party.expires_at) return null;
+    const expiresAt = new Date(party.expires_at).getTime();
+    const now = Date.now();
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) return null; // Already expired
+
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} ${t("timeago.days_short", "дн")}`;
+    } else if (hours > 0) {
+      return `${hours} ${t("timeago.hours_short", "ч")}`;
+    } else {
+      return `${minutes} ${t("timeago.minutes_short", "мин")}`;
+    }
+  };
+
+  const timeUntilExpiration = getTimeUntilExpiration();
+  const isExpiringSoon = party.expires_at && new Date(party.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000; // Less than 2 hours
+
   return (
     <div
-      className={`rounded-lg p-4 border transition-colors text-white space-y-3 w-full
+      className={`group relative rounded-xl p-5 sm:p-6 border transition-all duration-300 text-white space-y-4 w-full backdrop-blur-sm
       ${isPinned
-          ? "bg-pink-950/30 border-pink-600/40 hover:border-pink-500/60"
-          : "bg-zinc-800/50 border-zinc-700/50 hover:border-zinc-600/60"
+          ? "bg-gradient-to-br from-pink-950/40 via-pink-900/30 to-purple-950/40 border-pink-500/50 hover:border-pink-400/70 hover:shadow-lg hover:shadow-pink-500/20"
+          : "bg-gradient-to-br from-zinc-800/60 via-zinc-800/40 to-zinc-900/60 border-zinc-700/60 hover:border-zinc-600/80 hover:shadow-xl hover:shadow-zinc-900/50"
         }
     `}
     >
 
-      <div className="flex justify-between items-start">
-        <div className="space-y-1.5 flex-1">
-          <h3 className="text-lg font-semibold text-white">
-            {getGameName(party.game, t)}
-          </h3>
-
-          <div className="flex flex-wrap gap-1.5">
+      <div className="flex justify-between items-start gap-4">
+        <div className="space-y-3 flex-1 min-w-0">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-xl sm:text-2xl font-bold text-white bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent truncate">
+              {getGameName(party.game, t)}
+            </h3>
             {isPinned && (
-              <span className="inline-flex items-center gap-1 text-xs text-pink-300 bg-pink-900/30 px-2 py-0.5 rounded border border-pink-600/30">
-                <BookmarkIcon className="w-3 h-3" />
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-pink-500/20 blur-md rounded-full"></div>
+                <BookmarkIcon className="w-5 h-5 text-pink-400 relative" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {isPinned && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-200 bg-gradient-to-r from-pink-500/20 to-pink-600/20 px-3 py-1.5 rounded-lg border border-pink-500/40 shadow-md shadow-pink-500/10 backdrop-blur-sm">
+                <BookmarkIcon className="w-4 h-4" />
                 {t("party.pinned", { defaultValue: "Закреплено" })}
               </span>
             )}
 
             {isNewlyCreated && (
-              <span className="inline-flex items-center gap-1 text-xs text-blue-300 bg-blue-900/30 px-2 py-0.5 rounded border border-blue-600/30">
-                <ClockIcon className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-200 bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-3 py-1.5 rounded-lg border border-blue-500/40 shadow-md shadow-blue-500/10 backdrop-blur-sm animate-pulse">
+                <ClockIcon className="w-4 h-4" />
                 {t("party.new", { defaultValue: "Только что создано" })}
               </span>
             )}
 
             {isAlmostFull && !isFull && (
-              <span className="inline-flex items-center gap-1 text-xs text-yellow-300 bg-yellow-900/30 px-2 py-0.5 rounded border border-yellow-600/30">
-                <UserGroupIcon className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-yellow-200 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 px-3 py-1.5 rounded-lg border border-yellow-500/40 shadow-md shadow-yellow-500/10 backdrop-blur-sm">
+                <UserGroupIcon className="w-4 h-4" />
                 {t("party.almost_full", { defaultValue: "Почти заполнено" })}
+              </span>
+            )}
+
+            {timeUntilExpiration && (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border shadow-md backdrop-blur-sm ${
+                isExpiringSoon
+                  ? "text-red-200 bg-gradient-to-r from-red-500/20 to-red-600/20 border-red-500/40 shadow-red-500/10 animate-pulse"
+                  : "text-purple-200 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-500/40 shadow-purple-500/10"
+              }`}>
+                <Timer className="w-4 h-4" />
+                {t("party.expires_in", { defaultValue: "Истекает через" })} {timeUntilExpiration}
               </span>
             )}
           </div>
         </div>
 
-        <span className="text-xs text-zinc-400 whitespace-nowrap ml-3">
+        <span className="text-xs font-medium text-zinc-400 whitespace-nowrap px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex-shrink-0">
           {timeAgo(party.created_at, t)}
         </span>
       </div>
 
-      <div className="flex items-start gap-2 text-sm text-zinc-300">
-        <BoltIcon className="w-4 h-4 mt-0.5 shrink-0 text-blue-400" />
-        <p>{party.goal}</p>
+      <div className="flex items-start gap-3 text-sm text-zinc-200 bg-zinc-900/30 rounded-lg p-4 border border-zinc-700/30">
+        <div className="relative shrink-0">
+          <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full"></div>
+          <BoltIcon className="w-5 h-5 mt-0.5 text-blue-400 relative" />
+        </div>
+        <p className="flex-1 leading-relaxed break-words">{party.goal}</p>
       </div>
 
-      {renderContacts(party.contacts)}
-
-      <div className="flex items-center justify-end pt-2 border-t border-zinc-700/40">
-        <div className="flex items-center gap-1.5 text-sm text-zinc-400">
-          <UserGroupIcon className="w-4 h-4" />
-          <span>
-            <span className="text-white font-medium">{party.joined}</span>
-            <span className="mx-1">/</span>
-            <span>{party.slots}</span>
-          </span>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-zinc-700/50">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+          {renderContacts(party.contacts)}
+        </div>
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-900/60 border border-zinc-700/50 flex-shrink-0">
+          <UserGroupIcon className="w-4 h-4 text-zinc-400" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className={`font-bold ${isFull ? 'text-red-400' : isAlmostFull ? 'text-yellow-400' : 'text-green-400'}`}>
+              {party.joined}
+            </span>
+            <span className="text-zinc-500">/</span>
+            <span className="text-zinc-300 font-medium">{party.slots}</span>
+          </div>
           {isFull && (
-            <span className="ml-2 text-xs text-zinc-500">
+            <span className="ml-2 text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/30 whitespace-nowrap">
               {t("party.full", { defaultValue: "Заполнено" })}
             </span>
           )}

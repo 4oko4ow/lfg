@@ -368,6 +368,93 @@
     },
     "arcraiders": {
       "name": "Arc Raiders"
+    },
+    "lol": {
+      "name": "League of Legends"
+    },
+    "overwatch2": {
+      "name": "Overwatch 2"
+    },
+    "warzone": {
+      "name": "Call of Duty: Warzone"
+    },
+    "r6siege": {
+      "name": "Rainbow Six Siege"
+    },
+    "rocketleague": {
+      "name": "Rocket League"
+    },
+    "amongus": {
+      "name": "Among Us"
+    },
+    "phasmophobia": {
+      "name": "Phasmophobia"
+    },
+    "seaofthieves": {
+      "name": "Sea of Thieves"
+    },
+    "deadbydaylight": {
+      "name": "Dead by Daylight"
+    },
+    "wow": {
+      "name": "World of Warcraft"
+    },
+    "ffxiv": {
+      "name": "Final Fantasy XIV"
+    },
+    "genshin": {
+      "name": "Genshin Impact"
+    },
+    "honkaistarrail": {
+      "name": "Honkai: Star Rail"
+    },
+    "palworld": {
+      "name": "Palworld"
+    },
+    "helldivers2": {
+      "name": "Helldivers 2"
+    },
+    "destiny2": {
+      "name": "Destiny 2"
+    },
+    "warframe": {
+      "name": "Warframe"
+    },
+    "pathofexile": {
+      "name": "Path of Exile"
+    },
+    "diablo4": {
+      "name": "Diablo 4"
+    },
+    "lostark": {
+      "name": "Lost Ark"
+    },
+    "newworld": {
+      "name": "New World"
+    },
+    "guildwars2": {
+      "name": "Guild Wars 2"
+    },
+    "eso": {
+      "name": "Elder Scrolls Online"
+    },
+    "fallguys": {
+      "name": "Fall Guys"
+    },
+    "huntshowdown": {
+      "name": "Hunt: Showdown"
+    },
+    "tf2": {
+      "name": "Team Fortress 2"
+    },
+    "codmw3": {
+      "name": "Call of Duty: Modern Warfare III"
+    },
+    "bf2042": {
+      "name": "Battlefield 2042"
+    },
+    "haloinfinite": {
+      "name": "Halo Infinite"
     }
   }
 }

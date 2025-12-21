@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { useOnlineCount } from "../context/OnlineCountContext";
 import {
   Gamepad2,
   Users,
@@ -17,7 +18,7 @@ export default function LandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const [onlineCount, setOnlineCount] = useState(0);
+  const { onlineCount, setOnlineCount } = useOnlineCount();
   const [partiesCount, setPartiesCount] = useState(0);
 
   useEffect(() => {
