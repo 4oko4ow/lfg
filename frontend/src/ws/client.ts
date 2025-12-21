@@ -5,8 +5,26 @@ export let socket: WebSocket | null = null; // <-- экспортируем
 
 const listeners: ((msg: Message) => void)[] = [];
 
+function getWebSocketURL(): string {
+  const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
+  const backendBaseUrl = rawBackendBaseUrl.endsWith("/")
+    ? rawBackendBaseUrl.slice(0, -1)
+    : rawBackendBaseUrl;
+  
+  if (!backendBaseUrl) {
+    console.warn("VITE_BACKEND_URL is not set, using default WebSocket URL");
+    return "wss://lfg.findparty.online/ws";
+  }
+  
+  // Convert http:// to ws:// and https:// to wss://
+  const wsUrl = backendBaseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+  return `${wsUrl}/ws`;
+}
+
 export function connectWS() {
-  socket = new WebSocket("wss://lfg.fly.dev/ws");
+  const wsUrl = getWebSocketURL();
+  console.log("[WebSocket] Connecting to:", wsUrl);
+  socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
     console.log("✅ WebSocket connected");
