@@ -34,7 +34,7 @@ export type UserStats = {
   level: number;
   current_streak: number;
   longest_streak: number;
-  achievements: Achievement[];
+  achievements?: Achievement[];
 };
 
 export type Achievement = {

@@ -211,7 +211,7 @@ export default function ProfilePage() {
             : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
-          {t("profile.tabs.parties", "My Parties")} ({userParties.length})
+          {t("profile.tabs.parties", "My Parties")} ({userParties?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab("contacts")}
@@ -296,7 +296,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Achievements */}
-              {stats.achievements.length > 0 && (
+              {stats.achievements && stats.achievements.length > 0 && (
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
                   <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
                     <Award className="h-5 w-5 text-yellow-400" />
@@ -349,7 +349,7 @@ export default function ProfilePage() {
             </Link>
           </div>
 
-          {userParties.length === 0 ? (
+          {!userParties || userParties.length === 0 ? (
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
               <p className="mb-4 text-zinc-400">
                 {t("profile.parties.empty", "You haven't created any parties yet.")}
