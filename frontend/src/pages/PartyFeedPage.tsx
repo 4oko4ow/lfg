@@ -6,7 +6,6 @@ import {
   HelpCircle,
   MessageCircle,
   ChevronDown,
-  Users,
   Sparkles,
 } from "lucide-react";
 
