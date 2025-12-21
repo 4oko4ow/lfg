@@ -39,7 +39,7 @@ func (h *ChatHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 		SELECT id, user_id, user_display_name, message, client_msg_id, created_at
 		FROM chat_messages
 		ORDER BY created_at DESC
-		LIMIT 100
+		LIMIT 50
 	`)
 	if err != nil {
 		log.Printf("Error fetching chat messages: %v", err)

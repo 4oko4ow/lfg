@@ -19,8 +19,9 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { onlineCount, setOnlineCount } = useOnlineCount();
-  const [partiesCount, setPartiesCount] = useState(0);
+  const [partiesCount, setPartiesCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasReceivedParties, setHasReceivedParties] = useState(false);
   const hasReceivedDataRef = useRef(false);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function LandingPage() {
       switch (msg.type) {
         case "initial_state":
           setPartiesCount((msg.payload as any[]).length);
+          setHasReceivedParties(true);
           hasReceivedDataRef.current = true;
           setIsLoading(false);
           break;
@@ -48,10 +50,10 @@ export default function LandingPage() {
           }
           break;
         case "new_party":
-          setPartiesCount((prev) => prev + 1);
+          setPartiesCount((prev) => (prev ?? 0) + 1);
           break;
         case "party_remove":
-          setPartiesCount((prev) => Math.max(0, prev - 1));
+          setPartiesCount((prev) => Math.max(0, (prev ?? 0) - 1));
           break;
       }
     });
@@ -125,10 +127,10 @@ export default function LandingPage() {
                   {t("landing.stats.parties", "Active Parties")}
                 </span>
               </div>
-              {isLoading ? (
+              {!hasReceivedParties ? (
                 <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
               ) : (
-                <p className="text-3xl font-bold">{partiesCount}</p>
+                <p className="text-3xl font-bold">{partiesCount ?? 0}</p>
               )}
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
