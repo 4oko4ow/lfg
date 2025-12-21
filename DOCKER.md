@@ -29,10 +29,8 @@ This project is dockerized for deployment on a VPS with Traefik reverse proxy.
 - Exposed via Traefik on `lfg.findparty.online`
 
 ### Frontend
-- **Container**: `lfg-mvp-frontend`
-- **Port**: 80 (internal)
-- Serves the built React/Vite application
-- Exposed via Traefik on `findparty.online` and `www.findparty.online`
+- **Note**: Frontend is deployed on Vercel, not included in Docker Compose
+- Frontend should be configured to use `VITE_BACKEND_URL=https://lfg.findparty.online` in Vercel environment variables
 
 ## Environment Variables
 
@@ -49,11 +47,12 @@ This project is dockerized for deployment on a VPS with Traefik reverse proxy.
 
 **Quick Start - Required Variables:**
 - `DATABASE_URL` - PostgreSQL connection string
-- `VITE_BACKEND_URL` - Backend URL for frontend build
 - `AUTH_JWT_SECRET` - Secret key for sessions (generate with `openssl rand -hex 32`)
-- `FRONTEND_URL` - Frontend URL for OAuth redirects
-- `BACKEND_URL` - Backend URL for OAuth callbacks
+- `FRONTEND_URL` - Frontend URL for OAuth redirects (e.g., `https://findparty.online`)
+- `BACKEND_URL` - Backend URL for OAuth callbacks (e.g., `https://lfg.findparty.online`)
 - OAuth credentials (Discord, Steam, Telegram)
+
+**Note:** `VITE_BACKEND_URL` should be set in Vercel environment variables, not in Docker `.env`
 
 ## Usage
 
@@ -79,7 +78,7 @@ docker-compose logs -f
 
 # Specific service
 docker-compose logs -f api
-docker-compose logs -f frontend
+docker-compose logs -f postgres
 ```
 
 ### Stop services
@@ -104,10 +103,11 @@ The services are configured to work with Traefik reverse proxy. Make sure:
 
 ## Notes
 
+- **Frontend is deployed on Vercel**, not included in Docker Compose
+- Set `VITE_BACKEND_URL=https://lfg.findparty.online` in Vercel environment variables
 - The app uses **direct PostgreSQL** connections (no Supabase client)
 - You can use the included PostgreSQL service (`--profile local-db`) or provide your own database via `DATABASE_URL`
 - Migrations are automatically run when using the `local-db` profile
-- Frontend environment variables (`VITE_*`) are baked into the build at build time, not runtime
 - Auth data is persisted in a Docker volume (`auth_data`)
 - Chat messages are polled every 2 seconds (real-time updates via polling)
 

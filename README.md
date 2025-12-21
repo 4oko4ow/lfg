@@ -13,11 +13,11 @@ Looking For Group (LFG) MVP - A platform for finding gaming parties.
 
 ## Tech Stack
 
-- **Backend:** Go (Golang)
-- **Frontend:** React + TypeScript + Vite
+- **Backend:** Go (Golang) - Dockerized
+- **Frontend:** React + TypeScript + Vite - Deployed on Vercel
 - **Database:** PostgreSQL
 - **WebSocket:** Gorilla WebSocket
-- **Reverse Proxy:** Traefik (for production)
+- **Reverse Proxy:** Traefik (for production backend)
 
 ## Quick Start
 
@@ -51,7 +51,7 @@ Looking For Group (LFG) MVP - A platform for finding gaming parties.
    ```
 
 4. **Access the application**
-   - Frontend: `http://localhost` (or `https://findparty.online` in production)
+   - Frontend: Deployed on Vercel at `https://findparty.online`
    - Backend API: `http://localhost:8080` (or `https://lfg.findparty.online` in production)
    - Health check: `http://localhost:8080/healthz` (or `https://lfg.findparty.online/healthz` in production)
 

@@ -119,35 +119,6 @@ services:
       - "traefik.http.routers.lfg-health-redirect.entrypoints=web"
       - "traefik.http.routers.lfg-health-redirect.middlewares=lfg-redirect-https"
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-https://lfg.findparty.online}
-    container_name: lfg-mvp-frontend
-    networks:
-      - traefik
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-
-      # === Middleware для редиректа HTTP -> HTTPS ===
-      - "traefik.http.middlewares.lfg-frontend-redirect-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.lfg-frontend-redirect-https.redirectscheme.permanent=true"
-
-      # === HTTPS Frontend ===
-      - "traefik.http.routers.lfg-frontend.rule=Host(`findparty.online`) || Host(`www.findparty.online`)"
-      - "traefik.http.routers.lfg-frontend.entrypoints=websecure"
-      - "traefik.http.routers.lfg-frontend.tls.certresolver=le"
-      - "traefik.http.routers.lfg-frontend.service=lfg-frontend"
-      - "traefik.http.services.lfg-frontend.loadbalancer.server.port=80"
-
-      # === HTTP -> HTTPS редирект для frontend ===
-      - "traefik.http.routers.lfg-frontend-redirect.rule=Host(`findparty.online`) || Host(`www.findparty.online`)"
-      - "traefik.http.routers.lfg-frontend-redirect.entrypoints=web"
-      - "traefik.http.routers.lfg-frontend-redirect.middlewares=lfg-frontend-redirect-https"
-
 volumes:
   postgres_data:
     driver: local
@@ -159,4 +130,3 @@ networks:
     driver: bridge
   traefik:
     external: true
-
