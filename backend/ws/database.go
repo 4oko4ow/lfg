@@ -153,30 +153,47 @@ func SynchronizeMemoryWithDatabase() {
 	partyLock.Lock()
 	defer partyLock.Unlock()
 
-	// Clear existing parties
-	parties = make(map[string]*Party)
-
-	// Load parties from database
-	for _, dbParty := range partiesFromDB {
-		parties[dbParty.ID] = dbParty
+	// Create map from DB for quick lookup
+	dbParties := make(map[string]*Party)
+	for _, p := range partiesFromDB {
+		dbParties[p.ID] = p
 	}
 
-	log.Printf("[sync] Loaded %d parties from database", len(parties))
-
-	// Save any in-memory parties that aren't in DB
+	// Merge: take from DB, but preserve recently created in-memory parties
+	// that may not have been saved to DB yet
+	now := time.Now()
 	for id, memParty := range parties {
-		found := false
-		for _, dbParty := range partiesFromDB {
-			if dbParty.ID == id {
-				found = true
-				break
+		age := now.Sub(memParty.CreatedAt)
+		// If party in memory is newer than 5 minutes, preserve it (may not be saved to DB yet)
+		if age < 5*time.Minute {
+			if dbParty, exists := dbParties[id]; exists {
+				// If exists in DB, use DB data (more up-to-date)
+				parties[id] = dbParty
+			} else {
+				// If not in DB, keep in memory and try to save synchronously
+				if err := SavePartyToDatabase(memParty); err != nil {
+					log.Printf("⚠️  Failed to save party %s during sync: %v", id, err)
+					// Don't remove from memory if save failed - try again next time
+				}
 			}
-		}
-		if !found {
-			log.Printf("[sync] Party %s exists in memory but not in DB, saving...", id)
-			if err := SavePartyToDatabase(memParty); err != nil {
-				log.Printf("[sync] Error saving party %s: %v", id, err)
+		} else {
+			// Older parties: take from DB
+			if dbParty, exists := dbParties[id]; exists {
+				parties[id] = dbParty
+			} else {
+				// If not in DB and older than 5 minutes, remove from memory
+				delete(parties, id)
+				log.Printf("🗑️  Removed party %s from memory (not found in DB, age: %v)", id, age)
 			}
 		}
 	}
+
+	// Add parties from DB that aren't in memory
+	for id, dbParty := range dbParties {
+		if _, exists := parties[id]; !exists {
+			parties[id] = dbParty
+		}
+	}
+
+	log.Printf("[sync] Synchronized: %d parties in memory, %d from database", len(parties), len(partiesFromDB))
 }

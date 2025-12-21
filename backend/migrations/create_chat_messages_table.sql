@@ -80,25 +80,3 @@ DROP INDEX IF EXISTS idx_chat_messages_client_msg_id;
 -- Create unique index on client_msg_id (only for non-null values)
 CREATE UNIQUE INDEX idx_chat_messages_client_msg_id ON chat_messages(client_msg_id) WHERE client_msg_id IS NOT NULL;
 
--- Enable Row Level Security (RLS) for chat messages
-ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
-
--- Policy: Allow anyone to read chat messages
-DROP POLICY IF EXISTS "Anyone can read chat messages" ON chat_messages;
-CREATE POLICY "Anyone can read chat messages"
-    ON chat_messages
-    FOR SELECT
-    USING (true);
-
--- Policy: Allow authenticated users to insert chat messages
-DROP POLICY IF EXISTS "Authenticated users can insert chat messages" ON chat_messages;
-CREATE POLICY "Authenticated users can insert chat messages"
-    ON chat_messages
-    FOR INSERT
-    WITH CHECK (true);
-
--- Note: Service role key bypasses RLS, so these policies are for client-side access
--- If you're using service role key from backend, RLS won't apply
-
--- Note: This migration is for direct PostgreSQL usage (not Supabase)
-

@@ -1,9 +1,35 @@
+# IDE
 .idea
 /.idea/lfg-mvp.iml
+.vscode
+*.swp
+*.swo
+
+# Dependencies
 node_modules
 dist
-.DS_Store
-.env*
+build
+
+# Environment
+.env
+.env.local
+.env.*.local
 !.env.example
-!*/.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
 backend/data/
+*.test
+*.out
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+CLEANUP_SUMMARY.md
