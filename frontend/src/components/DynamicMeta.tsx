@@ -16,14 +16,14 @@ function getOrigin() {
 /** Мета для главной страницы (когда нет ?game) */
 const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
   ru: {
-    title: "Поиск тиммейтов — FindParty",
+    title: "Ищу тиммейтов — FindParty Online",
     description:
-      "Найди пати для Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft и других. Бесплатно, без регистрации.",
+      "Ищу тиммейтов для Steam игр? FindParty — быстрый поиск тиммейтов для Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft и других. Бесплатно, без регистрации.",
   },
   en: {
-    title: "Find Teammates — FindParty",
+    title: "Find Teammates — FindParty Online",
     description:
-      "Find a party for Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft and more. Free, no registration.",
+      "Looking for teammates for Steam games? FindParty — quick teammate finder for Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft and more. Free, no registration.",
   },
 };
 
@@ -40,9 +40,9 @@ const GAME_SEO: Record<
 > = {
   ru: {
     repo: {
-      title: "С кем поиграть в R.E.P.O — Найди пати на FindParty",
+      title: "Ищу тиммейтов для игры REPO — FindParty",
       description:
-        "Найди пати по R.E.P.O за секунды. Всё бесплатно, без регистрации. Вступи или создай объявление прямо сейчас.",
+        "Ищу тиммейтов для игры REPO? Найди пати по R.E.P.O за секунды. Всё бесплатно, без регистрации. Вступи или создай объявление прямо сейчас.",
     },
     dota2: {
       title: "Ищу пати в Dota 2 — С кем поиграть",
@@ -50,9 +50,9 @@ const GAME_SEO: Record<
         "На FindParty легко найти команду по Dota 2. Создай или вступи — всё работает без регистрации.",
     },
     cs2: {
-      title: "С кем поиграть в CS2 — Найди тиммейтов",
+      title: "Ищу с кем поиграть в CS2 — Найди тиммейтов",
       description:
-        "Найди тиммейтов для CS2 по интересам, с голосом и без регистрации. Быстро и удобно.",
+        "Ищу друзей в стим чтобы играть в кс 2? Найди тиммейтов для CS2 по интересам, с голосом и без регистрации. Быстро и удобно на FindParty.",
     },
     peak: {
       title: "Ищу пати в PEAK — Найди игроков на FindParty",
@@ -130,16 +130,16 @@ const GAME_SEO: Record<
         "Найди состав для Lethal Company: кооперативные вылазки, связь и координация. Без регистрации.",
     },
     arcraiders: {
-      title: "Arc Raiders — Найди команду",
+      title: "Ищу тиммейтов для Arc Raiders — FindParty",
       description:
-        "Найди пати для Arc Raiders: кооперативные рейды и командная игра. Создай объявление или вступи сейчас.",
+        "Ищу тиммейтов для игры Arc Raiders? Найди пати для кооперативных рейдов и командной игры. Всё бесплатно, без регистрации. Создай объявление или вступи сейчас.",
     },
   },
   en: {
     repo: {
-      title: "R.E.P.O LFG — Find Teammates on FindParty",
+      title: "Find Teammates for R.E.P.O — FindParty",
       description:
-        "Find a R.E.P.O party in seconds. Free, no registration. Join or create a listing right now.",
+        "Looking for teammates for R.E.P.O game? Find a R.E.P.O party in seconds. Free, no registration. Join or create a listing right now.",
     },
     dota2: {
       title: "Dota 2 LFG — Find a Party",
@@ -147,9 +147,9 @@ const GAME_SEO: Record<
         "Easily find a Dota 2 team on FindParty. Create or join — no registration required.",
     },
     cs2: {
-      title: "CS2 LFG — Find Teammates",
+      title: "Find Teammates for CS2 — FindParty",
       description:
-        "Find CS2 teammates by playstyle, with or without voice. Fast and convenient.",
+        "Looking for teammates to play CS2? Find CS2 teammates by playstyle, with or without voice. Fast and convenient on FindParty.",
     },
     peak: {
       title: "PEAK LFG — Find Players on FindParty",
@@ -227,9 +227,9 @@ const GAME_SEO: Record<
         "Find a crew for Lethal Company: co‑op runs, voice comms and coordination. No registration.",
     },
     arcraiders: {
-      title: "Arc Raiders LFG — Find a Squad",
+      title: "Find Teammates for Arc Raiders — FindParty",
       description:
-        "Find a party for Arc Raiders: co-op raids and team play. Create or join now.",
+        "Looking for teammates for Arc Raiders? Find a party for co-op raids and team play. Free, no registration. Create or join now on FindParty.",
     },
   },
 };
@@ -308,15 +308,33 @@ export function DynamicMeta() {
     const ogUrl = ensure("meta[property='og:url']", "property", "og:url");
     ogUrl.setAttribute("content", window.location.href);
 
+    const ogImage = ensure("meta[property='og:image']", "property", "og:image");
+    ogImage.setAttribute("content", `${getOrigin()}/og-image.png`);
+
+    const ogImageWidth = ensure("meta[property='og:image:width']", "property", "og:image:width");
+    ogImageWidth.setAttribute("content", "1200");
+
+    const ogImageHeight = ensure("meta[property='og:image:height']", "property", "og:image:height");
+    ogImageHeight.setAttribute("content", "630");
+
+    const ogSiteName = ensure("meta[property='og:site_name']", "property", "og:site_name");
+    ogSiteName.setAttribute("content", "FindParty");
+
+    const ogLocale = ensure("meta[property='og:locale']", "property", "og:locale");
+    ogLocale.setAttribute("content", lang === "ru" ? "ru_RU" : "en_US");
+
     // Twitter
     const twCard = ensure("meta[name='twitter:card']", "name", "twitter:card");
-    twCard.setAttribute("content", "summary");
+    twCard.setAttribute("content", "summary_large_image");
 
     const twTitle = ensure("meta[name='twitter:title']", "name", "twitter:title");
     twTitle.setAttribute("content", title);
 
     const twDesc = ensure("meta[name='twitter:description']", "name", "twitter:description");
     twDesc.setAttribute("content", description);
+
+    const twImage = ensure("meta[name='twitter:image']", "name", "twitter:image");
+    twImage.setAttribute("content", `${getOrigin()}/og-image.png`);
 
     // canonical + hreflang
     const origin = getOrigin();
