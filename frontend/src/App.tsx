@@ -41,9 +41,9 @@ function App() {
       <Header currentLang={currentLang} />
       <Routes>
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/:lang" element={<LandingPage />} />
         <Route path="/:lang/feed" element={<PartyFeedPage />} />
         <Route path="/:lang/profile" element={<ProfilePage />} />
+        <Route path="/:lang" element={<LandingPage />} />
         <Route
           path="*"
           element={<Navigate to={`/${currentLang}`} replace />}
