@@ -96,6 +96,7 @@ func LoadPartiesFromDatabase() []*Party {
 	for rows.Next() {
 		var p Party
 		var contactsJSON sql.NullString
+		var pinned sql.NullBool
 		var createdAt time.Time
 
 		err := rows.Scan(
@@ -106,7 +107,7 @@ func LoadPartiesFromDatabase() []*Party {
 			&p.Joined,
 			&createdAt,
 			&contactsJSON,
-			&p.Pinned,
+			&pinned,
 		)
 		if err != nil {
 			log.Printf("Error scanning party: %v", err)
@@ -114,6 +115,7 @@ func LoadPartiesFromDatabase() []*Party {
 		}
 
 		p.CreatedAt = createdAt
+		p.Pinned = pinned.Valid && pinned.Bool
 
 		// Parse contacts JSON if present
 		if contactsJSON.Valid && contactsJSON.String != "" {

@@ -23,6 +23,14 @@ If you're using Traefik as reverse proxy:
 docker network create traefik
 ```
 
+**Important:** After starting your services, restart Traefik so it discovers them:
+
+```bash
+docker restart traefik
+# Watch logs to see if services are discovered
+docker logs traefik -f
+```
+
 If you're NOT using Traefik, you'll need to:
 - Remove Traefik labels from `docker-compose.yml`
 - Expose ports directly or use a different reverse proxy

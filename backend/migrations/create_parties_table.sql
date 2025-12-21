@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS parties (
     pinned BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+-- Fix existing NULL pinned values (if any)
+UPDATE parties SET pinned = FALSE WHERE pinned IS NULL;
+ALTER TABLE parties ALTER COLUMN pinned SET NOT NULL;
+ALTER TABLE parties ALTER COLUMN pinned SET DEFAULT FALSE;
+
 -- Create indexes for faster lookups
 CREATE INDEX IF NOT EXISTS idx_parties_created_at ON parties(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_parties_game ON parties(game);
