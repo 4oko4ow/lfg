@@ -1,6 +1,6 @@
 -- Create chat_messages table for chat functionality (if it doesn't exist)
 CREATE TABLE IF NOT EXISTS chat_messages (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     user_id TEXT NOT NULL,
     user_display_name TEXT,
     message TEXT NOT NULL,
@@ -100,7 +100,5 @@ CREATE POLICY "Authenticated users can insert chat messages"
 -- Note: Service role key bypasses RLS, so these policies are for client-side access
 -- If you're using service role key from backend, RLS won't apply
 
--- Refresh Supabase PostgREST schema cache after dropping columns
--- This ensures the API layer recognizes the updated schema
-NOTIFY pgrst, 'reload schema';
+-- Note: This migration is for direct PostgreSQL usage (not Supabase)
 

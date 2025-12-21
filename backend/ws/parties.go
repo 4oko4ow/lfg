@@ -23,7 +23,7 @@ func ThrottledSync() {
 	lastSyncTime = time.Now()
 
 	go func() {
-		log.Println("[sync] Synchronizing memory with Supabase...")
-		SynchronizeMemoryWithSupabase()
+		log.Println("[sync] Synchronizing memory with database...")
+		SynchronizeMemoryWithDatabase()
 	}()
 }

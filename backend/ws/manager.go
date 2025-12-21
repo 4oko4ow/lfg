@@ -40,36 +40,36 @@ func AddParty(p *Party, save bool) {
 	parties[p.ID] = p
 	partyLock.Unlock()
 	
-	if save {
-		// Сохраняем синхронно для новых объявлений, чтобы гарантировать сохранение
-		// перед возможной синхронизацией
-		maxRetries := 3
-		retryDelay := 100 * time.Millisecond
-		var lastErr error
-		for i := 0; i < maxRetries; i++ {
-			if err := SavePartyToSupabase(p); err != nil {
-				lastErr = err
-				if i < maxRetries-1 {
-					time.Sleep(retryDelay)
-					retryDelay *= 2 // exponential backoff
-					continue
+		if save {
+			// Сохраняем синхронно для новых объявлений, чтобы гарантировать сохранение
+			// перед возможной синхронизацией
+			maxRetries := 3
+			retryDelay := 100 * time.Millisecond
+			var lastErr error
+			for i := 0; i < maxRetries; i++ {
+				if err := SavePartyToDatabase(p); err != nil {
+					lastErr = err
+					if i < maxRetries-1 {
+						time.Sleep(retryDelay)
+						retryDelay *= 2 // exponential backoff
+						continue
+					}
+				} else {
+					return // успешно сохранено
 				}
-			} else {
-				return // успешно сохранено
+			}
+			// Если все попытки не удались, логируем ошибку
+			if lastErr != nil {
+				log.Printf("❌ Failed to save party %s after %d retries: %v", p.ID, maxRetries, lastErr)
 			}
 		}
-		// Если все попытки не удались, логируем ошибку
-		if lastErr != nil {
-			log.Printf("❌ Failed to save party %s after %d retries: %v", p.ID, maxRetries, lastErr)
-		}
-	}
 }
 
 func RemoveParty(id string) {
 	partyLock.Lock()
 	defer partyLock.Unlock()
 	delete(parties, id)
-	go RemovePartyFromSupabase(id)
+	go RemovePartyFromDatabase(id)
 }
 
 func UpdatePartyJoined(id string) {
@@ -77,7 +77,7 @@ func UpdatePartyJoined(id string) {
 	defer partyLock.Unlock()
 	if p, ok := parties[id]; ok && p.Joined < p.Slots {
 		p.Joined++
-		go UpdatePartyInSupabase(p)
+		go UpdatePartyInDatabase(p)
 		Broadcast(Message{Type: "party_update", Payload: p})
 	}
 }

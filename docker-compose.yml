@@ -1,0 +1,162 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lfg-mvp-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-lfg_mvp}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lfg-network
+    restart: unless-stopped
+    profiles:
+      - local-db
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.migrate
+    container_name: lfg-mvp-migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lfg_mvp}?sslmode=disable}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lfg-network
+    restart: "no"
+    profiles:
+      - local-db
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lfg-mvp-api
+    environment:
+      PORT: ${PORT:-8080}
+      # Database configuration (required)
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lfg_mvp}?sslmode=disable}
+      # Auth configuration
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+      AUTH_DB_PATH: ${AUTH_DB_PATH:-/data/auth.json}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-lfg_session}
+      AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      AUTH_SESSION_TTL_DAYS: ${AUTH_SESSION_TTL_DAYS:-365}
+      # OAuth configuration
+      FRONTEND_URL: ${FRONTEND_URL:-https://findparty.online}
+      BACKEND_URL: ${BACKEND_URL:-https://findparty.online}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      STEAM_WEB_API_KEY: ${STEAM_WEB_API_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_ID: ${TELEGRAM_BOT_ID}
+      # CORS origins (comma-separated)
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://findparty.online,https://www.findparty.online}
+      GIN_MODE: ${GIN_MODE:-release}
+    volumes:
+      - auth_data:/data
+    networks:
+      - lfg-network
+      - traefik
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+
+      # === Middleware для редиректа HTTP -> HTTPS ===
+      - "traefik.http.middlewares.lfg-redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.lfg-redirect-https.redirectscheme.permanent=true"
+
+      # === HTTPS API на /api (без strip prefix, backend ожидает /api если нужно) ===
+      - "traefik.http.routers.lfg-api.rule=Host(`findparty.online`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.lfg-api.entrypoints=websecure"
+      - "traefik.http.routers.lfg-api.tls.certresolver=le"
+      - "traefik.http.routers.lfg-api.service=lfg-api"
+      - "traefik.http.services.lfg-api.loadbalancer.server.port=8080"
+
+      # === HTTP -> HTTPS редирект для /api ===
+      - "traefik.http.routers.lfg-api-redirect.rule=Host(`findparty.online`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.lfg-api-redirect.entrypoints=web"
+      - "traefik.http.routers.lfg-api-redirect.middlewares=lfg-redirect-https"
+
+      # === WebSocket endpoint ===
+      - "traefik.http.routers.lfg-ws.rule=Host(`findparty.online`) && Path(`/ws`)"
+      - "traefik.http.routers.lfg-ws.entrypoints=websecure"
+      - "traefik.http.routers.lfg-ws.tls.certresolver=le"
+      - "traefik.http.routers.lfg-ws.service=lfg-ws"
+      - "traefik.http.services.lfg-ws.loadbalancer.server.port=8080"
+
+      # === HTTP -> HTTPS редирект для /ws ===
+      - "traefik.http.routers.lfg-ws-redirect.rule=Host(`findparty.online`) && Path(`/ws`)"
+      - "traefik.http.routers.lfg-ws-redirect.entrypoints=web"
+      - "traefik.http.routers.lfg-ws-redirect.middlewares=lfg-redirect-https"
+
+      # === Health endpoint ===
+      - "traefik.http.routers.lfg-health.rule=Host(`findparty.online`) && Path(`/healthz`)"
+      - "traefik.http.routers.lfg-health.entrypoints=websecure"
+      - "traefik.http.routers.lfg-health.tls.certresolver=le"
+      - "traefik.http.routers.lfg-health.service=lfg-health"
+      - "traefik.http.services.lfg-health.loadbalancer.server.port=8080"
+
+      # === HTTP -> HTTPS редирект для /healthz ===
+      - "traefik.http.routers.lfg-health-redirect.rule=Host(`findparty.online`) && Path(`/healthz`)"
+      - "traefik.http.routers.lfg-health-redirect.entrypoints=web"
+      - "traefik.http.routers.lfg-health-redirect.middlewares=lfg-redirect-https"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-https://findparty.online}
+    container_name: lfg-mvp-frontend
+    networks:
+      - traefik
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+
+      # === Middleware для редиректа HTTP -> HTTPS ===
+      - "traefik.http.middlewares.lfg-frontend-redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.lfg-frontend-redirect-https.redirectscheme.permanent=true"
+
+      # === HTTPS Frontend ===
+      - "traefik.http.routers.lfg-frontend.rule=Host(`findparty.online`) || Host(`www.findparty.online`)"
+      - "traefik.http.routers.lfg-frontend.entrypoints=websecure"
+      - "traefik.http.routers.lfg-frontend.tls.certresolver=le"
+      - "traefik.http.routers.lfg-frontend.service=lfg-frontend"
+      - "traefik.http.services.lfg-frontend.loadbalancer.server.port=80"
+
+      # === HTTP -> HTTPS редирект для frontend ===
+      - "traefik.http.routers.lfg-frontend-redirect.rule=Host(`findparty.online`) || Host(`www.findparty.online`)"
+      - "traefik.http.routers.lfg-frontend-redirect.entrypoints=web"
+      - "traefik.http.routers.lfg-frontend-redirect.middlewares=lfg-frontend-redirect-https"
+
+volumes:
+  postgres_data:
+    driver: local
+  auth_data:
+    driver: local
+
+networks:
+  lfg-network:
+    driver: bridge
+  traefik:
+    external: true
+

@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build artifacts
+*.exe
+*.test
+*.out
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Data files (if using file store locally)
+data/
+

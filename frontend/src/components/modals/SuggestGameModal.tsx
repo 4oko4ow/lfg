@@ -1,7 +1,20 @@
 import { useState } from "react";
-import { supabase } from "../../supabaseClient";
 import { analytics } from "../../utils/analytics";
 import { useTranslation } from "react-i18next";
+
+const buildBackendUrl = (path: string): string => {
+  const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
+  const backendBaseUrl = rawBackendBaseUrl.endsWith("/")
+    ? rawBackendBaseUrl.slice(0, -1)
+    : rawBackendBaseUrl;
+  if (!path.startsWith("/")) {
+    throw new Error(`Backend paths must start with '/': ${path}`);
+  }
+  if (!backendBaseUrl) {
+    return path;
+  }
+  return `${backendBaseUrl}${path}`;
+};
 
 const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation();
@@ -14,9 +27,23 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
     if (!value || saving) return;
     setSaving(true);
     try {
-      await supabase.from("suggested_games").insert({ game: value });
+      const response = await fetch(buildBackendUrl("/api/games/suggest"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ game: value }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to suggest game");
+      }
+
       analytics.suggestGame(value);
       setSubmitted(true);
+    } catch (error) {
+      console.error("Error suggesting game:", error);
     } finally {
       setSaving(false);
     }

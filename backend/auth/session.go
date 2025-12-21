@@ -55,7 +55,7 @@ func NewSessionManagerWithTTL(secret, cookieName, cookieDomain string, secure bo
 	if err != nil {
 		log.Printf("[Session] ⚠️  WARNING: Failed to initialize DB session store, using stateless sessions: %v", err)
 		log.Printf("[Session] ⚠️  Sessions will NOT persist across server restarts!")
-		log.Printf("[Session] ⚠️  To enable persistent sessions, ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set")
+		log.Printf("[Session] ⚠️  To enable persistent sessions, ensure DATABASE_URL is set")
 		sessionStore = nil
 	} else {
 		log.Println("[Session] ✅ Using database-backed session storage (sessions will persist across restarts)")

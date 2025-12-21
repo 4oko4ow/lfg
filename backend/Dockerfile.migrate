@@ -1,0 +1,55 @@
+FROM postgres:16-alpine
+
+# Install additional tools if needed
+RUN apk add --no-cache postgresql-client
+
+# Copy migration files
+COPY migrations /migrations
+
+# Create a script to run migrations
+# Note: DATABASE_URL format: postgresql://user:password@host:port/dbname?sslmode=disable
+RUN echo '#!/bin/sh\n\
+    set -e\n\
+    if [ -z "$DATABASE_URL" ]; then\n\
+    echo "ERROR: DATABASE_URL is not set"\n\
+    exit 1\n\
+    fi\n\
+    \n\
+    # Parse DATABASE_URL\n\
+    # Format: postgresql://user:password@host:port/dbname?sslmode=disable\n\
+    DB_URL="$DATABASE_URL"\n\
+    \n\
+    # Extract components (simple parsing)\n\
+    DB_HOST=$(echo "$DB_URL" | sed -n "s|.*@\\([^:]*\\):.*|\\1|p")\n\
+    DB_PORT=$(echo "$DB_URL" | sed -n "s|.*@[^:]*:\\([0-9]*\\)/.*|\\1|p")\n\
+    DB_NAME=$(echo "$DB_URL" | sed -n "s|.*/\\([^?]*\\).*|\\1|p")\n\
+    DB_USER=$(echo "$DB_URL" | sed -n "s|postgresql://\\([^:]*\\):.*|\\1|p")\n\
+    DB_PASS=$(echo "$DB_URL" | sed -n "s|postgresql://[^:]*:\\([^@]*\\)@.*|\\1|p")\n\
+    \n\
+    # Set defaults\n\
+    DB_HOST=${DB_HOST:-postgres}\n\
+    DB_PORT=${DB_PORT:-5432}\n\
+    DB_USER=${DB_USER:-postgres}\n\
+    \n\
+    echo "Connecting to database: $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"\n\
+    echo "Running migrations..."\n\
+    \n\
+    # Wait for database to be ready\n\
+    until PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
+    echo "Waiting for database to be ready..."\n\
+    sleep 2\n\
+    done\n\
+    \n\
+    # Run migrations in order\n\
+    for file in /migrations/*.sql; do\n\
+    if [ -f "$file" ]; then\n\
+    echo "Running $(basename $file)"\n\
+    PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$file" || exit 1\n\
+    fi\n\
+    done\n\
+    \n\
+    echo "Migrations completed successfully"\n\
+    ' > /run-migrations.sh && chmod +x /run-migrations.sh
+
+CMD ["/run-migrations.sh"]
+

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"lfg/api"
 	"lfg/auth"
 	"lfg/ws"
 )
@@ -120,6 +121,16 @@ func main() {
 	handler.RegisterRoutes(mux)
 
 	mux.HandleFunc("/ws", ws.HandleConnections)
+
+	// API endpoints
+	db := ws.GetDB()
+	if db != nil {
+		chatHandler := api.NewChatHandler(db)
+		gamesHandler := api.NewGamesHandler(db)
+		mux.HandleFunc("/api/chat/messages", chatHandler.GetMessages)
+		mux.HandleFunc("/api/chat/messages/create", chatHandler.CreateMessage)
+		mux.HandleFunc("/api/games/suggest", gamesHandler.SuggestGame)
+	}
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

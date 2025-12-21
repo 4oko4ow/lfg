@@ -1,10 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../supabaseClient";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./modals/LoginModal";
+
+const buildBackendUrl = (path: string): string => {
+  const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
+  const backendBaseUrl = rawBackendBaseUrl.endsWith("/")
+    ? rawBackendBaseUrl.slice(0, -1)
+    : rawBackendBaseUrl;
+  if (!path.startsWith("/")) {
+    throw new Error(`Backend paths must start with '/': ${path}`);
+  }
+  if (!backendBaseUrl) {
+    return path;
+  }
+  return `${backendBaseUrl}${path}`;
+};
 
 const Chat = ({
   isMobile = false,
@@ -33,31 +46,15 @@ const Chat = ({
   useEffect(() => {
     fetchMessages();
 
-    const channel = supabase
-      .channel("chat-room")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages" },
-        (payload) => {
-          const newMsg = payload.new;
-
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-
-            const filtered = prev.filter(
-              (m) => m.client_msg_id !== newMsg.client_msg_id
-            );
-
-            return [...filtered, newMsg];
-          });
-        }
-      )
-      .subscribe();
+    // Poll for new messages every 2 seconds
+    const pollInterval = setInterval(() => {
+      fetchMessages();
+    }, 2000);
 
     if (isMobile) analytics.chatMobile();
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, []);
 
@@ -132,23 +129,26 @@ const Chat = ({
   };
 
   const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from("chat_messages")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
+    try {
+      const response = await fetch(buildBackendUrl("/api/chat/messages"), {
+        credentials: "include",
+      });
 
-    if (error) {
+      if (!response.ok) {
+        console.error("Chat load error:", response.status);
+        return;
+      }
+
+      const data = await response.json();
+      const ordered = (data || []).reverse();
+
+      setMessages((prev) => {
+        const withoutOptimistic = prev.filter((m) => !m.optimistic);
+        return [...withoutOptimistic, ...ordered];
+      });
+    } catch (error) {
       console.error("Chat load error:", error);
-      return;
     }
-
-    const ordered = (data || []).reverse();
-
-    setMessages((prev) => {
-      const withoutOptimistic = prev.filter((m) => !m.optimistic);
-      return [...withoutOptimistic, ...ordered];
-    });
   };
 
   const sendMessage = async () => {
@@ -173,18 +173,31 @@ const Chat = ({
     setInput("");
     scrollToBottom();
 
-    const { error } = await supabase.from("chat_messages").insert({
-      user_id: profile.id,
-      user_display_name: profile.displayName,
-      message: trimmed,
-      client_msg_id,
-    });
+    try {
+      const response = await fetch(buildBackendUrl("/api/chat/messages/create"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          user_id: profile.id,
+          user_display_name: profile.displayName,
+          message: trimmed,
+          client_msg_id,
+        }),
+      });
 
-    if (error) {
+      if (!response.ok) {
+        console.error("Chat send error:", response.status);
+      } else {
+        analytics.chatMessageSent();
+        analytics.chatMessageTyped(trimmed.length);
+        // Refresh messages to get the server-generated ID
+        fetchMessages();
+      }
+    } catch (error) {
       console.error("Chat send error:", error);
-    } else {
-      analytics.chatMessageSent();
-      analytics.chatMessageTyped(trimmed.length);
     }
   };
 
