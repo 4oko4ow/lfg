@@ -55,7 +55,7 @@ function PartyFeedPage() {
     return [];
   });
 
-  const ALL_LABEL = t("filters.all_games", "Все");
+  const ALL_LABEL = t("filters.all_games");
   const [filter, setFilter] = useState<string>(ALL_LABEL);
   const [showGameFilter, setShowGameFilter] = useState(false);
   const [gameFilterQuery, setGameFilterQuery] = useState("");
@@ -308,17 +308,17 @@ function PartyFeedPage() {
         <section className="mb-8">
           <div className="text-center space-y-4">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-            {t("hero.title", "Найди команду для игры")}
+            {t("hero.title")}
           </h1>
             <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
-            {t("hero.subtitle", "Вступай в готовые пати или создай своё объявление")}
+            {t("hero.subtitle")}
           </p>
             <button
               onClick={() => setCreatePartyModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60 mt-2"
             >
               <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-              {t("hero.create_party", "Создать объявление")}
+              {t("hero.create_party")}
             </button>
           </div>
         </section>
@@ -331,7 +331,7 @@ function PartyFeedPage() {
               <Sparkles className="h-5 w-5 text-blue-400 relative" />
             </div>
             <h2 className="text-base sm:text-lg font-semibold text-zinc-100 leading-tight">
-              {t("filters.title", "Фильтр по играм")}
+              {t("filters.title")}
             </h2>
           </div>
 
@@ -418,8 +418,8 @@ function PartyFeedPage() {
                   )}
                   <span className="relative">
                     {filter !== ALL_LABEL && !popularGames.some((g) => g.name === filter)
-                      ? games.find((g) => g.name === filter)?.name || t("filters.more", "Ещё")
-                      : t("filters.more", "Ещё")}
+                      ? games.find((g) => g.name === filter)?.name || t("filters.more")
+                      : t("filters.more")}
                   </span>
                   <ChevronDown className={`h-3.5 w-3.5 relative transition-transform duration-200 ${showGameFilter ? "rotate-180" : ""}`} />
                 </button>
@@ -433,7 +433,7 @@ function PartyFeedPage() {
                           type="text"
                           value={gameFilterQuery}
                           onChange={(e) => setGameFilterQuery(e.target.value)}
-                          placeholder={t("filters.search_games", "Поиск игр...")}
+                          placeholder={t("filters.search_games")}
                           className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-zinc-700/50 bg-zinc-900/70 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/90 focus:ring-2 focus:ring-blue-500/20"
                           autoFocus
                         />
@@ -477,7 +477,7 @@ function PartyFeedPage() {
                         <div className="p-6 text-center">
                           <Search className="h-8 w-8 text-zinc-600 mx-auto mb-2" />
                           <p className="text-sm text-zinc-500 font-medium">
-                            {t("filters.no_games_found", "Игры не найдены")}
+                            {t("filters.no_games_found")}
                           </p>
                         </div>
                       )}
@@ -530,17 +530,14 @@ function PartyFeedPage() {
               <Search className="h-10 w-10 text-zinc-500" />
             </div>
             <p className="text-base font-medium text-zinc-300 mb-2">
-              {t(
-                "filters.empty",
-                "Пока нет объявлений. Стань первым и создай своё!"
-              )}
+              {t("filters.empty")}
             </p>
             <button
               onClick={() => setCreatePartyModalOpen(true)}
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
             >
               <Sparkles className="h-4 w-4" />
-              {t("hero.create_party", "Создать объявление")}
+              {t("hero.create_party")}
             </button>
           </div>
         ) : (
@@ -590,7 +587,7 @@ function PartyFeedPage() {
         <button
           onClick={() => setChatOpen(true)}
           className="fixed bottom-6 left-6 sm:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-xl shadow-blue-500/50 transition-all duration-300 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-2xl hover:shadow-blue-500/70 hover:scale-110 active:scale-95 z-50 animate-fadeIn border border-blue-400/30"
-          aria-label={t("chat.title", "Чат")}
+          aria-label={t("chat.title")}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-md"></div>
           <MessageCircle className="h-6 w-6 relative" />
@@ -603,8 +600,8 @@ function PartyFeedPage() {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-md"></div>
         <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 relative" />
-        <span className="hidden sm:inline relative">{t("hero.suggest_game", "Нет нужной игры?")}</span>
-        <span className="sm:hidden relative">{t("hero.suggest_game_short", "Игра?")}</span>
+        <span className="hidden sm:inline relative">{t("hero.suggest_game")}</span>
+        <span className="sm:hidden relative">{t("hero.suggest_game_short")}</span>
       </button>
     </>
   );

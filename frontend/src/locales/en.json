@@ -26,8 +26,10 @@
     "title": "Find a team for gaming",
     "subtitle": "Join ready parties or create your own listing",
     "online": "Online: {{count}}",
+    "online_short": "online",
     "suggest_game": "Don't see your game?",
-    "suggest_game_short": "Game?"
+    "suggest_game_short": "Game?",
+    "create_party": "Create Party"
   },
   "ui": {
     "language": "Language",
@@ -58,6 +60,10 @@
     "without_voice": "No voice chat",
     "empty": "No listings yet. Be the first to create one!",
     "empty_hint": "Create your listing above 👆",
+    "title": "Game Filter",
+    "more": "More",
+    "search_games": "Search games...",
+    "no_games_found": "No games found",
     "sort": {
       "label": "Sort",
       "new": "Newest",
@@ -77,7 +83,8 @@
     "description": "Description",
     "created": "Created",
     "copy_contact_to_join": "Copy the contact to join the party",
-    "preferred": "Primary"
+    "preferred": "Primary",
+    "expires_in": "Expires in"
   },
   "form": {
     "title": "Create a party",
@@ -111,6 +118,21 @@
       "slots_required": "Choose number of slots",
       "contact_required": "Enter a contact",
       "description_required": "Enter a short description (10–200 chars)"
+    },
+    "popular_games": "Popular",
+    "by_ads_count": "by number of listings",
+    "other_games": "Other games",
+    "select_game": "Select a game",
+    "search_games": "Search games...",
+    "no_games_found": "No games found",
+    "expiration": {
+      "label": "Auto-hide after",
+      "hours": "h",
+      "hours_short": "h",
+      "day": "1 day",
+      "days": "days",
+      "custom_hours": "Custom hours",
+      "hint": "The listing will automatically be hidden after the specified time"
     }
   },
   "auth": {
@@ -128,21 +150,6 @@
     "sign_in_with_telegram": "Sign in with Telegram",
     "choose_provider": "Choose your preferred sign-in method:",
     "sign_out": "Sign out"
-  },
-  "profile": {
-    "link": "Profile",
-    "anonymous": "Player",
-    "title": "Your profile",
-    "description": "Connect messaging platforms and choose which ones to show in your ads.",
-    "steam_description": "Link your Steam account to share your profile.",
-    "discord_description": "Link Discord so players can reach you by username or profile.",
-    "telegram_description": "Connect Telegram to share your handle.",
-    "relink": "Reconnect",
-    "connect": "Connect",
-    "contact_label": "Contact for ads",
-    "save": "Save",
-    "link_required": "Connect the account first to set up the contact.",
-    "saved": "Saved"
   },
   "contact": {
     "title": "Contacts",
@@ -177,7 +184,10 @@
     "minutes": "{{count}} min ago",
     "hour": "1 h ago",
     "hours": "{{count}} h ago",
-    "days_hours": "{{d}}d {{h}}h ago"
+    "days_hours": "{{d}}d {{h}}h ago",
+    "days_short": "d",
+    "hours_short": "h",
+    "minutes_short": "min"
   },
   "modals": {
     "contact_title": "Join the party",
@@ -205,6 +215,7 @@
   },
   "survey": {
     "nojoin_title": "Didn't join? Why?",
+    "dismiss": "Don't show again",
     "reasons": [
       "Didn't find my game",
       "Afraid to message strangers",
@@ -282,6 +293,10 @@
     "save": "Save",
     "link_required": "Connect the account first to set up the contact.",
     "saved": "Saved",
+    "placeholders": {
+      "steam": "https://steamcommunity.com/id/username",
+      "discord": "username or @username"
+    },
     "tabs": {
       "stats": "Stats & Achievements",
       "parties": "My Parties",

@@ -63,7 +63,7 @@ export default function ContactModal({
       joinSentRef.current = true;
     }
     window.open(url, "_blank", "noopener");
-    toast.success(t("contact.opened", "Открываем контакт"), { duration: 4000 });
+    toast.success(t("contact.opened"), { duration: 4000 });
     onClose();
   };
 
@@ -79,7 +79,7 @@ export default function ContactModal({
         </h2>
         {contacts.length === 0 ? (
           <p className="text-sm text-zinc-300 text-center py-4">
-            {t("contact.no_methods", "Контакты не указаны")}
+            {t("contact.no_methods")}
           </p>
         ) : (
           <div className="space-y-3">
@@ -103,7 +103,7 @@ export default function ContactModal({
                   {contact.preferred && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200 border border-blue-500/30">
                       <StarIcon className="h-3 w-3" />
-                      {t("party.preferred", "Основной")}
+                      {t("party.preferred")}
                     </span>
                   )}
                 </div>
@@ -113,7 +113,7 @@ export default function ContactModal({
                       onClick={() => handleOpen(contact.url as string)}
                       className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
                     >
-                      {t("contact.open", "Открыть")}
+                      {t("contact.open")}
                     </button>
                   )}
                   <button

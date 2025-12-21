@@ -33,13 +33,13 @@ export default function CreatePartyModal({
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
-            {t("form.title", "Создать пати")}
+            {t("form.title")}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="text-zinc-400 hover:text-white transition-colors p-1"
-            aria-label={t("ui.close", "Закрыть")}
+            aria-label={t("ui.close")}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>

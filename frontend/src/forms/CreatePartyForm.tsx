@@ -11,10 +11,10 @@ import type { ContactMethodType, Party } from "../types";
 import { contactHandleToMethod } from "../utils/contactHelpers";
 import LoginModal from "../components/modals/LoginModal";
 
-export default function CreatePartyForm({ 
-    parties = [], 
-    onSuccess 
-}: { 
+export default function CreatePartyForm({
+    parties = [],
+    onSuccess
+}: {
     parties?: Party[];
     onSuccess?: () => void;
 }) {
@@ -146,13 +146,13 @@ export default function CreatePartyForm({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         console.log("📝 Form submit triggered");
         console.log("   goal:", goal);
         console.log("   canSubmit:", canSubmit);
         console.log("   availableMethods:", availableMethods);
         console.log("   selectedMethods:", selectedMethods);
-        
+
         if (!goal.trim()) {
             console.warn("⚠️  Goal is empty, not submitting");
             return;
@@ -181,7 +181,7 @@ export default function CreatePartyForm({
             .filter((contact): contact is NonNullable<typeof contact> => Boolean(contact));
 
         console.log("   contacts:", contacts);
-        
+
         if (contacts.length === 0) {
             console.warn("⚠️  No contacts generated, not submitting");
             return;
@@ -192,7 +192,7 @@ export default function CreatePartyForm({
         setGoal("");
         setSelectedMethods(availableMethods);
         setPreferredMethod(availableMethods[0] ?? null);
-        
+
         // Call onSuccess callback if provided (e.g., to close modal)
         if (onSuccess) {
             onSuccess();
@@ -210,25 +210,25 @@ export default function CreatePartyForm({
                     <BoltIcon className="h-6 w-6 text-blue-400 relative" />
                 </div>
                 <h2 className="text-xl font-bold text-white bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
-                    {t("form.title", "Создать пати")}
+                    {t("form.title")}
                 </h2>
             </div>
 
             <div className="space-y-3">
                 <label className="block text-sm font-semibold text-zinc-300 mb-2">
-                    {t("form.labels.game", "Игра")}
+                    {t("form.labels.game")}
                 </label>
-                
+
                 {/* Popular Games */}
                 {popularGames.length > 0 && (
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">
-                                {t("form.popular_games", "Популярные")}
+                                {t("form.popular_games")}
                             </span>
                             {popularGames.some((g) => gameCounts[g.slug.toLowerCase()] > 0) && (
                                 <span className="text-xs text-zinc-500">
-                                    {t("form.by_ads_count", "по количеству объявлений")}
+                                    {t("form.by_ads_count")}
                                 </span>
                             )}
                         </div>
@@ -245,23 +245,21 @@ export default function CreatePartyForm({
                                             setShowOtherGames(false);
                                             setGameSearchQuery("");
                                         }}
-                                        className={`relative group rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                                            isSelected
+                                        className={`relative group rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${isSelected
                                                 ? "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/40 border border-blue-400/50"
                                                 : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 border border-zinc-700/50 hover:border-zinc-600/70"
-                                        }`}
+                                            }`}
                                     >
                                         {isSelected && (
                                             <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-sm"></div>
                                         )}
                                         <span className="relative flex items-center gap-2">
-                                {g.name}
+                                            {g.name}
                                             {count > 0 && (
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                                                    isSelected
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected
                                                         ? "bg-white/20 text-white"
                                                         : "bg-zinc-700/50 text-zinc-400"
-                                                }`}>
+                                                    }`}>
                                                     {count}
                                                 </span>
                                             )}
@@ -278,9 +276,9 @@ export default function CreatePartyForm({
                     <div className="space-y-2" ref={otherGamesRef}>
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">
-                                {t("form.other_games", "Другие игры")}
+                                {t("form.other_games")}
                             </span>
-                </div>
+                        </div>
 
                         {!showOtherGames ? (
                             <button
@@ -292,7 +290,7 @@ export default function CreatePartyForm({
                                 className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-2 pr-10 text-sm text-white transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70 text-left flex items-center justify-between"
                             >
                                 <span>
-                                    {games.find((g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug))?.name || t("form.select_game", "Выберите игру")}
+                                    {games.find((g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug))?.name || t("form.select_game")}
                                 </span>
                                 <ChevronDown className="h-4 w-4 text-zinc-500" />
                             </button>
@@ -300,14 +298,14 @@ export default function CreatePartyForm({
                             <div className="space-y-2">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                        <input
-                            type="text"
-                            value={gameSearchQuery}
-                            onChange={(e) => setGameSearchQuery(e.target.value)}
-                            placeholder={t("form.search_games", "Поиск игр...")}
-                            className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
-                            autoFocus
-                        />
+                                    <input
+                                        type="text"
+                                        value={gameSearchQuery}
+                                        onChange={(e) => setGameSearchQuery(e.target.value)}
+                                        placeholder={t("form.search_games")}
+                                        className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
+                                        autoFocus
+                                    />
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -315,7 +313,7 @@ export default function CreatePartyForm({
                                             setGameSearchQuery("");
                                         }}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
-                                        aria-label={t("ui.close", "Закрыть")}
+                                        aria-label={t("ui.close")}
                                     >
                                         <ChevronDown className="h-4 w-4 rotate-180" />
                                     </button>
@@ -333,11 +331,10 @@ export default function CreatePartyForm({
                                                         setShowOtherGames(false);
                                                         setGameSearchQuery("");
                                                     }}
-                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                                                        isSelected
+                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSelected
                                                             ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 border border-blue-500/30"
                                                             : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {g.name}
                                                 </button>
@@ -347,7 +344,7 @@ export default function CreatePartyForm({
                                 ) : (
                                     <div className="rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 p-4 text-center">
                                         <p className="text-sm text-zinc-500">
-                                            {t("form.no_games_found", "Игры не найдены")}
+                                            {t("form.no_games_found")}
                                         </p>
                                     </div>
                                 )}
@@ -358,7 +355,7 @@ export default function CreatePartyForm({
 
                 <div className="relative w-full sm:w-32">
                     <label className="block text-sm font-semibold text-zinc-300 mb-1.5">
-                        {t("form.labels.slots", "Слоты")}
+                        {t("form.labels.slots")}
                     </label>
                     <div className="relative">
                         <input
@@ -368,7 +365,7 @@ export default function CreatePartyForm({
                             max={10}
                             onChange={(e) => setSlots(parseInt(e.target.value || "0", 10))}
                             className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-2 pl-10 text-sm text-white transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
-                            placeholder={t("form.labels.slots", "Слоты")}
+                            placeholder={t("form.labels.slots")}
                         />
                         <UserGroupIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                     </div>
@@ -377,14 +374,11 @@ export default function CreatePartyForm({
 
             <div>
                 <label className="block text-sm font-semibold text-zinc-300 mb-1.5">
-                    {t("form.labels.description", "Описание")}
+                    {t("form.labels.description")}
                 </label>
                 <input
                     type="text"
-                    placeholder={t(
-                        "form.placeholders.description",
-                        "Напиши пару слов о себе: цель, возраст, микро и т.п."
-                    )}
+                    placeholder={t("form.placeholders.description")}
                     required
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
@@ -397,7 +391,7 @@ export default function CreatePartyForm({
                 <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-xs font-medium text-zinc-400 cursor-pointer">
                         <ClockIcon className="h-4 w-4 text-zinc-500" />
-                        {t("form.expiration.label", "Автоматически скрыть через")}
+                        {t("form.expiration.label")}
                     </label>
                     <button
                         type="button"
@@ -407,16 +401,14 @@ export default function CreatePartyForm({
                                 setExpirationHours(24);
                             }
                         }}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                            expirationEnabled
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${expirationEnabled
                                 ? "bg-gradient-to-r from-blue-600 to-blue-500"
                                 : "bg-zinc-700"
-                        }`}
+                            }`}
                     >
                         <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                expirationEnabled ? "translate-x-5" : "translate-x-1"
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${expirationEnabled ? "translate-x-5" : "translate-x-1"
+                                }`}
                         />
                     </button>
                 </div>
@@ -428,17 +420,16 @@ export default function CreatePartyForm({
                                     key={hours}
                                     type="button"
                                     onClick={() => setExpirationHours(hours)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                                        expirationHours === hours
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${expirationHours === hours
                                             ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
                                             : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 hover:scale-105 active:scale-95"
-                                    }`}
+                                        }`}
                                 >
                                     {hours < 24
-                                        ? `${hours} ${t("form.expiration.hours", "ч")}`
+                                        ? `${hours} ${t("form.expiration.hours")}`
                                         : hours === 24
-                                        ? t("form.expiration.day", "1 день")
-                                        : `${hours / 24} ${t("form.expiration.days", "дня")}`}
+                                            ? t("form.expiration.day")
+                                            : `${hours / 24} ${t("form.expiration.days")}`}
                                 </button>
                             ))}
                         </div>
@@ -450,17 +441,14 @@ export default function CreatePartyForm({
                                 value={expirationHours}
                                 onChange={(e) => setExpirationHours(Math.max(1, parseInt(e.target.value) || 1))}
                                 className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-1.5 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
-                                placeholder={t("form.expiration.custom_hours", "Кастомное количество часов")}
+                                placeholder={t("form.expiration.custom_hours")}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
-                                {t("form.expiration.hours_short", "ч")}
+                                {t("form.expiration.hours_short")}
                             </span>
                         </div>
                         <p className="text-[10px] text-zinc-500 leading-relaxed">
-                            {t(
-                                "form.expiration.hint",
-                                "Объявление автоматически скроется через указанное время"
-                            )}
+                            {t("form.expiration.hint")}
                         </p>
                     </div>
                 )}
@@ -468,25 +456,19 @@ export default function CreatePartyForm({
 
             <div className="space-y-2 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3">
                 <p className="text-sm text-zinc-400">
-                    {t(
-                        "form.contact_methods",
-                        "Выберите способы связи, которые хотите показать"
-                    )}
+                    {t("form.contact_methods")}
                 </p>
                 {!profile ? (
                     <div className="space-y-2">
                         <p className="text-sm text-zinc-400">
-                            {t(
-                                "form.login_required",
-                                "Для создания пати необходимо войти в систему."
-                            )}
+                            {t("form.login_required")}
                         </p>
                         <button
                             type="button"
                             onClick={() => setShowLoginModal(true)}
                             className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
                         >
-                            {t("auth.sign_in", "Войти")}
+                            {t("auth.sign_in")}
                         </button>
                         {showLoginModal && (
                             <LoginModal onClose={() => setShowLoginModal(false)} />
@@ -494,15 +476,12 @@ export default function CreatePartyForm({
                     </div>
                 ) : availableMethods.length === 0 ? (
                     <p className="text-sm text-zinc-400">
-                        {t(
-                            "form.no_contacts",
-                            "У вас не добавлено ни одного контакта. Настройте их в профиле."
-                        )}{" "}
+                        {t("form.no_contacts")}{" "}
                         <Link
                             to={`/${lang ?? "en"}/profile`}
                             className="text-blue-400 underline"
                         >
-                            {t("form.go_to_profile", "Перейти в профиль")}
+                            {t("form.go_to_profile")}
                         </Link>
                     </p>
                 ) : (
@@ -510,11 +489,10 @@ export default function CreatePartyForm({
                         {availableMethods.map((method) => (
                             <div key={method} className="flex items-center gap-2">
                                 <label
-                                    className={`cursor-pointer rounded-xl border-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${
-                                        selectedMethods.includes(method)
+                                    className={`cursor-pointer rounded-xl border-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${selectedMethods.includes(method)
                                             ? "border-blue-500/60 bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 scale-105"
                                             : "border-zinc-700/60 bg-zinc-800/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/70 hover:scale-105 active:scale-95"
-                                    }`}
+                                        }`}
                                 >
                                     <input
                                         type="checkbox"
@@ -544,7 +522,7 @@ export default function CreatePartyForm({
             {selectedMethods.length > 0 && (
                 <div className="space-y-2 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3">
                     <label className="block text-sm font-semibold text-zinc-300">
-                        {t("form.preferred_contact", "Предпочтительный способ связи")}
+                        {t("form.preferred_contact")}
                     </label>
                     <select
                         value={preferredMethod ?? selectedMethods[0] ?? ""}
@@ -558,10 +536,7 @@ export default function CreatePartyForm({
                         ))}
                     </select>
                     <p className="text-xs text-zinc-500 leading-relaxed">
-                        {t(
-                            "form.preferred_contact_hint",
-                            "Этот контакт будет отображаться первым в списке"
-                        )}
+                        {t("form.preferred_contact_hint")}
                     </p>
                 </div>
             )}
@@ -579,15 +554,14 @@ export default function CreatePartyForm({
             <button
                 type="submit"
                 disabled={!canSubmit || !goal.trim()}
-                className={`w-full rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${
-                    !canSubmit || !goal.trim()
+                className={`w-full rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${!canSubmit || !goal.trim()
                         ? "bg-zinc-700 cursor-not-allowed opacity-50"
                         : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-lg hover:shadow-blue-500/40 border border-blue-400/30"
-                }`}
+                    }`}
             >
                 <span className="flex items-center justify-center gap-2">
                     {(!canSubmit || !goal.trim()) ? null : <BoltIcon className="h-4 w-4" />}
-                {t("form.cta", "Создать пати")}
+                    {t("form.cta")}
                 </span>
             </button>
         </form>

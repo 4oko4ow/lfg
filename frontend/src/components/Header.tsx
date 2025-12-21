@@ -23,7 +23,7 @@ export default function Header({
   const homePath = `/${currentLang}`;
 
   const displayName =
-    profile?.displayName || t("profile.anonymous", "Игрок");
+    profile?.displayName || t("profile.anonymous");
 
   const handleSignOut = async () => {
     try {
@@ -31,7 +31,7 @@ export default function Header({
       navigate(homePath);
     } catch (error) {
       console.error(error);
-      toast.error(t("auth.error", "Не удалось авторизоваться"));
+      toast.error(t("auth.error"));
     }
   };
 
@@ -57,7 +57,7 @@ export default function Header({
                   {onlineCount}
                 </span>
                 <span className="text-xs text-green-400/80 font-medium leading-tight">
-                  {t("hero.online_short", "онлайн")}
+                  {t("hero.online_short")}
                 </span>
               </div>
             </div>
@@ -65,7 +65,7 @@ export default function Header({
           <LanguageSwitcher />
           {loading ? (
             <span className="text-zinc-400 text-xs sm:text-sm">
-              {t("auth.loading", "Загрузка...")}
+              {t("auth.loading")}
             </span>
           ) : profile ? (
             <>
@@ -76,13 +76,13 @@ export default function Header({
                 to={profilePath}
                 className="rounded-lg border border-zinc-700/60 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-zinc-200 transition-all duration-200 hover:border-blue-500/60 hover:text-blue-400 hover:scale-105 active:scale-95 whitespace-nowrap"
               >
-                {t("profile.link", "Профиль")}
+                {t("profile.link")}
               </Link>
               <button
                 onClick={handleSignOut}
                 className="rounded-lg bg-zinc-800/80 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-zinc-200 transition-all duration-200 hover:bg-zinc-700/80 hover:scale-105 active:scale-95 whitespace-nowrap"
               >
-                {t("auth.sign_out", "Выйти")}
+                {t("auth.sign_out")}
               </button>
             </>
           ) : (
@@ -91,7 +91,7 @@ export default function Header({
                 onClick={() => setShowLoginModal(true)}
                 className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg whitespace-nowrap"
               >
-                {t("auth.sign_in", "Sign in")}
+                {t("auth.sign_in")}
               </button>
               {showLoginModal && (
                 <LoginModal onClose={() => setShowLoginModal(false)} />

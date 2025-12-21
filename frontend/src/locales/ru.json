@@ -30,8 +30,10 @@
     "title": "Найди команду для игры",
     "subtitle": "Вступай в готовые пати или создай своё объявление",
     "online": "Онлайн: {{count}}",
+    "online_short": "онлайн",
     "suggest_game": "Нет нужной игры?",
-    "suggest_game_short": "Игра?"
+    "suggest_game_short": "Игра?",
+    "create_party": "Создать объявление"
   },
   "ui": {
     "language": "Язык",
@@ -62,6 +64,10 @@
     "without_voice": "Без войса",
     "empty": "Пока нет объявлений. Стань первым и создай своё!",
     "empty_hint": "Создай своё объявление выше 👆",
+    "title": "Фильтр по играм",
+    "more": "Ещё",
+    "search_games": "Поиск игр...",
+    "no_games_found": "Игры не найдены",
     "sort": {
       "label": "Сортировка",
       "new": "Сначала новые",
@@ -81,7 +87,8 @@
     "description": "Описание",
     "created": "Создано",
     "copy_contact_to_join": "Скопируй контакт, чтобы вступить в пати",
-    "preferred": "Основной"
+    "preferred": "Основной",
+    "expires_in": "Истекает через"
   },
   "form": {
     "title": "Создать пати",
@@ -115,6 +122,21 @@
       "slots_required": "Укажи число слотов (2–10)",
       "contact_required": "Укажи контакт",
       "description_required": "Коротко опиши цель (10–200 символов)"
+    },
+    "popular_games": "Популярные",
+    "by_ads_count": "по количеству объявлений",
+    "other_games": "Другие игры",
+    "select_game": "Выберите игру",
+    "search_games": "Поиск игр...",
+    "no_games_found": "Игры не найдены",
+    "expiration": {
+      "label": "Автоматически скрыть через",
+      "hours": "ч",
+      "hours_short": "ч",
+      "day": "1 день",
+      "days": "дня",
+      "custom_hours": "Кастомное количество часов",
+      "hint": "Объявление автоматически скроется через указанное время"
     }
   },
   "auth": {
@@ -132,21 +154,6 @@
     "sign_in_with_telegram": "Войти через Telegram",
     "choose_provider": "Выберите способ входа:",
     "sign_out": "Выйти"
-  },
-  "profile": {
-    "link": "Профиль",
-    "anonymous": "Игрок",
-    "title": "Ваш профиль",
-    "description": "Подключите сервисы и выберите, что показывать в объявлениях.",
-    "steam_description": "Привяжите Steam, чтобы делиться профилем.",
-    "discord_description": "Подключите Discord, чтобы игроки писали вам по нику или ссылке.",
-    "telegram_description": "Добавьте Telegram, чтобы делиться своим @", 
-    "relink": "Переподключить",
-    "connect": "Подключить",
-    "contact_label": "Контакт для объявлений",
-    "save": "Сохранить",
-    "link_required": "Сначала подключите аккаунт, затем укажите контакт.",
-    "saved": "Сохранено"
   },
   "contact": {
     "title": "Контакты",
@@ -181,8 +188,10 @@
     "minutes": "{{count}} мин назад",
     "hour": "час назад",
     "hours": "{{count}} ч назад",
-    "days_hours": "{{d}}дн {{h}}ч назад"
-
+    "days_hours": "{{d}}дн {{h}}ч назад",
+    "days_short": "дн",
+    "hours_short": "ч",
+    "minutes_short": "мин"
   },
   "modals": {
     "contact_title": "Вступить в пати",
@@ -203,6 +212,7 @@
   },
   "survey": {
     "nojoin_title": "Почему не вступил?",
+    "dismiss": "Больше не показывать",
     "reasons": [
       "Не нашёл подходящую игру",
       "Боюсь писать незнакомым",
@@ -276,6 +286,10 @@
     "save": "Сохранить",
     "link_required": "Сначала подключите аккаунт, затем укажите контакт.",
     "saved": "Сохранено",
+    "placeholders": {
+      "steam": "https://steamcommunity.com/id/username",
+      "discord": "username или @username"
+    },
     "tabs": {
       "stats": "Статистика и достижения",
       "parties": "Мои пати",
@@ -309,58 +323,164 @@
     "label_short": "Обратная связь"
   },
   "games": {
-    "abioticfactor": { "name": "Abiotic Factor" },
-    "repo": { "name": "R.E.P.O" },
-    "dota2": { "name": "Dota 2" },
-    "cs2": { "name": "CS2" },
-    "peak": { "name": "PEAK" },
-    "pubg": { "name": "PUBG" },
-    "rust": { "name": "Rust" },
-    "minecraft": { "name": "Minecraft" },
-    "tarkov": { "name": "Tarkov" },
-    "fortnite": { "name": "Fortnite" },
-    "roblox": { "name": "Roblox" },
-    "valorant": { "name": "Valorant" },
-    "apex": { "name": "Apex" },
-    "thefinals": { "name": "The Finals" },
-    "marvelrivals": { "name": "Marvel Rivals" },
-    "deeprockgalactic": { "name": "Deep Rock Galactic" },
-    "baldursgate3": { "name": "Baldurs Gate 3" },
-    "lethalcompany": { "name": "Lethal Company" },
-    "arcraiders": { "name": "Arc Raiders" },
-    "lol": { "name": "League of Legends" },
-    "overwatch2": { "name": "Overwatch 2" },
-    "warzone": { "name": "Call of Duty: Warzone" },
-    "r6siege": { "name": "Rainbow Six Siege" },
-    "rocketleague": { "name": "Rocket League" },
-    "amongus": { "name": "Among Us" },
-    "phasmophobia": { "name": "Phasmophobia" },
-    "seaofthieves": { "name": "Sea of Thieves" },
-    "deadbydaylight": { "name": "Dead by Daylight" },
-    "wow": { "name": "World of Warcraft" },
-    "ffxiv": { "name": "Final Fantasy XIV" },
-    "genshin": { "name": "Genshin Impact" },
-    "honkaistarrail": { "name": "Honkai: Star Rail" },
-    "palworld": { "name": "Palworld" },
-    "helldivers2": { "name": "Helldivers 2" },
-    "destiny2": { "name": "Destiny 2" },
-    "warframe": { "name": "Warframe" },
-    "pathofexile": { "name": "Path of Exile" },
-    "diablo4": { "name": "Diablo 4" },
-    "lostark": { "name": "Lost Ark" },
-    "newworld": { "name": "New World" },
-    "guildwars2": { "name": "Guild Wars 2" },
-    "eso": { "name": "Elder Scrolls Online" },
-    "fallguys": { "name": "Fall Guys" },
-    "huntshowdown": { "name": "Hunt: Showdown" },
-    "tf2": { "name": "Team Fortress 2" },
-    "codmw3": { "name": "Call of Duty: Modern Warfare III" },
-    "bf2042": { "name": "Battlefield 2042" },
-    "haloinfinite": { "name": "Halo Infinite" },
-    "rvthereyet": { "name": "RV There Yet?" },
-    "cuphead": { "name": "Cuphead" },
-    "projectzomboid": { "name": "Project Zomboid" },
-    "brawlstars": { "name": "Brawl Stars" },
-    "mobilelegends": { "name": "Mobile Legends" }
+    "abioticfactor": {
+      "name": "Abiotic Factor"
+    },
+    "repo": {
+      "name": "R.E.P.O"
+    },
+    "dota2": {
+      "name": "Dota 2"
+    },
+    "cs2": {
+      "name": "CS2"
+    },
+    "peak": {
+      "name": "PEAK"
+    },
+    "pubg": {
+      "name": "PUBG"
+    },
+    "rust": {
+      "name": "Rust"
+    },
+    "minecraft": {
+      "name": "Minecraft"
+    },
+    "tarkov": {
+      "name": "Tarkov"
+    },
+    "fortnite": {
+      "name": "Fortnite"
+    },
+    "roblox": {
+      "name": "Roblox"
+    },
+    "valorant": {
+      "name": "Valorant"
+    },
+    "apex": {
+      "name": "Apex"
+    },
+    "thefinals": {
+      "name": "The Finals"
+    },
+    "marvelrivals": {
+      "name": "Marvel Rivals"
+    },
+    "deeprockgalactic": {
+      "name": "Deep Rock Galactic"
+    },
+    "baldursgate3": {
+      "name": "Baldurs Gate 3"
+    },
+    "lethalcompany": {
+      "name": "Lethal Company"
+    },
+    "arcraiders": {
+      "name": "Arc Raiders"
+    },
+    "lol": {
+      "name": "League of Legends"
+    },
+    "overwatch2": {
+      "name": "Overwatch 2"
+    },
+    "warzone": {
+      "name": "Call of Duty: Warzone"
+    },
+    "r6siege": {
+      "name": "Rainbow Six Siege"
+    },
+    "rocketleague": {
+      "name": "Rocket League"
+    },
+    "amongus": {
+      "name": "Among Us"
+    },
+    "phasmophobia": {
+      "name": "Phasmophobia"
+    },
+    "seaofthieves": {
+      "name": "Sea of Thieves"
+    },
+    "deadbydaylight": {
+      "name": "Dead by Daylight"
+    },
+    "wow": {
+      "name": "World of Warcraft"
+    },
+    "ffxiv": {
+      "name": "Final Fantasy XIV"
+    },
+    "genshin": {
+      "name": "Genshin Impact"
+    },
+    "honkaistarrail": {
+      "name": "Honkai: Star Rail"
+    },
+    "palworld": {
+      "name": "Palworld"
+    },
+    "helldivers2": {
+      "name": "Helldivers 2"
+    },
+    "destiny2": {
+      "name": "Destiny 2"
+    },
+    "warframe": {
+      "name": "Warframe"
+    },
+    "pathofexile": {
+      "name": "Path of Exile"
+    },
+    "diablo4": {
+      "name": "Diablo 4"
+    },
+    "lostark": {
+      "name": "Lost Ark"
+    },
+    "newworld": {
+      "name": "New World"
+    },
+    "guildwars2": {
+      "name": "Guild Wars 2"
+    },
+    "eso": {
+      "name": "Elder Scrolls Online"
+    },
+    "fallguys": {
+      "name": "Fall Guys"
+    },
+    "huntshowdown": {
+      "name": "Hunt: Showdown"
+    },
+    "tf2": {
+      "name": "Team Fortress 2"
+    },
+    "codmw3": {
+      "name": "Call of Duty: Modern Warfare III"
+    },
+    "bf2042": {
+      "name": "Battlefield 2042"
+    },
+    "haloinfinite": {
+      "name": "Halo Infinite"
+    },
+    "rvthereyet": {
+      "name": "RV There Yet?"
+    },
+    "cuphead": {
+      "name": "Cuphead"
+    },
+    "projectzomboid": {
+      "name": "Project Zomboid"
+    },
+    "brawlstars": {
+      "name": "Brawl Stars"
+    },
+    "mobilelegends": {
+      "name": "Mobile Legends"
+    }
   }
 }

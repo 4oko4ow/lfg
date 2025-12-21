@@ -67,10 +67,10 @@ export default function AuthCallbackPage() {
           }
 
           if (profileLoaded) {
-            toast.success(t(messageMeta.key, "Вы успешно вошли"));
+            toast.success(t(messageMeta.key));
           } else {
             console.warn("Profile not loaded after all retries, but showing success message");
-            toast.success(t(messageMeta.key, "Вы успешно вошли"));
+            toast.success(t(messageMeta.key));
             // Try one more time after showing the message
             setTimeout(() => {
               void refreshProfile();
@@ -79,32 +79,17 @@ export default function AuthCallbackPage() {
         } catch (error) {
           console.error("Failed to refresh profile after auth:", error);
           // Still show success message and navigate, profile might load on next page
-          toast.success(t(messageMeta.key, "Вы успешно вошли"));
+          toast.success(t(messageMeta.key));
         }
       } else if (status === "discord_conflict") {
         analytics.loginError("discord", "conflict");
-        toast.error(
-          t(
-            messageMeta.key,
-            "Этот Discord аккаунт уже привязан к другой учетной записи"
-          )
-        );
+        toast.error(t(messageMeta.key));
       } else if (status === "steam_conflict") {
         analytics.loginError("steam", "conflict");
-        toast.error(
-          t(
-            messageMeta.key,
-            "Этот Steam аккаунт уже привязан к другой учетной записи"
-          )
-        );
+        toast.error(t(messageMeta.key));
       } else if (status === "telegram_conflict") {
         analytics.loginError("telegram", "conflict");
-        toast.error(
-          t(
-            messageMeta.key,
-            "Этот Telegram аккаунт уже привязан к другой учетной записи"
-          )
-        );
+        toast.error(t(messageMeta.key));
       } else if (status === "telegram_error") {
         // For telegram_error, try refreshing profile anyway with retries
         // The popup might have closed before we got the message, but auth might have succeeded
@@ -132,20 +117,20 @@ export default function AuthCallbackPage() {
           if (profileLoaded) {
             // Auth actually succeeded, show success
             analytics.loginSuccess("telegram");
-            toast.success(t("auth.success", "Вы успешно вошли"));
+            toast.success(t("auth.success"));
           } else {
             analytics.loginError("telegram", "error");
-            toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
+            toast.error(t(messageMeta.key));
           }
         } catch (error) {
           console.error("Failed to refresh profile on telegram_error:", error);
           analytics.loginError("telegram", "error");
-          toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
+          toast.error(t(messageMeta.key));
         }
       } else {
         const provider = status.includes("discord") ? "discord" : status.includes("steam") ? "steam" : status.includes("telegram") ? "telegram" : "unknown";
         analytics.loginError(provider, status);
-        toast.error(t(messageMeta.key, "Не удалось авторизоваться"));
+        toast.error(t(messageMeta.key));
       }
       navigate(redirect, { replace: true });
     };
@@ -157,7 +142,7 @@ export default function AuthCallbackPage() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center text-white">
       <span className="text-sm text-zinc-300">
-        {t("auth.loading", "Загрузка...")}
+        {t("auth.loading")}
       </span>
     </div>
   );

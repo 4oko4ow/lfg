@@ -57,7 +57,7 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
       >
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
           <span className="text-pink-500">✨</span>
-          {t("suggest_game.title", "Предложить игру")}
+          {t("suggest_game.title")}
         </h2>
 
         {submitted ? (
@@ -66,17 +66,14 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
               <span className="text-2xl">✓</span>
             </div>
             <p className="text-green-400 text-sm font-medium">
-              {t("suggest_game.thanks", "Спасибо! Мы учтём твоё предложение.")}
+              {t("suggest_game.thanks")}
             </p>
           </div>
         ) : (
           <>
             <input
               className="w-full p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-sm text-white mb-4 transition-colors hover:border-zinc-600"
-              placeholder={t(
-                "suggest_game.placeholder",
-                "Введи название игры"
-              )}
+              placeholder={t("suggest_game.placeholder")}
               value={game}
               onChange={(e) => setGame(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -89,10 +86,10 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
               {saving ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  {t("common.saving", "Сохранение…")}
+                  {t("common.saving")}
                 </span>
               ) : (
-                t("suggest_game.submit", "Отправить")
+                t("suggest_game.submit")
               )}
             </button>
           </>
@@ -102,7 +99,7 @@ const SuggestGameModal = ({ onClose }: { onClose: () => void }) => {
           className="mt-4 w-full text-sm text-zinc-400 hover:text-white transition-colors duration-200 py-2"
           onClick={onClose}
         >
-          {t("common.close", "Закрыть")}
+          {t("common.close")}
         </button>
       </div>
     </div>

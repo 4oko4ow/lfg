@@ -88,7 +88,7 @@ export default function PartyCard({
               {contact.preferred && (
                 <span className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full bg-blue-500/20 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase text-blue-200">
                   <StarIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                  <span className="hidden sm:inline">{t("party.preferred", "Основной")}</span>
+                  <span className="hidden sm:inline">{t("party.preferred")}</span>
                 </span>
               )}
             </>
@@ -132,11 +132,11 @@ export default function PartyCard({
     
     if (hours > 24) {
       const days = Math.floor(hours / 24);
-      return `${days} ${t("timeago.days_short", "дн")}`;
+      return `${days} ${t("timeago.days_short")}`;
     } else if (hours > 0) {
-      return `${hours} ${t("timeago.hours_short", "ч")}`;
+      return `${hours} ${t("timeago.hours_short")}`;
     } else {
-      return `${minutes} ${t("timeago.minutes_short", "мин")}`;
+      return `${minutes} ${t("timeago.minutes_short")}`;
     }
   };
 
@@ -171,21 +171,21 @@ export default function PartyCard({
             {isPinned && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-200 bg-gradient-to-r from-pink-500/20 to-pink-600/20 px-3 py-1.5 rounded-lg border border-pink-500/40 shadow-md shadow-pink-500/10 backdrop-blur-sm">
                 <BookmarkIcon className="w-4 h-4" />
-                {t("party.pinned", { defaultValue: "Закреплено" })}
+                {t("party.pinned")}
               </span>
             )}
 
             {isNewlyCreated && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-200 bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-3 py-1.5 rounded-lg border border-blue-500/40 shadow-md shadow-blue-500/10 backdrop-blur-sm animate-pulse">
                 <ClockIcon className="w-4 h-4" />
-                {t("party.new", { defaultValue: "Только что создано" })}
+                {t("party.new")}
               </span>
             )}
 
             {isAlmostFull && !isFull && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-yellow-200 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 px-3 py-1.5 rounded-lg border border-yellow-500/40 shadow-md shadow-yellow-500/10 backdrop-blur-sm">
                 <UserGroupIcon className="w-4 h-4" />
-                {t("party.almost_full", { defaultValue: "Почти заполнено" })}
+                {t("party.almost_full")}
               </span>
             )}
 
@@ -196,7 +196,7 @@ export default function PartyCard({
                   : "text-purple-200 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-500/40 shadow-purple-500/10"
               }`}>
                 <Timer className="w-4 h-4" />
-                {t("party.expires_in", { defaultValue: "Истекает через" })} {timeUntilExpiration}
+                {t("party.expires_in")} {timeUntilExpiration}
               </span>
             )}
           </div>
@@ -230,7 +230,7 @@ export default function PartyCard({
           </div>
           {isFull && (
             <span className="ml-2 text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/30 whitespace-nowrap">
-              {t("party.full", { defaultValue: "Заполнено" })}
+              {t("party.full")}
             </span>
           )}
         </div>

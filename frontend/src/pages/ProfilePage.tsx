@@ -25,19 +25,19 @@ const PROVIDERS: {
   id: SocialProvider;
   title: string;
   description: string;
-  placeholder: string;
+  placeholderKey: string;
 }[] = [
     {
       id: "steam",
       title: "Steam",
       description: "profile.steam_description",
-      placeholder: "https://steamcommunity.com/id/username",
+      placeholderKey: "profile.placeholders.steam",
     },
     {
       id: "discord",
       title: "Discord",
       description: "profile.discord_description",
-      placeholder: "username или @username",
+      placeholderKey: "profile.placeholders.discord",
     },
   ];
 
@@ -196,7 +196,7 @@ export default function ProfilePage() {
           {t("profile.title", "Your Profile")}
         </h1>
         <p className="text-zinc-400">
-          {t("profile.description", "Manage your contacts, view stats, and manage your parties.")}
+          {t("profile.description")}
         </p>
       </div>
 
@@ -440,7 +440,7 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       setValues((prev) => ({ ...prev, [provider.id]: e.target.value }))
                     }
-                    placeholder={provider.placeholder}
+                    placeholder={t(provider.placeholderKey)}
                     className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 hover:bg-zinc-900/70 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <button
