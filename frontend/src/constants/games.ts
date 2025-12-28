@@ -54,7 +54,14 @@ export const GAME_SLUGS = [
   "cuphead",
   "projectzomboid",
   "brawlstars",
-  "mobilelegends"
+  "mobilelegends",
+  "wewerehere",
+  "contentwarning",
+  "satisfactory",
+  "thebreakin",
+  "scpsecretlaboratory",
+  "worldoftanks",
+  "worldoftanksblitz"
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
@@ -114,7 +121,14 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   cuphead: "Cuphead",
   projectzomboid: "Project Zomboid",
   brawlstars: "Brawl Stars",
-  mobilelegends: "Mobile Legends"
+  mobilelegends: "Mobile Legends",
+  wewerehere: "We Were Here",
+  contentwarning: "Content Warning",
+  satisfactory: "Satisfactory",
+  thebreakin: "The Break-In",
+  scpsecretlaboratory: "SCP: Secret Laboratory",
+  worldoftanks: "World of Tanks",
+  worldoftanksblitz: "World of Tanks Blitz"
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })

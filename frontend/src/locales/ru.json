@@ -481,6 +481,27 @@
     },
     "mobilelegends": {
       "name": "Mobile Legends"
+    },
+    "wewerehere": {
+      "name": "We Were Here"
+    },
+    "contentwarning": {
+      "name": "Content Warning"
+    },
+    "satisfactory": {
+      "name": "Satisfactory"
+    },
+    "thebreakin": {
+      "name": "The Break-In"
+    },
+    "scpsecretlaboratory": {
+      "name": "SCP: Secret Laboratory"
+    },
+    "worldoftanks": {
+      "name": "World of Tanks"
+    },
+    "worldoftanksblitz": {
+      "name": "World of Tanks Blitz"
     }
   }
 }
