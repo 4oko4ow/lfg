@@ -43,9 +43,19 @@ const Chat = ({
     const saved = localStorage.getItem("chat_collapsed");
     return saved === "true";
   });
+  const chatOpenTime = useRef(Date.now());
+  const hasTrackedOpen = useRef(false);
 
   useEffect(() => {
     fetchMessages();
+
+    // Трекинг открытия чата
+    if (!hasTrackedOpen.current) {
+      const source = isMobile ? "mobile" : "auto";
+      analytics.chatOpened();
+      analytics.chatOpenedDetailed(source);
+      hasTrackedOpen.current = true;
+    }
 
     if (isMobile) analytics.chatMobile();
 
@@ -213,6 +223,8 @@ const Chat = ({
 
       if (!response.ok) {
         console.error("Chat send error:", response.status);
+        analytics.chatMessageFailed(`HTTP ${response.status}`);
+        analytics.chatMessageAttempt(trimmed.length);
       } else {
         analytics.chatMessageSent();
         analytics.chatMessageTyped(trimmed.length);
@@ -223,6 +235,9 @@ const Chat = ({
       }
     } catch (error) {
       console.error("Chat send error:", error);
+      const errorMessage = error instanceof Error ? error.message : "unknown";
+      analytics.chatMessageFailed(errorMessage);
+      analytics.chatMessageAttempt(trimmed.length);
     }
   };
 
@@ -236,8 +251,24 @@ const Chat = ({
   };
 
   const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+    const newCollapsed = !isCollapsed;
+    setIsCollapsed(newCollapsed);
+    if (newCollapsed) {
+      analytics.chatCollapsed();
+    } else {
+      analytics.chatExpanded();
+    }
   };
+
+  // Трекинг закрытия чата
+  useEffect(() => {
+    return () => {
+      if (hasTrackedOpen.current) {
+        const timeOpen = Date.now() - chatOpenTime.current;
+        analytics.chatClosed(timeOpen, messages.length);
+      }
+    };
+  }, [messages.length]);
 
   return (
     <div

@@ -178,4 +178,186 @@ export const analytics = {
   contactModalOpened: (game: string, partyId: string) => {
     track("contact_modal_opened", { game, party_id: partyId });
   },
+
+  // ===== ДЕТАЛЬНЫЙ ТРЕКИНГ =====
+
+  // Детальная авторизация
+  loginStart: (provider: string) => {
+    track("login_start", { provider, timestamp: Date.now() });
+  },
+
+  loginComplete: (provider: string, duration: number) => {
+    track("login_complete", { provider, duration_ms: duration });
+  },
+
+  loginFailed: (provider: string, errorType: string, errorMessage?: string) => {
+    track("login_failed", {
+      provider,
+      error_type: errorType,
+      error_message: errorMessage || "unknown"
+    });
+  },
+
+  loginCancelled: (provider: string) => {
+    track("login_cancelled", { provider });
+  },
+
+  loginTimeout: (provider: string, timeoutMs: number) => {
+    track("login_timeout", { provider, timeout_ms: timeoutMs });
+  },
+
+  // Воронка присоединения к партии
+  partyCardViewed: (game: string, partyId: string, position: number) => {
+    track("party_card_viewed", { game, party_id: partyId, position });
+  },
+
+  partyCardHover: (game: string, partyId: string) => {
+    track("party_card_hover", { game, party_id: partyId });
+  },
+
+  contactModalClosed: (game: string, partyId: string, action: "copy" | "close" | "none") => {
+    track("contact_modal_closed", { game, party_id: partyId, action });
+  },
+
+  contactModalClosedWithoutAction: (game: string, partyId: string, timeOpen: number) => {
+    track("contact_modal_closed_no_action", {
+      game,
+      party_id: partyId,
+      time_open_ms: timeOpen
+    });
+  },
+
+  // Детальный трекинг чата
+  chatOpenedDetailed: (source: "button" | "auto" | "mobile") => {
+    track("chat_opened_detailed", { source });
+  },
+
+  chatClosed: (timeOpen: number, messagesCount: number) => {
+    track("chat_closed", { time_open_ms: timeOpen, messages_count: messagesCount });
+  },
+
+  chatMessageFailed: (error: string) => {
+    track("chat_message_failed", { error });
+  },
+
+  chatMessageAttempt: (length: number) => {
+    track("chat_message_attempt", { length });
+  },
+
+  chatCollapsed: () => {
+    track("chat_collapsed");
+  },
+
+  chatExpanded: () => {
+    track("chat_expanded");
+  },
+
+  // Время до первого действия
+  timeToFeed: (duration: number) => {
+    track("time_to_feed", { duration_ms: duration });
+  },
+
+  timeToJoin: (duration: number) => {
+    track("time_to_join", { duration_ms: duration });
+  },
+
+  timeToCreateParty: (duration: number) => {
+    track("time_to_create_party", { duration_ms: duration });
+  },
+
+  timeToFirstAction: (action: string, duration: number) => {
+    track("time_to_first_action", { action, duration_ms: duration });
+  },
+
+  // Retention и сессии
+  sessionStart: (isReturning: boolean) => {
+    track("session_start", { is_returning: isReturning ? 1 : 0 });
+  },
+
+  sessionEnd: (duration: number, actionsCount: number) => {
+    track("session_end", { duration_ms: duration, actions_count: actionsCount });
+  },
+
+  userReturned: (daysSinceLastVisit: number) => {
+    track("user_returned", { days_since_last_visit: daysSinceLastVisit });
+  },
+
+  // Детальный WebSocket трекинг
+  wsReconnectAttempt: (attemptNumber: number, timeSinceDisconnect: number) => {
+    track("ws_reconnect_attempt", {
+      attempt_number: attemptNumber,
+      time_since_disconnect_ms: timeSinceDisconnect
+    });
+  },
+
+  wsReconnectSuccess: (attemptNumber: number, totalTime: number) => {
+    track("ws_reconnect_success", {
+      attempt_number: attemptNumber,
+      total_time_ms: totalTime
+    });
+  },
+
+  wsReconnectFailed: (attemptNumber: number, error: string) => {
+    track("ws_reconnect_failed", {
+      attempt_number: attemptNumber,
+      error
+    });
+  },
+
+  wsConnectionDuration: (duration: number) => {
+    track("ws_connection_duration", { duration_ms: duration });
+  },
+
+  // Опрос "почему не присоединились"
+  noJoinSurveyClosed: (timeShown: number, responded: boolean) => {
+    track("no_join_survey_closed", {
+      time_shown_ms: timeShown,
+      responded: responded ? 1 : 0
+    });
+  },
+
+  noJoinSurveyDismissed: (timeShown: number) => {
+    track("no_join_survey_dismissed", { time_shown_ms: timeShown });
+  },
+
+  // Создание партии - детали
+  createPartyStart: (game: string) => {
+    track("create_party_start", { game });
+  },
+
+  createPartyAbandoned: (game: string, step: string, timeSpent: number) => {
+    track("create_party_abandoned", {
+      game,
+      abandoned_at_step: step,
+      time_spent_ms: timeSpent
+    });
+  },
+
+  createPartyValidationError: (game: string, field: string) => {
+    track("create_party_validation_error", { game, field });
+  },
+
+  // Фильтры и поиск
+  filterApplied: (game: string, partiesCount: number) => {
+    track("filter_applied", { game, parties_count: partiesCount });
+  },
+
+  filterCleared: () => {
+    track("filter_cleared");
+  },
+
+  // Просмотр профиля
+  profileSectionViewed: (section: string) => {
+    track("profile_section_viewed", { section });
+  },
+
+  // Ошибки API
+  apiErrorDetailed: (endpoint: string, method: string, status: number, error: string) => {
+    track("api_error_detailed", {
+      endpoint,
+      method,
+      status,
+      error
+    });
+  },
 };  

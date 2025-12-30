@@ -5,6 +5,9 @@ import { analytics } from "../utils/analytics";
 export let socket: WebSocket | null = null; // <-- экспортируем
 
 const listeners: ((msg: Message) => void)[] = [];
+let reconnectAttempt = 0;
+let disconnectTime: number | null = null;
+let connectionStartTime: number | null = null;
 
 function getWebSocketURL(): string {
   const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
@@ -25,11 +28,39 @@ function getWebSocketURL(): string {
 export function connectWS() {
   const wsUrl = getWebSocketURL();
   console.log("[WebSocket] Connecting to:", wsUrl);
+  
+  // Трекинг попытки переподключения
+  if (disconnectTime !== null) {
+    const timeSinceDisconnect = Date.now() - disconnectTime;
+    reconnectAttempt++;
+    analytics.wsReconnectAttempt(reconnectAttempt, timeSinceDisconnect);
+  } else {
+    reconnectAttempt = 0;
+  }
+  
   socket = new WebSocket(wsUrl);
+  connectionStartTime = Date.now();
 
   socket.onopen = () => {
     console.log("✅ WebSocket connected");
     analytics.wsConnected();
+    
+    // Трекинг успешного переподключения
+    if (reconnectAttempt > 0) {
+      const totalTime = disconnectTime ? Date.now() - disconnectTime : 0;
+      analytics.wsReconnectSuccess(reconnectAttempt, totalTime);
+      reconnectAttempt = 0;
+      disconnectTime = null;
+    }
+    
+    // Трекинг длительности соединения при закрытии
+    if (connectionStartTime) {
+      const connectionDuration = Date.now() - connectionStartTime;
+      // Отслеживаем длительность только для стабильных соединений (> 5 секунд)
+      if (connectionDuration > 5000) {
+        analytics.wsConnectionDuration(connectionDuration);
+      }
+    }
   };
 
   socket.onmessage = (event) => {
@@ -43,12 +74,30 @@ export function connectWS() {
 
   socket.onerror = (error) => {
     console.error("❌ WebSocket error:", error);
-    analytics.wsError("connection_error");
+    const errorMessage = error instanceof Error ? error.message : "connection_error";
+    analytics.wsError(errorMessage);
+    
+    // Трекинг неудачного переподключения
+    if (reconnectAttempt > 0) {
+      analytics.wsReconnectFailed(reconnectAttempt, errorMessage);
+    }
   };
 
   socket.onclose = () => {
     console.warn("WebSocket closed, retrying in 2s");
     analytics.wsDisconnected();
+    
+    // Сохраняем время отключения для трекинга
+    disconnectTime = Date.now();
+    
+    // Трекинг длительности соединения
+    if (connectionStartTime) {
+      const connectionDuration = Date.now() - connectionStartTime;
+      if (connectionDuration > 1000) { // Трекаем только соединения длительнее 1 секунды
+        analytics.wsConnectionDuration(connectionDuration);
+      }
+    }
+    
     setTimeout(connectWS, 2000);
   };
 }

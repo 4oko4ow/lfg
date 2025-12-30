@@ -24,9 +24,24 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasReceivedParties, setHasReceivedParties] = useState(false);
   const hasReceivedDataRef = useRef(false);
+  const landingStartTime = useRef(Date.now());
 
   useEffect(() => {
     analytics.landingPageView();
+
+    // Трекинг retention
+    const lastVisit = localStorage.getItem("last_visit");
+    const isReturning = !!lastVisit;
+    analytics.sessionStart(isReturning);
+
+    if (lastVisit) {
+      const daysSince = Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24));
+      if (daysSince > 0) {
+        analytics.userReturned(daysSince);
+      }
+    }
+    localStorage.setItem("last_visit", Date.now().toString());
+
     connectWS();
 
     // Таймаут на случай, если данные не придут
@@ -91,6 +106,11 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 to={feedPath}
+                onClick={() => {
+                  const duration = Date.now() - landingStartTime.current;
+                  analytics.timeToFeed(duration);
+                  analytics.timeToFirstAction("feed", duration);
+                }}
                 className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
               >
                 {t("landing.cta.browse", "Browse Parties")}
@@ -217,6 +237,11 @@ export default function LandingPage() {
           </p>
           <Link
             to={feedPath}
+            onClick={() => {
+              const duration = Date.now() - landingStartTime.current;
+              analytics.timeToFeed(duration);
+              analytics.timeToFirstAction("feed", duration);
+            }}
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
           >
             {t("landing.cta_section.button", "Get Started Now")}

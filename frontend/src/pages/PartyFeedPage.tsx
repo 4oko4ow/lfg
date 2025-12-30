@@ -196,6 +196,10 @@ function PartyFeedPage() {
     });
     analytics.enableAutoPageviews();
     analytics.feedPageView();
+    
+    // Трекинг времени до первого присоединения
+    const feedStartTime = Date.now();
+    sessionStorage.setItem("feed_start_time", feedStartTime.toString());
 
     return () => clearTimeout(fallbackTimeout);
   }, []);
@@ -292,6 +296,17 @@ function PartyFeedPage() {
   const handleContactClick = (party: Party) => {
     analytics.joinPartyClick(party.game);
     analytics.contactModalOpened(party.game, party.id);
+    
+    // Трекинг времени до присоединения
+    const feedStartTime = sessionStorage.getItem("feed_start_time");
+    if (feedStartTime) {
+      const duration = Date.now() - parseInt(feedStartTime);
+      analytics.timeToJoin(duration);
+      analytics.timeToFirstAction("join", duration);
+    }
+    
+    // Сохраняем game для трекинга в модалке
+    sessionStorage.setItem(`contact_modal_game_${party.id}`, party.game);
     if (party.joined >= party.slots) {
       analytics.partyFullClick(party.game);
     }
@@ -510,7 +525,11 @@ function PartyFeedPage() {
                 className="animate-fadeIn"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <PartyCard party={party} onContactClick={() => handleContactClick(party)} />
+                <PartyCard 
+                  party={party} 
+                  onContactClick={() => handleContactClick(party)}
+                  position={index}
+                />
         </div>
             ))}
             {/* Show skeleton for new items being loaded */}
@@ -548,7 +567,11 @@ function PartyFeedPage() {
                 className="animate-fadeIn"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <PartyCard party={party} onContactClick={() => handleContactClick(party)} />
+                <PartyCard 
+                  party={party} 
+                  onContactClick={() => handleContactClick(party)}
+                  position={index}
+                />
               </div>
             ))}
           </div>

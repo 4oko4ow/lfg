@@ -46,6 +46,15 @@ export default function CreatePartyForm({
     const [preferredMethod, setPreferredMethod] = useState<ContactMethodType | null>(
         availableMethods[0] ?? null
     );
+    const formStartTime = useRef<number | null>(null);
+
+    // Трекинг начала создания партии
+    useEffect(() => {
+        if (!formStartTime.current) {
+            formStartTime.current = Date.now();
+            analytics.createPartyStart(game);
+        }
+    }, [game]);
 
     // Calculate game popularity from parties
     const gameCounts = useMemo(() => {
@@ -160,10 +169,23 @@ export default function CreatePartyForm({
 
         if (!canSubmit) {
             console.warn("⚠️  Cannot submit:", { availableMethods: availableMethods.length, selectedMethods: selectedMethods.length });
+            analytics.createPartyValidationError(game, "canSubmit");
+            return;
+        }
+
+        if (!goal.trim()) {
+            analytics.createPartyValidationError(game, "goal");
             return;
         }
 
         analytics.createPartySubmit(game);
+
+        // Трекинг времени до создания партии
+        if (formStartTime.current) {
+            const duration = Date.now() - formStartTime.current;
+            analytics.timeToCreateParty(duration);
+            analytics.timeToFirstAction("create_party", duration);
+        }
 
         const effectivePreferred =
             preferredMethod && selectedMethods.includes(preferredMethod)

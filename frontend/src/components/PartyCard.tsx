@@ -11,6 +11,8 @@ import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getGameName } from "../constants/games";
 import { StarIcon } from "@heroicons/react/20/solid";
+import { analytics } from "../utils/analytics";
+import { useEffect, useRef } from "react";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -61,11 +63,22 @@ const CONTACT_ICONS: Record<string, { icon: ReactNode; label: string }> = {
 export default function PartyCard({
   party,
   onContactClick,
+  position,
 }: {
   party: Party;
   onContactClick: () => void;
+  position?: number;
 }) {
   const { t } = useTranslation();
+  const hasTrackedView = useRef(false);
+
+  // Трекинг просмотра карточки (только один раз)
+  useEffect(() => {
+    if (!hasTrackedView.current && position !== undefined) {
+      analytics.partyCardViewed(party.game, party.id, position);
+      hasTrackedView.current = true;
+    }
+  }, [party.game, party.id, position]);
 
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
@@ -143,8 +156,13 @@ export default function PartyCard({
   const timeUntilExpiration = getTimeUntilExpiration();
   const isExpiringSoon = party.expires_at && new Date(party.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000; // Less than 2 hours
 
+  const handleMouseEnter = () => {
+    analytics.partyCardHover(party.game, party.id);
+  };
+
   return (
     <div
+      onMouseEnter={handleMouseEnter}
       className={`group relative rounded-xl p-5 sm:p-6 border transition-all duration-300 text-white space-y-4 w-full backdrop-blur-sm
       ${isPinned
           ? "bg-gradient-to-br from-pink-950/40 via-pink-900/30 to-purple-950/40 border-pink-500/50 hover:border-pink-400/70 hover:shadow-lg hover:shadow-pink-500/20"

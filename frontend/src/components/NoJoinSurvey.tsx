@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 export function NoJoinSurvey({ visible }: { visible: boolean }) {
     const { t } = useTranslation();
     const [dismissed, setDismissed] = useState(false);
+    const surveyShownTime = useRef<number | null>(null);
+    const hasResponded = useRef(false);
 
     // безопасно тянем массив причин из i18n
     const reasons = useMemo(() => {
@@ -26,16 +28,27 @@ export function NoJoinSurvey({ visible }: { visible: boolean }) {
     }, []);
 
     useEffect(() => {
-        if (visible && !dismissed) analytics.noJoinSurveyShown();
+        if (visible && !dismissed) {
+            analytics.noJoinSurveyShown();
+            surveyShownTime.current = Date.now();
+        }
     }, [visible, dismissed]);
 
     const handleClick = (reason: string) => {
+        hasResponded.current = true;
         analytics.noJoinFeedback(reason);
+        const timeShown = surveyShownTime.current ? Date.now() - surveyShownTime.current : 0;
+        analytics.noJoinSurveyClosed(timeShown, true);
         localStorage.setItem("noJoinDismissed", "true");
         setDismissed(true);
     };
 
     const handleClose = () => {
+        const timeShown = surveyShownTime.current ? Date.now() - surveyShownTime.current : 0;
+        if (!hasResponded.current) {
+            analytics.noJoinSurveyClosed(timeShown, false);
+            analytics.noJoinSurveyDismissed(timeShown);
+        }
         localStorage.setItem("noJoinDismissed", "true");
         setDismissed(true);
     };

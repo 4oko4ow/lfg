@@ -25,22 +25,40 @@ export default function ContactModal({
   const { t } = useTranslation();
   // Флаг для отслеживания, было ли уже отправлено join для этого объявления
   const joinSentRef = useRef(false);
+  const modalOpenTime = useRef(Date.now());
+  const actionTaken = useRef(false);
+  const game = useRef<string | null>(null);
 
   useEffect(() => {
+    // Получаем game из sessionStorage (сохраняется при открытии модалки)
+    const storedGame = sessionStorage.getItem(`contact_modal_game_${partyId}`);
+    game.current = storedGame;
+
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
-  }, [onClose]);
+  }, [onClose, partyId]);
 
   // Сбрасываем флаг при закрытии модального окна
   useEffect(() => {
     return () => {
       joinSentRef.current = false;
+      // Трекинг закрытия модалки
+      const timeOpen = Date.now() - modalOpenTime.current;
+      const gameName = game.current || "unknown";
+      if (!actionTaken.current) {
+        analytics.contactModalClosedWithoutAction(gameName, partyId, timeOpen);
+        analytics.contactModalClosed(gameName, partyId, "none");
+      }
     };
   }, []);
 
   const handleCopy = async (value: string) => {
+    actionTaken.current = true;
     analytics.contactCopy();
+    const gameName = game.current || "unknown";
+    analytics.contactModalClosed(gameName, partyId, "copy");
+
     // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
       sendJoinParty(partyId);
@@ -56,7 +74,11 @@ export default function ContactModal({
   };
 
   const handleOpen = (url: string) => {
+    actionTaken.current = true;
     analytics.contactCopy();
+    const gameName = game.current || "unknown";
+    analytics.contactModalClosed(gameName, partyId, "copy");
+
     // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
       sendJoinParty(partyId);
@@ -67,9 +89,17 @@ export default function ContactModal({
     onClose();
   };
 
+  const handleClose = () => {
+    const gameName = game.current || "unknown";
+    if (!actionTaken.current) {
+      analytics.contactModalClosed(gameName, partyId, "close");
+    }
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
-      <div 
+    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn" onClick={handleClose}>
+      <div
         className="bg-zinc-900/95 backdrop-blur-md p-6 rounded-xl w-full max-w-md text-white space-y-4 shadow-2xl border border-zinc-700/50 animate-slideIn"
         onClick={(e) => e.stopPropagation()}
       >
@@ -93,9 +123,9 @@ export default function ContactModal({
                     {
                       CONTACT_LABELS[contact.type]
                         ? t(
-                            CONTACT_LABELS[contact.type].key,
-                            CONTACT_LABELS[contact.type].defaultValue
-                          )
+                          CONTACT_LABELS[contact.type].key,
+                          CONTACT_LABELS[contact.type].defaultValue
+                        )
                         : contact.type
                     }
                   </span>
@@ -129,7 +159,7 @@ export default function ContactModal({
         )}
         <div className="flex justify-end pt-2">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
           >
             {t("ui.close")}
