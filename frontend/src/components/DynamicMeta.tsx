@@ -16,9 +16,9 @@ function getOrigin() {
 /** Мета для главной страницы (когда нет ?game) */
 const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
   ru: {
-    title: "Найти тиммейтов — FindParty Online | Поиск напарников для кооп игр: CS2, Dota 2, Valorant, Apex",
+    title: "Сайт для поиска тиммейтов — FindParty Online | Поиск тиммейтов для Dota 2, CS2, Rust, Fortnite",
     description:
-      "Найти тиммейтов для кооп игр? FindParty — быстрый поиск напарников и команды для CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld и других топовых кооп игр. Поиск игроков майнкрафт, поиск тиммейтов, поиск группы в таркове, найти напарника для игр, киберспортивные команды, как поступить в киберспорт. Без регистрации, живой чат, всё бесплатно.",
+      "Сайт для поиска тиммейтов? FindParty — быстрый поиск тиммейтов для Dota 2, CS2, Rust, Fortnite, Valorant, Minecraft, Apex, PUBG, Tarkov, REPO и других игр. Поиск тиммейтов дота 2, поиск тиммейтов раст, поиск тиммейтов кс 2, поиск тиммейтов фортнайт, поиск тиммейтов валорант, поиск тиммейтов майнкрафт. Без регистрации, живой чат, всё бесплатно.",
   },
   en: {
     title: "Find Teammates — FindParty Online | Find Partners for Co-op Games: CS2, Dota 2, Valorant, Apex",
