@@ -16,14 +16,14 @@ function getOrigin() {
 /** Мета для главной страницы (когда нет ?game) */
 const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
   ru: {
-    title: "Ищу тиммейтов — FindParty Online",
+    title: "Ищу тиммейтов — FindParty Online | Топ кооп игры: CS2, Dota 2, Valorant, Apex",
     description:
-      "Ищу тиммейтов для Steam игр? FindParty — быстрый поиск тиммейтов для Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft и других. Бесплатно, без регистрации.",
+      "Ищу тиммейтов для топовых кооп игр? FindParty — быстрый поиск команды для CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld и других популярных онлайн игр. Без регистрации, живой чат, всё бесплатно.",
   },
   en: {
-    title: "Find Teammates — FindParty Online",
+    title: "Find Teammates — FindParty Online | Top Co-op Games: CS2, Dota 2, Valorant, Apex",
     description:
-      "Looking for teammates for Steam games? FindParty — quick teammate finder for Valorant, Fortnite, Apex, CS2, Dota 2, Rust, Minecraft and more. Free, no registration.",
+      "Looking for teammates for top co-op games? FindParty — quick teammate finder for CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld and other popular online games. Free, no registration.",
   },
 };
 
@@ -134,6 +134,61 @@ const GAME_SEO: Record<
       description:
         "Ищу тиммейтов для игры Arc Raiders? Найди пати для кооперативных рейдов и командной игры. Всё бесплатно, без регистрации. Создай объявление или вступи сейчас.",
     },
+    lol: {
+      title: "Ищу пати в League of Legends — Найди команду",
+      description:
+        "Ищешь команду для League of Legends? Найди тиммейтов для ранкеда, нормсов или клоша. Создай или вступи в пати за секунды. Без регистрации.",
+    },
+    overwatch2: {
+      title: "Ищу тиммейтов в Overwatch 2 — FindParty",
+      description:
+        "Ищешь команду для Overwatch 2? Найди тиммейтов для ранкеда, быстрых матчей или аркады. Создай пати или вступи в готовую команду. Всё бесплатно.",
+    },
+    warzone: {
+      title: "Ищу пати в Call of Duty: Warzone — Найди команду",
+      description:
+        "Ищешь команду для Warzone? Найди тиммейтов для рейдов, боевого зона или ресёрдженса. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    r6siege: {
+      title: "Ищу тиммейтов в Rainbow Six Siege — FindParty",
+      description:
+        "Ищешь команду для Rainbow Six Siege? Найди тиммейтов для ранкеда, казуала или неранкеда. Создай пати или вступи в готовую команду. Всё бесплатно.",
+    },
+    helldivers2: {
+      title: "Ищу пати в Helldivers 2 — Найди команду",
+      description:
+        "Ищешь команду для Helldivers 2? Найди тиммейтов для кооперативных миссий и рейдов. Создай или вступи в пати за секунды. Без регистрации.",
+    },
+    palworld: {
+      title: "Ищу тиммейтов в Palworld — FindParty",
+      description:
+        "Ищешь команду для Palworld? Найди тиммейтов для выживания, крафта и приключений. Создай пати или вступи в готовую команду. Всё бесплатно.",
+    },
+    destiny2: {
+      title: "Ищу пати в Destiny 2 — Найди команду",
+      description:
+        "Ищешь команду для Destiny 2? Найди тиммейтов для рейдов, страйков, гамбита или PvP. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    warframe: {
+      title: "Ищу тиммейтов в Warframe — FindParty",
+      description:
+        "Ищешь команду для Warframe? Найди тиммейтов для миссий, рейдов или эйдолонов. Создай пати или вступи в готовую команду. Всё бесплатно.",
+    },
+    lostark: {
+      title: "Ищу пати в Lost Ark — Найди команду",
+      description:
+        "Ищешь команду для Lost Ark? Найди тиммейтов для рейдов, данжей или PvP. Создай или вступи в пати за секунды. Без регистрации.",
+    },
+    seaofthieves: {
+      title: "Ищу тиммейтов в Sea of Thieves — FindParty",
+      description:
+        "Ищешь команду для Sea of Thieves? Найди тиммейтов для пиратских приключений, рейдов и сокровищ. Создай пати или вступи в готовую команду. Всё бесплатно.",
+    },
+    phasmophobia: {
+      title: "Ищу пати в Phasmophobia — Найди команду",
+      description:
+        "Ищешь команду для Phasmophobia? Найди тиммейтов для охоты на призраков и расследований. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
   },
   en: {
     repo: {
@@ -231,6 +286,61 @@ const GAME_SEO: Record<
       description:
         "Looking for teammates for Arc Raiders? Find a party for co-op raids and team play. Free, no registration. Create or join now on FindParty.",
     },
+    lol: {
+      title: "League of Legends LFG — Find a Team",
+      description:
+        "Looking for a League of Legends team? Find teammates for ranked, normals or clash. Create or join a party in seconds. No registration.",
+    },
+    overwatch2: {
+      title: "Overwatch 2 LFG — Find Teammates",
+      description:
+        "Looking for an Overwatch 2 team? Find teammates for ranked, quick play or arcade. Create a party or join an existing team. Free.",
+    },
+    warzone: {
+      title: "Call of Duty: Warzone LFG — Find a Squad",
+      description:
+        "Looking for a Warzone squad? Find teammates for raids, battle royale or resurgence. Create or join a party now. No registration.",
+    },
+    r6siege: {
+      title: "Rainbow Six Siege LFG — Find Teammates",
+      description:
+        "Looking for a Rainbow Six Siege team? Find teammates for ranked, casual or unranked. Create a party or join an existing team. Free.",
+    },
+    helldivers2: {
+      title: "Helldivers 2 LFG — Find a Squad",
+      description:
+        "Looking for a Helldivers 2 squad? Find teammates for co-op missions and raids. Create or join a party in seconds. No registration.",
+    },
+    palworld: {
+      title: "Palworld LFG — Find Teammates",
+      description:
+        "Looking for a Palworld team? Find teammates for survival, crafting and adventures. Create a party or join an existing team. Free.",
+    },
+    destiny2: {
+      title: "Destiny 2 LFG — Find a Team",
+      description:
+        "Looking for a Destiny 2 team? Find teammates for raids, strikes, gambit or PvP. Create or join a party now. No registration.",
+    },
+    warframe: {
+      title: "Warframe LFG — Find Teammates",
+      description:
+        "Looking for a Warframe team? Find teammates for missions, raids or eidolons. Create a party or join an existing team. Free.",
+    },
+    lostark: {
+      title: "Lost Ark LFG — Find a Team",
+      description:
+        "Looking for a Lost Ark team? Find teammates for raids, dungeons or PvP. Create or join a party in seconds. No registration.",
+    },
+    seaofthieves: {
+      title: "Sea of Thieves LFG — Find Teammates",
+      description:
+        "Looking for a Sea of Thieves crew? Find teammates for pirate adventures, raids and treasure. Create a party or join an existing team. Free.",
+    },
+    phasmophobia: {
+      title: "Phasmophobia LFG — Find a Team",
+      description:
+        "Looking for a Phasmophobia team? Find teammates for ghost hunting and investigations. Create or join a party now. No registration.",
+    },
   },
 };
 
@@ -261,6 +371,17 @@ export function DynamicMeta() {
     "abioticfactor",
     "lethalcompany",
     "arcraiders",
+    "lol",
+    "overwatch2",
+    "warzone",
+    "r6siege",
+    "helldivers2",
+    "palworld",
+    "destiny2",
+    "warframe",
+    "lostark",
+    "seaofthieves",
+    "phasmophobia",
   ]);
 
   const game = knownSlugs.has(raw) ? raw : null;
