@@ -16,14 +16,14 @@ function getOrigin() {
 /** Мета для главной страницы (когда нет ?game) */
 const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
   ru: {
-    title: "Ищу тиммейтов — FindParty Online | Топ кооп игры: CS2, Dota 2, Valorant, Apex",
+    title: "Найти тиммейтов — FindParty Online | Поиск напарников для кооп игр: CS2, Dota 2, Valorant, Apex",
     description:
-      "Ищу тиммейтов для топовых кооп игр? FindParty — быстрый поиск команды для CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld и других популярных онлайн игр. Без регистрации, живой чат, всё бесплатно.",
+      "Найти тиммейтов для кооп игр? FindParty — быстрый поиск напарников и команды для CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld и других топовых кооп игр. Поиск игроков майнкрафт, поиск тиммейтов, поиск группы в таркове, найти напарника для игр, киберспортивные команды, как поступить в киберспорт. Без регистрации, живой чат, всё бесплатно.",
   },
   en: {
-    title: "Find Teammates — FindParty Online | Top Co-op Games: CS2, Dota 2, Valorant, Apex",
+    title: "Find Teammates — FindParty Online | Find Partners for Co-op Games: CS2, Dota 2, Valorant, Apex",
     description:
-      "Looking for teammates for top co-op games? FindParty — quick teammate finder for CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld and other popular online games. Free, no registration.",
+      "Find teammates for co-op games? FindParty — quick way to find partners and teams for CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld and other top co-op games. Find Minecraft players, find teammates, esports teams. Free, no registration.",
   },
 };
 
@@ -40,9 +40,9 @@ const GAME_SEO: Record<
 > = {
   ru: {
     repo: {
-      title: "Ищу тиммейтов для игры REPO — FindParty",
+      title: "Поиск игроков для R.E.P.O — FindParty | Найти команду и тиммейтов",
       description:
-        "Ищу тиммейтов для игры REPO? Найди пати по R.E.P.O за секунды. Всё бесплатно, без регистрации. Вступи или создай объявление прямо сейчас.",
+        "Поиск игроков для R.E.P.O? FindParty — быстрый способ найти команду и тиммейтов для игры R.E.P.O. Создай пати или вступи в готовую команду за 10 секунд. Без регистрации, всё бесплатно.",
     },
     dota2: {
       title: "Ищу пати в Dota 2 — С кем поиграть",
@@ -70,14 +70,14 @@ const GAME_SEO: Record<
         "Rust требует слаженной игры — найди подходящую пати на FindParty.",
     },
     minecraft: {
-      title: "Ищу игроков в Minecraft — Найди с кем поиграть",
+      title: "Поиск игроков майнкрафт — Найти команду и тиммейтов",
       description:
-        "Найди друзей для выживания, креатива, мини-игр или модов в Minecraft. Без регистрации.",
+        "Поиск игроков майнкрафт? FindParty — быстрый способ найти команду и игроков для выживания, креатива, мини-игр или модов в Minecraft. Создай пати или вступи в готовую команду. Без регистрации.",
     },
     tarkov: {
-      title: "Пати в Escape from Tarkov — Найди напарников",
+      title: "Поиск группы в таркове — Найди команду и тарков тиммейты",
       description:
-        "Найди команду для Tarkov — голос, координация, опыт. Создай или вступи прямо сейчас.",
+        "Поиск группы в таркове? Тарков тиммейты? FindParty — быстрый способ найти команду и напарников для Escape from Tarkov. Голос, координация, опыт. Создай или вступи в группу прямо сейчас. Без регистрации.",
     },
     fortnite: {
       title: "С кем поиграть в Fortnite — Пати без регистрации",
@@ -192,9 +192,9 @@ const GAME_SEO: Record<
   },
   en: {
     repo: {
-      title: "Find Teammates for R.E.P.O — FindParty",
+      title: "Find Players for R.E.P.O — FindParty | Find Team and Teammates",
       description:
-        "Looking for teammates for R.E.P.O game? Find a R.E.P.O party in seconds. Free, no registration. Join or create a listing right now.",
+        "Looking for players for R.E.P.O? FindParty — quick way to find a team and teammates for R.E.P.O game. Create a party or join an existing team in 10 seconds. Free, no registration.",
     },
     dota2: {
       title: "Dota 2 LFG — Find a Party",
@@ -222,14 +222,14 @@ const GAME_SEO: Record<
         "Rust needs coordination — find the right party on FindParty.",
     },
     minecraft: {
-      title: "Minecraft LFG — Find Friends to Play",
+      title: "Find Minecraft Players — Find Team and Teammates",
       description:
-        "Find players for survival, creative, mini-games or modded Minecraft. No registration.",
+        "Looking for Minecraft players? FindParty — quick way to find a team and players for survival, creative, mini-games or modded Minecraft. Create a party or join an existing team. No registration.",
     },
     tarkov: {
-      title: "Escape from Tarkov LFG — Find Teammates",
+      title: "Escape from Tarkov LFG — Find Group and Teammates",
       description:
-        "Find a Tarkov squad with voice and experience. Create or join instantly.",
+        "Looking for an Escape from Tarkov group? FindParty — quick way to find a squad with voice and experience. Create or join a group instantly. No registration.",
     },
     fortnite: {
       title: "Fortnite LFG — Play Without Solo",
