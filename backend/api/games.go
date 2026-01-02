@@ -38,7 +38,8 @@ func (h *GamesHandler) SuggestGame(w http.ResponseWriter, r *http.Request) {
 		CREATE TABLE IF NOT EXISTS suggested_games (
 			id SERIAL PRIMARY KEY,
 			game TEXT NOT NULL,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			added BOOLEAN NOT NULL DEFAULT FALSE
 		)
 	`)
 	if err != nil {
@@ -46,8 +47,8 @@ func (h *GamesHandler) SuggestGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = h.db.Exec(`
-		INSERT INTO suggested_games (game, created_at)
-		VALUES ($1, NOW())
+		INSERT INTO suggested_games (game, created_at, added)
+		VALUES ($1, NOW(), FALSE)
 	`, req.Game)
 
 	if err != nil {

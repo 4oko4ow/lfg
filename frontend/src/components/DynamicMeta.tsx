@@ -189,6 +189,21 @@ const GAME_SEO: Record<
       description:
         "Ищешь команду для Phasmophobia? Найди тиммейтов для охоты на призраков и расследований. Создай или вступи в пати прямо сейчас. Без регистрации.",
     },
+    wewerehere: {
+      title: "Ищу пати в We Were Here — Найди команду",
+      description:
+        "Ищешь команду для We Were Here? Найди тиммейтов для кооперативных головоломок и приключений. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    plateup: {
+      title: "Ищу пати в Plate Up — Найди команду",
+      description:
+        "Ищешь команду для Plate Up? Найди тиммейтов для кооперативного ресторанного симулятора. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    stalcraft: {
+      title: "Ищу пати в Stalcraft — Найди команду",
+      description:
+        "Ищешь команду для Stalcraft? Найди тиммейтов для выживания в зоне отчуждения. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
   },
   en: {
     repo: {
@@ -341,6 +356,21 @@ const GAME_SEO: Record<
       description:
         "Looking for a Phasmophobia team? Find teammates for ghost hunting and investigations. Create or join a party now. No registration.",
     },
+    wewerehere: {
+      title: "We Were Here LFG — Find a Team",
+      description:
+        "Looking for a We Were Here team? Find teammates for cooperative puzzles and adventures. Create or join a party now. No registration.",
+    },
+    plateup: {
+      title: "Plate Up LFG — Find a Team",
+      description:
+        "Looking for a Plate Up team? Find teammates for cooperative restaurant simulation. Create or join a party now. No registration.",
+    },
+    stalcraft: {
+      title: "Stalcraft LFG — Find a Team",
+      description:
+        "Looking for a Stalcraft team? Find teammates for survival in the exclusion zone. Create or join a party now. No registration.",
+    },
   },
 };
 
@@ -382,6 +412,9 @@ export function DynamicMeta() {
     "lostark",
     "seaofthieves",
     "phasmophobia",
+    "wewerehere",
+    "plateup",
+    "stalcraft",
   ]);
 
   const game = knownSlugs.has(raw) ? raw : null;
