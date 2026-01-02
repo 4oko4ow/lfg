@@ -63,7 +63,16 @@ export const GAME_SLUGS = [
   "thebreakin",
   "scpsecretlaboratory",
   "worldoftanks",
-  "worldoftanksblitz"
+  "worldoftanksblitz",
+  "drivebeyondhorizons",
+  "beamngdrive",
+  "7daystodie",
+  "magearena",
+  "barotrauma",
+  "nomansky",
+  "dontstarvetogether",
+  "readyornot",
+  "standoff2"
 ] as const;
 
 export type GameSlug = typeof GAME_SLUGS[number];
@@ -132,7 +141,16 @@ export const SLUG_TO_FALLBACK_NAME: Record<GameSlug, string> = {
   thebreakin: "The Break-In",
   scpsecretlaboratory: "SCP: Secret Laboratory",
   worldoftanks: "World of Tanks",
-  worldoftanksblitz: "World of Tanks Blitz"
+  worldoftanksblitz: "World of Tanks Blitz",
+  drivebeyondhorizons: "Drive Beyond Horizons",
+  beamngdrive: "BeamNG Drive",
+  "7daystodie": "7 Days to Die",
+  magearena: "Mage Arena",
+  barotrauma: "Barotrauma",
+  nomansky: "No Man's Sky",
+  dontstarvetogether: "Don't Starve Together",
+  readyornot: "Ready or Not",
+  standoff2: "Standoff 2"
 };
 
 // i18n‑совместимый тип: t(key, { defaultValue })

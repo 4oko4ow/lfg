@@ -508,6 +508,33 @@
     },
     "worldoftanksblitz": {
       "name": "World of Tanks Blitz"
+    },
+    "drivebeyondhorizons": {
+      "name": "Drive Beyond Horizons"
+    },
+    "beamngdrive": {
+      "name": "BeamNG Drive"
+    },
+    "7daystodie": {
+      "name": "7 Days to Die"
+    },
+    "magearena": {
+      "name": "Mage Arena"
+    },
+    "barotrauma": {
+      "name": "Barotrauma"
+    },
+    "nomansky": {
+      "name": "No Man's Sky"
+    },
+    "dontstarvetogether": {
+      "name": "Don't Starve Together"
+    },
+    "readyornot": {
+      "name": "Ready or Not"
+    },
+    "standoff2": {
+      "name": "Standoff 2"
     }
   }
 }

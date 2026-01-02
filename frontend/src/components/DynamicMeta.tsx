@@ -204,6 +204,51 @@ const GAME_SEO: Record<
       description:
         "Ищешь команду для Stalcraft? Найди тиммейтов для выживания в зоне отчуждения. Создай или вступи в пати прямо сейчас. Без регистрации.",
     },
+    drivebeyondhorizons: {
+      title: "Ищу пати в Drive Beyond Horizons — Найди команду",
+      description:
+        "Ищешь команду для Drive Beyond Horizons? Найди тиммейтов для кооперативных гонок и приключений. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    beamngdrive: {
+      title: "Ищу пати в BeamNG Drive — Найди команду",
+      description:
+        "Ищешь команду для BeamNG Drive? Найди тиммейтов для реалистичных симуляций и гонок. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    "7daystodie": {
+      title: "Ищу пати в 7 Days to Die — Найди команду",
+      description:
+        "Ищешь команду для 7 Days to Die? Найди тиммейтов для выживания в зомби-апокалипсисе. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    magearena: {
+      title: "Ищу пати в Mage Arena — Найди команду",
+      description:
+        "Ищешь команду для Mage Arena? Найди тиммейтов для магических сражений и приключений. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    barotrauma: {
+      title: "Ищу пати в Barotrauma — Найди команду",
+      description:
+        "Ищешь команду для Barotrauma? Найди тиммейтов для кооперативного выживания под водой. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    nomansky: {
+      title: "Ищу пати в No Man's Sky — Найди команду",
+      description:
+        "Ищешь команду для No Man's Sky? Найди тиммейтов для исследования космоса и совместных приключений. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    dontstarvetogether: {
+      title: "Ищу пати в Don't Starve Together — Найди команду",
+      description:
+        "Ищешь команду для Don't Starve Together? Найди тиммейтов для кооперативного выживания. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    readyornot: {
+      title: "Ищу пати в Ready or Not — Найди команду",
+      description:
+        "Ищешь команду для Ready or Not? Найди тиммейтов для тактических рейдов SWAT. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
+    standoff2: {
+      title: "Ищу пати в Standoff 2 — Найди команду",
+      description:
+        "Ищешь команду для Standoff 2? Найди тиммейтов для тактических шутеров и командных матчей. Создай или вступи в пати прямо сейчас. Без регистрации.",
+    },
   },
   en: {
     repo: {
@@ -371,6 +416,51 @@ const GAME_SEO: Record<
       description:
         "Looking for a Stalcraft team? Find teammates for survival in the exclusion zone. Create or join a party now. No registration.",
     },
+    drivebeyondhorizons: {
+      title: "Drive Beyond Horizons LFG — Find a Team",
+      description:
+        "Looking for a Drive Beyond Horizons team? Find teammates for cooperative racing and adventures. Create or join a party now. No registration.",
+    },
+    beamngdrive: {
+      title: "BeamNG Drive LFG — Find a Team",
+      description:
+        "Looking for a BeamNG Drive team? Find teammates for realistic simulations and racing. Create or join a party now. No registration.",
+    },
+    "7daystodie": {
+      title: "7 Days to Die LFG — Find a Team",
+      description:
+        "Looking for a 7 Days to Die team? Find teammates for zombie apocalypse survival. Create or join a party now. No registration.",
+    },
+    magearena: {
+      title: "Mage Arena LFG — Find a Team",
+      description:
+        "Looking for a Mage Arena team? Find teammates for magical battles and adventures. Create or join a party now. No registration.",
+    },
+    barotrauma: {
+      title: "Barotrauma LFG — Find a Team",
+      description:
+        "Looking for a Barotrauma team? Find teammates for cooperative underwater survival. Create or join a party now. No registration.",
+    },
+    nomansky: {
+      title: "No Man's Sky LFG — Find a Team",
+      description:
+        "Looking for a No Man's Sky team? Find teammates for space exploration and joint adventures. Create or join a party now. No registration.",
+    },
+    dontstarvetogether: {
+      title: "Don't Starve Together LFG — Find a Team",
+      description:
+        "Looking for a Don't Starve Together team? Find teammates for cooperative survival. Create or join a party now. No registration.",
+    },
+    readyornot: {
+      title: "Ready or Not LFG — Find a Team",
+      description:
+        "Looking for a Ready or Not team? Find teammates for tactical SWAT raids. Create or join a party now. No registration.",
+    },
+    standoff2: {
+      title: "Standoff 2 LFG — Find a Team",
+      description:
+        "Looking for a Standoff 2 team? Find teammates for tactical shooters and team matches. Create or join a party now. No registration.",
+    },
   },
 };
 
@@ -415,6 +505,15 @@ export function DynamicMeta() {
     "wewerehere",
     "plateup",
     "stalcraft",
+    "drivebeyondhorizons",
+    "beamngdrive",
+    "7daystodie",
+    "magearena",
+    "barotrauma",
+    "nomansky",
+    "dontstarvetogether",
+    "readyornot",
+    "standoff2",
   ]);
 
   const game = knownSlugs.has(raw) ? raw : null;
