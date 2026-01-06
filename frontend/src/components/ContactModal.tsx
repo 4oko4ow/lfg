@@ -179,6 +179,8 @@ export default function ContactModal({
                   steamID64: steamID64,
                 });
               }
+              // Показываем метку "основной" только если контактов больше одного
+              const showPreferred = contact.preferred && contacts.length > 1;
               return (
                 <div
                   key={`${contact.type}-${contact.handle}`}
@@ -196,7 +198,7 @@ export default function ContactModal({
                       }
                     </span>
                     <span className="break-all text-zinc-200">{contact.handle}</span>
-                    {contact.preferred && (
+                    {showPreferred && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200 border border-blue-500/30">
                         <StarIcon className="h-3 w-3" />
                         {t("party.preferred")}

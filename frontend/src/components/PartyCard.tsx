@@ -110,6 +110,8 @@ export default function PartyCard({
 
   const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
+    // Показываем метку "основной" только если контактов больше одного
+    const showPreferred = contacts.length > 1;
     return (
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-zinc-300">
         {contacts.map((contact) => {
@@ -122,7 +124,7 @@ export default function PartyCard({
               {config.icon}
               <span className="font-medium text-zinc-200 hidden sm:inline">{config.label}</span>
               <span className="text-zinc-400 truncate max-w-[100px] sm:max-w-none">{contact.handle}</span>
-              {contact.preferred && (
+              {contact.preferred && showPreferred && (
                 <span className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full bg-blue-500/20 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase text-blue-200">
                   <StarIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   <span className="hidden sm:inline">{t("party.preferred")}</span>

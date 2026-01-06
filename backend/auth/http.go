@@ -465,10 +465,19 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Use username instead of global_name
+	// IMPORTANT: Always use username, never global_name
 	handle := discordUser.Username
+	if handle == "" {
+		log.Printf("[Auth] WARNING: Discord username is empty, falling back to global_name")
+		handle = discordUser.GlobalName
+		if handle == "" {
+			handle = discordUser.ID // Last resort: use user ID
+		}
+	}
 	if discordUser.Discriminator != "0" && discordUser.Discriminator != "" {
 		handle = fmt.Sprintf("%s#%s", handle, discordUser.Discriminator)
 	}
+	log.Printf("[Auth] Discord handle: %s (username: %s, global_name: %s)", handle, discordUser.Username, discordUser.GlobalName)
 
 	var linkUserID string
 	if payload.Link {

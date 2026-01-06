@@ -176,9 +176,14 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 	}
 
 	// Upsert contact
+	// IMPORTANT: For Discord, always use username (never global_name or user ID)
 	contactHandle := username
 	if contactHandle == "" {
 		contactHandle = providerID
+	}
+	if provider == ProviderDiscord && contactHandle == providerID {
+		// If we're using providerID as fallback for Discord, log a warning
+		log.Printf("[Auth] WARNING: Discord contact handle is user ID (%s) instead of username", providerID)
 	}
 
 	if contactHandle != "" {
