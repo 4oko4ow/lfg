@@ -54,6 +54,7 @@ func NewDBStore() (*DBStore, error) {
 
 	// Add prefer_simple_protocol=true to prevent prepared statement issues
 	// This fixes "pq: unnamed prepared statement does not exist" errors
+	// Required for Supabase Transaction mode pooler (port 6543) which doesn't support prepared statements
 	dbURL = addConnectionParam(dbURL, "prefer_simple_protocol", "true")
 
 	db, err := sql.Open("postgres", dbURL)
@@ -62,11 +63,15 @@ func NewDBStore() (*DBStore, error) {
 	}
 
 	// Configure connection pool for Supabase/PgBouncer compatibility
+	// For Transaction mode pooler (port 6543), connections are short-lived
 	// Lower limits for free tier (Supabase free tier has connection limits)
 	// prefer_simple_protocol=true already set above prevents prepared statement issues
 	db.SetMaxOpenConns(10)  // Reduced for Supabase free tier compatibility
 	db.SetMaxIdleConns(2)   // Reduced for Supabase free tier compatibility
-	db.SetConnMaxLifetime(5 * time.Minute)
+	// Shorter lifetime for Transaction mode - connections are reused by pooler
+	db.SetConnMaxLifetime(2 * time.Minute)
+	// Close idle connections faster to avoid stale connections
+	db.SetConnMaxIdleTime(30 * time.Second)
 
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)

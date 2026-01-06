@@ -25,6 +25,7 @@ func InitDB() {
 
 	// Add prefer_simple_protocol=true to prevent prepared statement issues
 	// This fixes "pq: unnamed prepared statement does not exist" errors
+	// Required for Supabase Transaction mode pooler (port 6543) which doesn't support prepared statements
 	dbURL = addConnectionParam(dbURL, "prefer_simple_protocol", "true")
 
 	var err error
@@ -34,11 +35,15 @@ func InitDB() {
 	}
 
 	// Configure connection pool for Supabase/PgBouncer compatibility
+	// For Transaction mode pooler (port 6543), connections are short-lived
 	// Lower limits for free tier (Supabase free tier has connection limits)
 	// prefer_simple_protocol=true already set above prevents prepared statement issues
 	db.SetMaxOpenConns(10)  // Reduced for Supabase free tier compatibility
 	db.SetMaxIdleConns(2)   // Reduced for Supabase free tier compatibility
-	db.SetConnMaxLifetime(5 * time.Minute)
+	// Shorter lifetime for Transaction mode - connections are reused by pooler
+	db.SetConnMaxLifetime(2 * time.Minute)
+	// Close idle connections faster to avoid stale connections
+	db.SetConnMaxIdleTime(30 * time.Second)
 
 	if err := db.Ping(); err != nil {
 		log.Fatalf("failed to ping database: %v", err)
@@ -267,10 +272,25 @@ func SynchronizeMemoryWithDatabase() {
 
 // addConnectionParam adds a parameter to a database connection string
 // Handles both postgres:// and postgresql:// URLs, and existing query parameters
+// Works with Supabase URLs which may have multiple parameters like:
+// postgresql://user:pass@host:5432/db?sslmode=require&options=project%3Dxxx
 func addConnectionParam(dbURL, key, value string) string {
-	// Check if parameter already exists
+	// Parse URL to check if parameter already exists
+	// Check for both key= and &key= patterns to avoid duplicates
 	if strings.Contains(dbURL, key+"=") {
-		return dbURL
+		// Parameter might already exist, but check if it's a complete parameter
+		// (not part of another parameter name)
+		idx := strings.Index(dbURL, key+"=")
+		if idx > 0 {
+			// Check character before key - should be ? or &
+			before := dbURL[idx-1]
+			if before == '?' || before == '&' {
+				return dbURL // Parameter already exists
+			}
+		} else if idx == 0 {
+			// Key at start (unlikely but possible)
+			return dbURL
+		}
 	}
 
 	separator := "?"

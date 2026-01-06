@@ -33,14 +33,18 @@ postgresql://username:password@host:port/database?sslmode=disable
 - Local: `postgresql://postgres:postgres@localhost:5432/lfg_mvp?sslmode=disable`
 - Docker: `postgresql://postgres:password@postgres:5432/lfg_mvp?sslmode=disable`
 - Remote: `postgresql://user:pass@db.example.com:5432/lfg_mvp?sslmode=require`
-- **Supabase**: `postgresql://postgres:[PASSWORD]@[PROJECT].supabase.co:5432/postgres?sslmode=require`
+- **Supabase Session mode** (recommended): `postgres://postgres.[PROJECT]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres?sslmode=require`
+- **Supabase Transaction mode**: `postgresql://postgres.[PROJECT]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require`
 
 **Notes:**
 - Used by backend for all database operations
 - If not set, the application will fail to start
 - For production, use `sslmode=require` or `sslmode=verify-full`
-- **Supabase users**: The app automatically adds `prefer_simple_protocol=true` to work with Supabase's PgBouncer (transaction pooling mode)
-- Connection pool is optimized for Supabase free tier (10 max connections, 2 idle)
+- **Supabase users**: 
+  - **Session mode (port 5432) is recommended** - supports prepared statements, better compatibility
+  - **Transaction mode (port 6543)** - doesn't support prepared statements, requires `prefer_simple_protocol=true` (automatically added by the app)
+  - The app automatically adds `prefer_simple_protocol=true` when using Transaction mode to prevent "unnamed prepared statement does not exist" errors
+  - Connection pool is optimized for Supabase (10 max connections, 2 idle, 2min lifetime for Transaction mode)
 
 ### `POSTGRES_USER` (Optional)
 
