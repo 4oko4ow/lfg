@@ -253,7 +253,10 @@
     "stats": {
       "online": "Онлайн сейчас",
       "parties": "Активных пати",
-      "growing": "Растём быстро"
+      "growing": "Растём быстро",
+      "parties_created": "Пати создано",
+      "people_joined": "Людей вступило",
+      "parties_filled": "Пати заполнено"
     },
     "features": {
       "title": "Почему FindParty?",

@@ -11,9 +11,16 @@ import {
   ArrowRight,
   MessageCircle,
   TrendingUp,
+  CheckCircle2,
 } from "lucide-react";
 import { connectWS, onMessage, socket } from "../ws/client";
 import { analytics } from "../utils/analytics";
+
+interface Stats {
+  parties_created: number;
+  people_joined: number;
+  parties_filled: number;
+}
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -23,6 +30,8 @@ export default function LandingPage() {
   const [partiesCount, setPartiesCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasReceivedParties, setHasReceivedParties] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   const hasReceivedDataRef = useRef(false);
   const landingStartTime = useRef(Date.now());
 
@@ -83,6 +92,24 @@ export default function LandingPage() {
     };
   }, [setOnlineCount]);
 
+  // Load stats from API
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+    fetch(`${backendUrl}/api/stats`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch stats");
+        return res.json();
+      })
+      .then((data: Stats) => {
+        setStats(data);
+        setIsLoadingStats(false);
+      })
+      .catch((err) => {
+        console.error("Error loading stats:", err);
+        setIsLoadingStats(false);
+      });
+  }, []);
+
   const currentLang = window.location.pathname.match(/^\/(en|ru)(\/|$)/i)?.[1]?.toLowerCase() || "en";
   const feedPath = `/${currentLang}/feed`;
 
@@ -128,7 +155,7 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
               <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <Users className="h-6 w-6" />
@@ -156,13 +183,43 @@ export default function LandingPage() {
               )}
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
-              <div className="mb-2 flex items-center gap-2 text-pink-400">
-                <TrendingUp className="h-6 w-6" />
+              <div className="mb-2 flex items-center gap-2 text-green-400">
+                <Gamepad2 className="h-6 w-6" />
                 <span className="text-sm font-semibold uppercase tracking-wide">
-                  {t("landing.stats.growing", "Growing Fast")}
+                  {t("landing.stats.parties_created", "Parties Created")}
                 </span>
               </div>
-              <p className="text-3xl font-bold">24/7</p>
+              {isLoadingStats ? (
+                <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
+              ) : (
+                <p className="text-3xl font-bold">{stats?.parties_created ?? 0}</p>
+              )}
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
+              <div className="mb-2 flex items-center gap-2 text-yellow-400">
+                <Users className="h-6 w-6" />
+                <span className="text-sm font-semibold uppercase tracking-wide">
+                  {t("landing.stats.people_joined", "People Joined")}
+                </span>
+              </div>
+              {isLoadingStats ? (
+                <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
+              ) : (
+                <p className="text-3xl font-bold">{stats?.people_joined ?? 0}</p>
+              )}
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
+              <div className="mb-2 flex items-center gap-2 text-pink-400">
+                <CheckCircle2 className="h-6 w-6" />
+                <span className="text-sm font-semibold uppercase tracking-wide">
+                  {t("landing.stats.parties_filled", "Parties Filled")}
+                </span>
+              </div>
+              {isLoadingStats ? (
+                <div className="h-9 w-24 animate-pulse rounded-md bg-gradient-to-r from-zinc-700/30 via-zinc-600/40 to-zinc-700/30"></div>
+              ) : (
+                <p className="text-3xl font-bold">{stats?.parties_filled ?? 0}</p>
+              )}
             </div>
           </div>
         </div>

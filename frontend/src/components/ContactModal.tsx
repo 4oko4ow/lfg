@@ -6,6 +6,7 @@ import { analytics } from "../utils/analytics";
 import { sendJoinParty } from "../ws/client";
 import type { ContactMethod } from "../types";
 import { StarIcon } from "@heroicons/react/20/solid";
+import { PhoneIcon, UserIcon } from "@heroicons/react/24/outline";
 import { normalizeDiscordUrl, extractSteamID64 } from "../utils/contactHelpers";
 import { useAuth } from "../context/AuthContext";
 
@@ -27,7 +28,7 @@ export default function ContactModal({
   const { t } = useTranslation();
   const { profile } = useAuth();
   const [discordTooltipVisible, setDiscordTooltipVisible] = useState<string | null>(null);
-  
+
   // Создаем мапу providerId по провайдеру для быстрого доступа
   const providerIds = useRef<Partial<Record<string, string>>>({});
   if (profile?.identities) {
@@ -125,14 +126,14 @@ export default function ContactModal({
       sendJoinParty(partyId);
       joinSentRef.current = true;
     }
-    
+
     // Проверяем, что URL валидный
     if (!url || (!url.startsWith("http://") && !url.startsWith("https://"))) {
       console.error("[ContactModal] Invalid URL:", url);
       toast.error(t("contact.invalid_url", "Invalid URL"));
       return;
     }
-    
+
     console.log("[ContactModal] Opening URL:", url);
     window.open(url, "_blank", "noopener");
     toast.success(t("contact.opened"), { duration: 4000 });
@@ -154,7 +155,7 @@ export default function ContactModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <span className="text-blue-500">📞</span>
+          <PhoneIcon className="w-5 h-5 text-blue-500" />
           {t("contact.title")}
         </h2>
         {contacts.length === 0 ? (
@@ -169,13 +170,13 @@ export default function ContactModal({
                 contact,
                 providerIds.current[contact.type]
               );
-              
+
               // Извлекаем SteamID64 для Steam контактов
               const steamID64 = extractSteamID64(
                 contact,
                 providerIds.current[contact.type]
               );
-              
+
               // Логирование для отладки
               if (process.env.NODE_ENV === "development") {
                 console.log("[ContactModal] Contact:", {
@@ -188,80 +189,73 @@ export default function ContactModal({
                 });
               }
               return (
-              <div
-                key={`${contact.type}-${contact.handle}`}
-                className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 backdrop-blur-sm p-4 hover:border-zinc-600 hover:bg-zinc-800/70 transition-all duration-200"
-              >
-                <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-zinc-300">
-                  <span className="font-semibold text-white">
-                    {
-                      CONTACT_LABELS[contact.type]
-                        ? t(
-                          CONTACT_LABELS[contact.type].key,
-                          CONTACT_LABELS[contact.type].defaultValue
-                        )
-                        : contact.type
-                    }
-                  </span>
-                  <span className="break-all text-zinc-200">{contact.handle}</span>
-                  {contact.preferred && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200 border border-blue-500/30">
-                      <StarIcon className="h-3 w-3" />
-                      {t("party.preferred")}
+                <div
+                  key={`${contact.type}-${contact.handle}`}
+                  className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 backdrop-blur-sm p-4 hover:border-zinc-600 hover:bg-zinc-800/70 transition-all duration-200"
+                >
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-zinc-300">
+                    <span className="font-semibold text-white">
+                      {
+                        CONTACT_LABELS[contact.type]
+                          ? t(
+                            CONTACT_LABELS[contact.type].key,
+                            CONTACT_LABELS[contact.type].defaultValue
+                          )
+                          : contact.type
+                      }
                     </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2 relative">
-                  {contact.type === "steam" && steamID64 ? (
-                    <>
-                      <button
-                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}/addfriend`)}
-                        className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-green-500/50 active:scale-95"
-                      >
-                        ➕ {t("contact.add_friend_steam")}
-                      </button>
+                    <span className="break-all text-zinc-200">{contact.handle}</span>
+                    {contact.preferred && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-200 border border-blue-500/30">
+                        <StarIcon className="h-3 w-3" />
+                        {t("party.preferred")}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 relative">
+                    {contact.type === "steam" && steamID64 ? (
                       <button
                         onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`)}
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95 flex items-center gap-2"
+                      >
+                        <UserIcon className="w-4 h-4" />
+                        {t("contact.open_profile_steam")}
+                      </button>
+                    ) : contact.type === "discord" ? (
+                      <div className="relative">
+                        <button
+                          onClick={() => handleAddToDiscord(contact)}
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-indigo-500/50 active:scale-95"
+                        >
+                          {t("contact.add_to_discord")}
+                        </button>
+                        {discordTooltipVisible === contact.handle && (
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-zinc-800 text-white text-xs rounded-lg shadow-lg border border-zinc-700 whitespace-nowrap z-10 animate-fadeIn">
+                            {t("contact.discord_tooltip")}
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                              <div className="border-4 border-transparent border-t-zinc-800"></div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : normalizedUrl ? (
+                      <button
+                        onClick={() => handleOpen(normalizedUrl)}
                         className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
                       >
-                        👤 {t("contact.open_profile_steam")}
+                        {t("contact.open")}
                       </button>
-                    </>
-                  ) : contact.type === "discord" ? (
-                    <div className="relative">
+                    ) : (
                       <button
-                        onClick={() => handleAddToDiscord(contact)}
-                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-indigo-500/50 active:scale-95"
+                        onClick={() => handleCopy(contact.handle)}
+                        className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
                       >
-                        {t("contact.add_to_discord")}
+                        {t("ui.copy_contact")}
                       </button>
-                      {discordTooltipVisible === contact.handle && (
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-zinc-800 text-white text-xs rounded-lg shadow-lg border border-zinc-700 whitespace-nowrap z-10 animate-fadeIn">
-                          {t("contact.discord_tooltip")}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                            <div className="border-4 border-transparent border-t-zinc-800"></div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : normalizedUrl ? (
-                    <button
-                      onClick={() => handleOpen(normalizedUrl)}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
-                    >
-                      {t("contact.open")}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleCopy(contact.handle)}
-                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
-                    >
-                      {t("ui.copy_contact")}
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
+              );
             })}
           </div>
         )}

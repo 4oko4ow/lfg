@@ -260,7 +260,10 @@
     "stats": {
       "online": "Online Now",
       "parties": "Active Parties",
-      "growing": "Growing Fast"
+      "growing": "Growing Fast",
+      "parties_created": "Parties Created",
+      "people_joined": "People Joined",
+      "parties_filled": "Parties Filled"
     },
     "features": {
       "title": "Why Choose FindParty?",

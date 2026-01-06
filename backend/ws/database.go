@@ -115,6 +115,9 @@ func LoadPartiesFromDatabase() []*Party {
 
 	var parties []*Party
 	now := time.Now()
+	const threeDays = 3 * 24 * time.Hour
+	const threeWeeks = 21 * 24 * time.Hour
+
 	for rows.Next() {
 		var p Party
 		var contactsJSON sql.NullString
@@ -141,8 +144,9 @@ func LoadPartiesFromDatabase() []*Party {
 		}
 
 		p.CreatedAt = createdAt
+		
+		// Check if party has expired
 		if expiresAt.Valid {
-			// Only include party if it hasn't expired
 			if expiresAt.Time.After(now) {
 				p.ExpiresAt = &expiresAt.Time
 			} else {
@@ -150,6 +154,21 @@ func LoadPartiesFromDatabase() []*Party {
 				continue
 			}
 		}
+
+		// Filter out old parties based on frontend rules
+		age := now.Sub(createdAt)
+		isFull := p.Joined >= p.Slots
+		
+		// Skip old full parties (older than 3 days)
+		if isFull && age > threeDays {
+			continue
+		}
+		
+		// Skip old unfilled parties (older than 3 weeks)
+		if !isFull && age > threeWeeks {
+			continue
+		}
+
 		p.Pinned = pinned.Valid && pinned.Bool
 		if userID.Valid {
 			p.UserID = userID.String

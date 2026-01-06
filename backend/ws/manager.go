@@ -30,12 +30,30 @@ func GetParties() []*Party {
 	partyLock.Lock()
 	defer partyLock.Unlock()
 	now := time.Now()
+	const threeDays = 3 * 24 * time.Hour
+	const threeWeeks = 21 * 24 * time.Hour
+	
 	list := make([]*Party, 0, len(parties))
 	for _, p := range parties {
 		// Filter out expired parties
 		if p.ExpiresAt != nil && now.After(*p.ExpiresAt) {
 			continue
 		}
+		
+		// Filter out old parties based on frontend rules
+		age := now.Sub(p.CreatedAt)
+		isFull := p.Joined >= p.Slots
+		
+		// Skip old full parties (older than 3 days)
+		if isFull && age > threeDays {
+			continue
+		}
+		
+		// Skip old unfilled parties (older than 3 weeks)
+		if !isFull && age > threeWeeks {
+			continue
+		}
+		
 		list = append(list, p)
 	}
 	return list
