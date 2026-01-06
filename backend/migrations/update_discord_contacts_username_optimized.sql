@@ -22,8 +22,16 @@ BEGIN
     contact_url := contact->>'url';
     
     -- Extract user_id from URL or handle
+    -- Supports both formats:
+    -- - https://discord.com/channels/@me/{user_id} (new format)
+    -- - https://discord.com/users/{user_id} (old format)
     IF contact_url IS NOT NULL THEN
+        -- Try new format first
         discord_user_id := substring(contact_url from 'discord\.com/channels/@me/(\d{17,19})');
+        -- If not found, try old format
+        IF discord_user_id IS NULL THEN
+            discord_user_id := substring(contact_url from 'discord\.com/users/(\d{17,19})');
+        END IF;
     END IF;
     
     IF discord_user_id IS NULL AND contact_handle ~ '^\d{17,19}$' THEN

@@ -109,7 +109,8 @@ func getPartiesWithDiscordContacts(db *sql.DB) ([]PartyContact, error) {
 
 	var parties []PartyContact
 	discordIDRegex := regexp.MustCompile(`^\d{17,19}$`)
-	urlRegex := regexp.MustCompile(`discord\.com/channels/@me/(\d{17,19})`)
+	urlRegexNew := regexp.MustCompile(`discord\.com/channels/@me/(\d{17,19})`)
+	urlRegexOld := regexp.MustCompile(`discord\.com/users/(\d{17,19})`)
 
 	for rows.Next() {
 		var partyID string
@@ -136,9 +137,9 @@ func getPartiesWithDiscordContacts(db *sql.DB) ([]PartyContact, error) {
 				// Check if we can extract user_id from URL, handle, or find by username
 				canExtractUserID := false
 				
-				// Try URL first
+				// Try URL first (both new and old formats)
 				if contact.URL != "" {
-					if urlRegex.MatchString(contact.URL) {
+					if urlRegexNew.MatchString(contact.URL) || urlRegexOld.MatchString(contact.URL) {
 						canExtractUserID = true
 					}
 				}
@@ -201,12 +202,23 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 		// Extract Discord user ID from URL or handle
 		discordUserID := ""
 		
-		// Try to extract from URL first (format: https://discord.com/channels/@me/{user_id})
+		// Try to extract from URL first
+		// Supports both formats:
+		// - https://discord.com/channels/@me/{user_id} (new format)
+		// - https://discord.com/users/{user_id} (old format)
 		if contact.URL != "" {
+			// Try new format first
 			urlRegex := regexp.MustCompile(`discord\.com/channels/@me/(\d{17,19})`)
 			matches := urlRegex.FindStringSubmatch(contact.URL)
 			if len(matches) > 1 {
 				discordUserID = matches[1]
+			} else {
+				// Try old format
+				urlRegexOld := regexp.MustCompile(`discord\.com/users/(\d{17,19})`)
+				matchesOld := urlRegexOld.FindStringSubmatch(contact.URL)
+				if len(matchesOld) > 1 {
+					discordUserID = matchesOld[1]
+				}
 			}
 		}
 		
