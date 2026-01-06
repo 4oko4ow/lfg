@@ -51,8 +51,21 @@ func main() {
 
 	log.Println("Starting Discord contacts update...")
 
+	// First, check total number of parties with contacts
+	var totalParties int
+	err = db.QueryRow(`
+		SELECT COUNT(*) 
+		FROM parties 
+		WHERE contacts IS NOT NULL 
+		AND jsonb_array_length(contacts) > 0
+	`).Scan(&totalParties)
+	if err == nil {
+		log.Printf("Total parties with contacts: %d", totalParties)
+	}
+
 	// Get all parties with Discord contacts
-	parties, err := getPartiesWithDiscordContacts(db)
+	var parties []PartyContact
+	parties, err = getPartiesWithDiscordContacts(db)
 	if err != nil {
 		log.Fatalf("failed to get parties: %v", err)
 	}
@@ -96,6 +109,7 @@ func getPartiesWithDiscordContacts(db *sql.DB) ([]PartyContact, error) {
 
 	var parties []PartyContact
 	discordIDRegex := regexp.MustCompile(`^\d{17,19}$`)
+	urlRegex := regexp.MustCompile(`discord\.com/channels/@me/(\d{17,19})`)
 
 	for rows.Next() {
 		var partyID string
@@ -111,19 +125,57 @@ func getPartiesWithDiscordContacts(db *sql.DB) ([]PartyContact, error) {
 
 		var contacts []ContactMethod
 		if err := json.Unmarshal([]byte(contactsJSON.String), &contacts); err != nil {
+			log.Printf("Failed to unmarshal contacts for party %s: %v", partyID, err)
 			continue
 		}
 
-		// Check if this party has Discord contacts with user IDs
-		hasDiscordID := false
+		// Check if this party has Discord contacts (any Discord contact)
+		hasDiscordContact := false
 		for _, contact := range contacts {
-			if contact.Type == "discord" && discordIDRegex.MatchString(contact.Handle) {
-				hasDiscordID = true
-				break
+			if contact.Type == "discord" {
+				// Check if we can extract user_id from URL, handle, or find by username
+				canExtractUserID := false
+				
+				// Try URL first
+				if contact.URL != "" {
+					if urlRegex.MatchString(contact.URL) {
+						canExtractUserID = true
+					}
+				}
+				
+				// Or check if handle is user ID
+				if !canExtractUserID && discordIDRegex.MatchString(contact.Handle) {
+					canExtractUserID = true
+				}
+				
+				// Or try to find user_id by username in auth_identities (if handle is username/global_name)
+				if !canExtractUserID {
+					var foundUserID string
+					err := db.QueryRow(`
+						SELECT provider_id 
+						FROM auth_identities 
+						WHERE provider = 'discord' 
+						AND username = $1
+					`, contact.Handle).Scan(&foundUserID)
+					
+					if err == nil && foundUserID != "" {
+						canExtractUserID = true
+					}
+				}
+				
+				// If we can extract user_id, we can update this contact
+				if canExtractUserID {
+					hasDiscordContact = true
+					break
+				} else {
+					// Log Discord contacts that we can't update (for debugging)
+					log.Printf("Party %s: Discord contact found but can't extract user_id (handle: '%s', url: '%s')", 
+						partyID, contact.Handle, contact.URL)
+				}
 			}
 		}
 
-		if hasDiscordID {
+		if hasDiscordContact {
 			parties = append(parties, PartyContact{
 				PartyID:  partyID,
 				Contacts: contacts,
@@ -163,9 +215,26 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 			discordUserID = contact.Handle
 		}
 		
+		// If we still don't have user_id, try to find it by username in auth_identities
+		if discordUserID == "" {
+			var foundUserID string
+			err := db.QueryRow(`
+				SELECT provider_id 
+				FROM auth_identities 
+				WHERE provider = 'discord' 
+				AND username = $1
+			`, contact.Handle).Scan(&foundUserID)
+			
+			if err == nil && foundUserID != "" {
+				discordUserID = foundUserID
+				log.Printf("Party %s: Found user_id by username for Discord contact: '%s' -> %s", 
+					party.PartyID, contact.Handle, discordUserID)
+			}
+		}
+		
 		// If we still don't have user_id, skip this contact
 		if discordUserID == "" {
-			log.Printf("Party %s: Skipped Discord contact (no user_id found): handle=%s, url=%s", 
+			log.Printf("Party %s: Skipped Discord contact (no user_id found): handle='%s', url='%s'", 
 				party.PartyID, contact.Handle, contact.URL)
 			continue
 		}
