@@ -6,6 +6,8 @@ import { analytics } from "../utils/analytics";
 import { sendJoinParty } from "../ws/client";
 import type { ContactMethod } from "../types";
 import { StarIcon } from "@heroicons/react/20/solid";
+import { normalizeDiscordUrl } from "../utils/contactHelpers";
+import { useAuth } from "../context/AuthContext";
 
 const CONTACT_LABELS: Record<string, { key: string; defaultValue: string }> = {
   steam: { key: "contact.methods.steam", defaultValue: "Steam" },
@@ -23,6 +25,15 @@ export default function ContactModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { profile } = useAuth();
+  
+  // Создаем мапу providerId по провайдеру для быстрого доступа
+  const providerIds = useRef<Partial<Record<string, string>>>({});
+  if (profile?.identities) {
+    profile.identities.forEach((identity) => {
+      providerIds.current[identity.provider] = identity.providerId;
+    });
+  }
   // Флаг для отслеживания, было ли уже отправлено join для этого объявления
   const joinSentRef = useRef(false);
   const modalOpenTime = useRef(Date.now());
@@ -123,13 +134,20 @@ export default function ContactModal({
         ) : (
           <div className="space-y-3">
             {contacts.map((contact) => {
+              // Нормализуем Discord URL (преобразуем старый формат в новый)
+              const normalizedUrl = normalizeDiscordUrl(
+                contact,
+                providerIds.current[contact.type]
+              );
+              
               // Логирование для отладки
               if (process.env.NODE_ENV === "development") {
                 console.log("[ContactModal] Contact:", {
                   type: contact.type,
                   handle: contact.handle,
-                  url: contact.url,
-                  hasUrl: !!contact.url,
+                  originalUrl: contact.url,
+                  normalizedUrl: normalizedUrl,
+                  providerId: providerIds.current[contact.type],
                 });
               }
               return (
@@ -157,9 +175,9 @@ export default function ContactModal({
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {contact.url && (
+                  {normalizedUrl && (
                     <button
-                      onClick={() => handleOpen(contact.url as string)}
+                      onClick={() => handleOpen(normalizedUrl)}
                       className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
                     >
                       {t("contact.open")}

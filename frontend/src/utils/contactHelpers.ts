@@ -78,3 +78,45 @@ export function contactHandleToMethod(
 export function contactHandleToInput(handle: ContactHandle | null | undefined) {
   return handle?.handle ?? "";
 }
+
+/**
+ * Преобразует Discord URL из старого формата (users) в новый (channels/@me)
+ * или извлекает Discord ID из handle и генерирует правильный URL
+ */
+export function normalizeDiscordUrl(
+  contact: { type: string; url?: string; handle: string },
+  providerId?: string
+): string | undefined {
+  // Если это не Discord, возвращаем URL как есть
+  if (contact.type !== "discord") {
+    return contact.url;
+  }
+
+  // Приоритет 1: Используем providerId, если передан
+  if (providerId) {
+    return `https://discord.com/channels/@me/${providerId}`;
+  }
+
+  // Приоритет 2: Преобразуем старый формат URL
+  if (contact.url) {
+    // Старый формат: https://discord.com/users/{id}
+    const oldFormatMatch = contact.url.match(/discord\.com\/users\/(\d{17,19})/i);
+    if (oldFormatMatch) {
+      const discordId = oldFormatMatch[1];
+      return `https://discord.com/channels/@me/${discordId}`;
+    }
+
+    // Уже правильный формат: https://discord.com/channels/@me/{id}
+    if (contact.url.includes("discord.com/channels/@me/")) {
+      return contact.url;
+    }
+  }
+
+  // Приоритет 3: Извлекаем Discord ID из handle (если это числовой ID)
+  if (/^\d{17,19}$/.test(contact.handle)) {
+    return `https://discord.com/channels/@me/${contact.handle}`;
+  }
+
+  // Если ничего не подошло, возвращаем исходный URL
+  return contact.url;
+}
