@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -22,15 +23,21 @@ func InitDB() {
 		log.Fatal("DATABASE_URL must be set")
 	}
 
+	// Add prefer_simple_protocol=true to prevent prepared statement issues
+	// This fixes "pq: unnamed prepared statement does not exist" errors
+	dbURL = addConnectionParam(dbURL, "prefer_simple_protocol", "true")
+
 	var err error
 	db, err = sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 
-	// Configure connection pool to prevent prepared statement issues
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(5)
+	// Configure connection pool for Supabase/PgBouncer compatibility
+	// Lower limits for free tier (Supabase free tier has connection limits)
+	// prefer_simple_protocol=true already set above prevents prepared statement issues
+	db.SetMaxOpenConns(10)  // Reduced for Supabase free tier compatibility
+	db.SetMaxIdleConns(2)   // Reduced for Supabase free tier compatibility
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	if err := db.Ping(); err != nil {
@@ -224,4 +231,19 @@ func SynchronizeMemoryWithDatabase() {
 	}
 
 	log.Printf("[sync] Synchronized: %d parties in memory, %d from database", len(parties), len(partiesFromDB))
+}
+
+// addConnectionParam adds a parameter to a database connection string
+// Handles both postgres:// and postgresql:// URLs, and existing query parameters
+func addConnectionParam(dbURL, key, value string) string {
+	// Check if parameter already exists
+	if strings.Contains(dbURL, key+"=") {
+		return dbURL
+	}
+
+	separator := "?"
+	if strings.Contains(dbURL, "?") {
+		separator = "&"
+	}
+	return dbURL + separator + key + "=" + value
 }

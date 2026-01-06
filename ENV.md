@@ -33,11 +33,14 @@ postgresql://username:password@host:port/database?sslmode=disable
 - Local: `postgresql://postgres:postgres@localhost:5432/lfg_mvp?sslmode=disable`
 - Docker: `postgresql://postgres:password@postgres:5432/lfg_mvp?sslmode=disable`
 - Remote: `postgresql://user:pass@db.example.com:5432/lfg_mvp?sslmode=require`
+- **Supabase**: `postgresql://postgres:[PASSWORD]@[PROJECT].supabase.co:5432/postgres?sslmode=require`
 
 **Notes:**
 - Used by backend for all database operations
 - If not set, the application will fail to start
 - For production, use `sslmode=require` or `sslmode=verify-full`
+- **Supabase users**: The app automatically adds `prefer_simple_protocol=true` to work with Supabase's PgBouncer (transaction pooling mode)
+- Connection pool is optimized for Supabase free tier (10 max connections, 2 idle)
 
 ### `POSTGRES_USER` (Optional)
 

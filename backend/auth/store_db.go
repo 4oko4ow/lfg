@@ -52,14 +52,20 @@ func NewDBStore() (*DBStore, error) {
 		return nil, errors.New("DATABASE_URL must be set")
 	}
 
+	// Add prefer_simple_protocol=true to prevent prepared statement issues
+	// This fixes "pq: unnamed prepared statement does not exist" errors
+	dbURL = addConnectionParam(dbURL, "prefer_simple_protocol", "true")
+
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Configure connection pool to prevent prepared statement issues
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(5)
+	// Configure connection pool for Supabase/PgBouncer compatibility
+	// Lower limits for free tier (Supabase free tier has connection limits)
+	// prefer_simple_protocol=true already set above prevents prepared statement issues
+	db.SetMaxOpenConns(10)  // Reduced for Supabase free tier compatibility
+	db.SetMaxIdleConns(2)   // Reduced for Supabase free tier compatibility
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	if err := db.Ping(); err != nil {
