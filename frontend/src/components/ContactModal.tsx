@@ -8,7 +8,6 @@ import type { ContactMethod } from "../types";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { PhoneIcon, UserIcon } from "@heroicons/react/24/outline";
 import { normalizeDiscordUrl, extractSteamID64 } from "../utils/contactHelpers";
-import { useAuth } from "../context/AuthContext";
 
 const CONTACT_LABELS: Record<string, { key: string; defaultValue: string }> = {
   steam: { key: "contact.methods.steam", defaultValue: "Steam" },
@@ -26,16 +25,7 @@ export default function ContactModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
   const [discordTooltipVisible, setDiscordTooltipVisible] = useState<string | null>(null);
-
-  // Создаем мапу providerId по провайдеру для быстрого доступа
-  const providerIds = useRef<Partial<Record<string, string>>>({});
-  if (profile?.identities) {
-    profile.identities.forEach((identity) => {
-      providerIds.current[identity.provider] = identity.providerId;
-    });
-  }
   // Флаг для отслеживания, было ли уже отправлено join для этого объявления
   const joinSentRef = useRef(false);
   const modalOpenTime = useRef(Date.now());
@@ -166,15 +156,17 @@ export default function ContactModal({
           <div className="space-y-3">
             {contacts.map((contact) => {
               // Нормализуем Discord URL (преобразуем старый формат в новый)
+              // Не передаем providerId текущего пользователя - используем данные из контакта
               const normalizedUrl = normalizeDiscordUrl(
                 contact,
-                providerIds.current[contact.type]
+                undefined
               );
 
               // Извлекаем SteamID64 для Steam контактов
+              // Не передаем providerId текущего пользователя - используем данные из контакта
               const steamID64 = extractSteamID64(
                 contact,
-                providerIds.current[contact.type]
+                undefined
               );
 
               // Логирование для отладки
@@ -184,7 +176,6 @@ export default function ContactModal({
                   handle: contact.handle,
                   originalUrl: contact.url,
                   normalizedUrl: normalizedUrl,
-                  providerId: providerIds.current[contact.type],
                   steamID64: steamID64,
                 });
               }

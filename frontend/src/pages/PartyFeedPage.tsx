@@ -143,6 +143,24 @@ function PartyFeedPage() {
           setTimeout(() => {
             const party = parties.find(p => p.id === partyData.id);
             if (party) {
+              const isFull = party.joined >= party.slots;
+              
+              // Для заполненных пати проверяем, является ли пользователь участником или создателем
+              if (isFull) {
+                // Проверяем, является ли пользователь создателем
+                const isCreator = profile && party.user_id && profile.id === party.user_id;
+                
+                // Проверяем, является ли пользователь участником
+                const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+                const isMember = joinedParties.includes(party.id);
+                
+                // Если пользователь не создатель и не участник - не показываем контакты
+                if (!isCreator && !isMember) {
+                  sessionStorage.removeItem("pending_join_party");
+                  return;
+                }
+              }
+              
               // Открываем модалку контактов для сохраненной пати
               analytics.joinPartyClick(party.game);
               analytics.contactModalOpened(party.game, party.id);
@@ -374,6 +392,29 @@ function PartyFeedPage() {
   }, [filter, filteredParties.length, joinClicked]);
 
   const handleContactClick = (party: Party) => {
+    const isFull = party.joined >= party.slots;
+    
+    // Для заполненных пати проверяем, является ли пользователь участником или создателем
+    if (isFull) {
+      const isAuthenticated = profile !== null;
+      if (!isAuthenticated) {
+        // Неавторизованные пользователи не могут видеть контакты заполненных пати
+        return;
+      }
+      
+      // Проверяем, является ли пользователь создателем
+      const isCreator = profile && party.user_id && profile.id === party.user_id;
+      
+      // Проверяем, является ли пользователь участником
+      const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+      const isMember = joinedParties.includes(party.id);
+      
+      // Если пользователь не создатель и не участник - не показываем контакты
+      if (!isCreator && !isMember) {
+        return;
+      }
+    }
+    
     analytics.joinPartyClick(party.game);
     analytics.contactModalOpened(party.game, party.id);
     

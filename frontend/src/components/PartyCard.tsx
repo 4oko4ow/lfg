@@ -13,6 +13,7 @@ import { getGameName } from "../constants/games";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { analytics } from "../utils/analytics";
 import { useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -72,6 +73,7 @@ export default function PartyCard({
   position?: number;
 }) {
   const { t } = useTranslation();
+  const { profile } = useAuth();
   const hasTrackedView = useRef(false);
 
   // Трекинг просмотра карточки (только один раз)
@@ -85,6 +87,26 @@ export default function PartyCard({
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
   const isPinned = party.pinned;
+  
+  // Проверяем, может ли пользователь видеть контакты заполненной пати
+  const canViewContacts = (() => {
+    if (!isFull) return true; // Не заполненные пати - контакты видны всем
+    
+    // Для заполненных пати проверяем, является ли пользователь участником или создателем
+    if (!profile) return false; // Неавторизованные пользователи не могут видеть контакты
+    
+    // Проверяем, является ли пользователь создателем
+    const isCreator = party.user_id && profile.id === party.user_id;
+    if (isCreator) return true;
+    
+    // Проверяем, является ли пользователь участником
+    try {
+      const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+      return joinedParties.includes(party.id);
+    } catch {
+      return false;
+    }
+  })();
 
   const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
@@ -114,8 +136,8 @@ export default function PartyCard({
               key={`${contact.type}-${contact.handle}`}
               type="button"
               onClick={onContactClick}
-              disabled={isFull}
-              className={`inline-flex items-center gap-1 sm:gap-2 rounded-full border-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${isFull
+              disabled={!canViewContacts}
+              className={`inline-flex items-center gap-1 sm:gap-2 rounded-full border-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${!canViewContacts
                   ? "border-zinc-700/40 bg-zinc-800/30 opacity-50 cursor-not-allowed"
                   : contact.preferred
                     ? "border-blue-500/50 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105 active:scale-95 cursor-pointer"
