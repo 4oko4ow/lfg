@@ -230,19 +230,17 @@ export default function CreatePartyForm({
                 // Если у контакта нет URL, пытаемся сгенерировать из identity
                 if (contact && !contact.url) {
                     const identity = identityData[method];
-                    if (identity) {
-                        // Сначала пробуем использовать существующий URL из identity
-                        if (identity.url) {
+                    if (identity && identity.providerId) {
+                        // Для Discord и Steam всегда генерируем URL из providerId (игнорируем старый URL из БД)
+                        const generatedUrl = generateUrlFromProviderId(method, identity.providerId);
+                        if (generatedUrl) {
+                            console.log(`[CreatePartyForm] Generated URL from providerId for ${method}:`, generatedUrl);
+                            contact.url = generatedUrl;
+                        }
+                        // Для других провайдеров используем URL из identity, если есть
+                        else if (identity.url) {
                             console.log(`[CreatePartyForm] Using identity URL for ${method}:`, identity.url);
                             contact.url = identity.url;
-                        } 
-                        // Если URL нет, генерируем из providerId
-                        else if (identity.providerId) {
-                            const generatedUrl = generateUrlFromProviderId(method, identity.providerId);
-                            if (generatedUrl) {
-                                console.log(`[CreatePartyForm] Generated URL from providerId for ${method}:`, generatedUrl);
-                                contact.url = generatedUrl;
-                            }
                         }
                     }
                 }
