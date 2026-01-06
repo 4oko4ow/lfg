@@ -30,16 +30,33 @@ export default function CreatePartyForm({
     const [expirationHours, setExpirationHours] = useState(24);
     const { contactHandles, profile } = useAuth();
     
-    // Создаем мапу identity URL по провайдеру для быстрого доступа
-    const identityUrls = useMemo(() => {
-        const urls: Partial<Record<ContactMethodType, string>> = {};
+    // Создаем мапу identity providerId и URL по провайдеру для быстрого доступа
+    const identityData = useMemo(() => {
+        const data: Partial<Record<ContactMethodType, { providerId: string; url?: string }>> = {};
         profile?.identities?.forEach((identity) => {
-            if (identity.url) {
-                urls[identity.provider] = identity.url;
-            }
+            data[identity.provider] = {
+                providerId: identity.providerId,
+                url: identity.url,
+            };
         });
-        return urls;
+        return data;
     }, [profile?.identities]);
+    
+    // Функция для генерации URL из providerId
+    const generateUrlFromProviderId = (provider: ContactMethodType, providerId: string): string | undefined => {
+        switch (provider) {
+            case "discord":
+                return `https://discord.com/channels/@me/${providerId}`;
+            case "steam":
+                // Для Steam можно использовать providerId как Steam ID
+                if (/^\d{5,}$/.test(providerId)) {
+                    return `https://steamcommunity.com/profiles/${providerId}`;
+                }
+                return undefined;
+            default:
+                return undefined;
+        }
+    };
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showOtherGames, setShowOtherGames] = useState(false);
     const [gameSearchQuery, setGameSearchQuery] = useState("");
@@ -210,10 +227,24 @@ export default function CreatePartyForm({
                     contactHandles[method],
                     method === effectivePreferred
                 );
-                // Если у контакта нет URL, но есть identity URL для этого провайдера, используем его
-                if (contact && !contact.url && identityUrls[method]) {
-                    console.log(`[CreatePartyForm] Using identity URL for ${method}:`, identityUrls[method]);
-                    contact.url = identityUrls[method];
+                // Если у контакта нет URL, пытаемся сгенерировать из identity
+                if (contact && !contact.url) {
+                    const identity = identityData[method];
+                    if (identity) {
+                        // Сначала пробуем использовать существующий URL из identity
+                        if (identity.url) {
+                            console.log(`[CreatePartyForm] Using identity URL for ${method}:`, identity.url);
+                            contact.url = identity.url;
+                        } 
+                        // Если URL нет, генерируем из providerId
+                        else if (identity.providerId) {
+                            const generatedUrl = generateUrlFromProviderId(method, identity.providerId);
+                            if (generatedUrl) {
+                                console.log(`[CreatePartyForm] Generated URL from providerId for ${method}:`, generatedUrl);
+                                contact.url = generatedUrl;
+                            }
+                        }
+                    }
                 }
                 return contact;
             })
