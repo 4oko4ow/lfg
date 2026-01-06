@@ -464,12 +464,10 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	handle := discordUser.GlobalName
-	if handle == "" {
-		handle = discordUser.Username
-		if discordUser.Discriminator != "0" && discordUser.Discriminator != "" {
-			handle = fmt.Sprintf("%s#%s", handle, discordUser.Discriminator)
-		}
+	// Use username instead of global_name
+	handle := discordUser.Username
+	if discordUser.Discriminator != "0" && discordUser.Discriminator != "" {
+		handle = fmt.Sprintf("%s#%s", handle, discordUser.Discriminator)
 	}
 
 	var linkUserID string

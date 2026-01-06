@@ -160,6 +160,10 @@
     "opened": "Открываем контакт",
     "open": "Открыть",
     "no_methods": "Контакты не указаны",
+    "add_to_discord": "Добавить в Discord",
+    "discord_tooltip": "Username скопирован. Вставь в Discord → Add Friend",
+    "add_friend_steam": "Добавить в друзья",
+    "open_profile_steam": "Открыть профиль",
     "methods": {
       "steam": "Steam",
       "discord": "Discord",

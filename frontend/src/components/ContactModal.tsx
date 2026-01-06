@@ -1,12 +1,12 @@
 // components/ContactModal.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { analytics } from "../utils/analytics";
 import { sendJoinParty } from "../ws/client";
 import type { ContactMethod } from "../types";
 import { StarIcon } from "@heroicons/react/20/solid";
-import { normalizeDiscordUrl } from "../utils/contactHelpers";
+import { normalizeDiscordUrl, extractSteamID64 } from "../utils/contactHelpers";
 import { useAuth } from "../context/AuthContext";
 
 const CONTACT_LABELS: Record<string, { key: string; defaultValue: string }> = {
@@ -26,6 +26,7 @@ export default function ContactModal({
 }) {
   const { t } = useTranslation();
   const { profile } = useAuth();
+  const [discordTooltipVisible, setDiscordTooltipVisible] = useState<string | null>(null);
   
   // Создаем мапу providerId по провайдеру для быстрого доступа
   const providerIds = useRef<Partial<Record<string, string>>>({});
@@ -79,6 +80,35 @@ export default function ContactModal({
       await navigator.clipboard.writeText(value);
       toast.success(t("ui.copied"), { duration: 5000 });
       onClose();
+    } catch {
+      toast.error(t("toasts.error"), { duration: 5000 });
+    }
+  };
+
+  const handleAddToDiscord = async (contact: ContactMethod) => {
+    actionTaken.current = true;
+    analytics.contactCopy();
+    const gameName = game.current || "unknown";
+    analytics.contactModalClosed(gameName, partyId, "copy");
+
+    // Отправляем join только один раз при первом реальном действии
+    if (!joinSentRef.current) {
+      sendJoinParty(partyId);
+      joinSentRef.current = true;
+    }
+
+    // Use contact.handle as username (users typically enter username in contacts)
+    // If handle is a Discord ID (numeric), we'll still copy it (user can use it)
+    const usernameToCopy = contact.handle;
+
+    try {
+      await navigator.clipboard.writeText(usernameToCopy);
+      // Show tooltip
+      setDiscordTooltipVisible(contact.handle);
+      // Hide tooltip after 4 seconds
+      setTimeout(() => {
+        setDiscordTooltipVisible(null);
+      }, 4000);
     } catch {
       toast.error(t("toasts.error"), { duration: 5000 });
     }
@@ -140,6 +170,12 @@ export default function ContactModal({
                 providerIds.current[contact.type]
               );
               
+              // Извлекаем SteamID64 для Steam контактов
+              const steamID64 = extractSteamID64(
+                contact,
+                providerIds.current[contact.type]
+              );
+              
               // Логирование для отладки
               if (process.env.NODE_ENV === "development") {
                 console.log("[ContactModal] Contact:", {
@@ -148,6 +184,7 @@ export default function ContactModal({
                   originalUrl: contact.url,
                   normalizedUrl: normalizedUrl,
                   providerId: providerIds.current[contact.type],
+                  steamID64: steamID64,
                 });
               }
               return (
@@ -174,21 +211,54 @@ export default function ContactModal({
                     </span>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {normalizedUrl && (
+                <div className="flex flex-wrap gap-2 relative">
+                  {contact.type === "steam" && steamID64 ? (
+                    <>
+                      <button
+                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}/addfriend`)}
+                        className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-green-500/50 active:scale-95"
+                      >
+                        ➕ {t("contact.add_friend_steam")}
+                      </button>
+                      <button
+                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`)}
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
+                      >
+                        👤 {t("contact.open_profile_steam")}
+                      </button>
+                    </>
+                  ) : contact.type === "discord" ? (
+                    <div className="relative">
+                      <button
+                        onClick={() => handleAddToDiscord(contact)}
+                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-indigo-500/50 active:scale-95"
+                      >
+                        {t("contact.add_to_discord")}
+                      </button>
+                      {discordTooltipVisible === contact.handle && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-zinc-800 text-white text-xs rounded-lg shadow-lg border border-zinc-700 whitespace-nowrap z-10 animate-fadeIn">
+                          {t("contact.discord_tooltip")}
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-zinc-800"></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : normalizedUrl ? (
                     <button
                       onClick={() => handleOpen(normalizedUrl)}
                       className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
                     >
                       {t("contact.open")}
                     </button>
+                  ) : (
+                    <button
+                      onClick={() => handleCopy(contact.handle)}
+                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
+                    >
+                      {t("ui.copy_contact")}
+                    </button>
                   )}
-                  <button
-                    onClick={() => handleCopy(contact.handle)}
-                    className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
-                  >
-                    {t("ui.copy_contact")}
-                  </button>
                 </div>
               </div>
             );

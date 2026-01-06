@@ -120,3 +120,41 @@ export function normalizeDiscordUrl(
   // Если ничего не подошло, возвращаем исходный URL
   return contact.url;
 }
+
+/**
+ * Извлекает SteamID64 из контакта Steam
+ * SteamID64 - это числовой ID (17 цифр)
+ * Ссылка на документацию: https://steamcommunity.com/profiles/STEAM_ID/addfriend
+ */
+export function extractSteamID64(
+  contact: { type: string; url?: string; handle: string },
+  providerId?: string
+): string | null {
+  if (contact.type !== "steam") {
+    return null;
+  }
+
+  // Приоритет 1: Используем providerId, если передан (это SteamID64 из identity)
+  // SteamID64 всегда 17 цифр
+  if (providerId && /^\d{17}$/.test(providerId)) {
+    return providerId;
+  }
+
+  // Приоритет 2: Извлекаем из URL
+  if (contact.url) {
+    // Формат: https://steamcommunity.com/profiles/STEAM_ID
+    const profileMatch = contact.url.match(/steamcommunity\.com\/profiles\/(\d{17})/i);
+    if (profileMatch) {
+      return profileMatch[1];
+    }
+  }
+
+  // Приоритет 3: Проверяем handle (если это числовой ID длиной 17 цифр)
+  // SteamID64 всегда 17 цифр, но могут быть и другие форматы (5+ цифр для старых ID)
+  // Проверяем именно 17 цифр для SteamID64
+  if (/^\d{17}$/.test(contact.handle)) {
+    return contact.handle;
+  }
+
+  return null;
+}

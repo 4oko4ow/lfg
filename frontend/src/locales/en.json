@@ -156,6 +156,10 @@
     "opened": "Opening contact",
     "open": "Open",
     "no_methods": "No contacts provided",
+    "add_to_discord": "Add to Discord",
+    "discord_tooltip": "Username copied. Paste in Discord → Add Friend",
+    "add_friend_steam": "Add Friend",
+    "open_profile_steam": "Open Profile",
     "methods": {
       "steam": "Steam",
       "discord": "Discord",
