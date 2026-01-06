@@ -3,6 +3,9 @@
 -- It updates contacts where handle is either:
 -- 1. A user ID (17-19 digits)
 -- 2. A different value than the username in auth_identities (could be global_name)
+--
+-- NOTE: For better performance, use update_discord_contacts_username_optimized.sql instead
+-- This migration uses loops and is slower for large datasets
 
 DO $$
 DECLARE
