@@ -91,7 +91,14 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 				log.Println("invalid join payload:", err)
 				continue
 			}
-			UpdatePartyJoined(payload.ID)
+			// Extract user_id from session if available
+			var userID string
+			if sessionManager != nil {
+				if uid, err := sessionManager.Extract(r); err == nil {
+					userID = uid
+				}
+			}
+			UpdatePartyJoined(payload.ID, userID)
 
 		case "heartbeat":
 			// опционально: обработка, если нужна (например, log/пинг)

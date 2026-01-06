@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { connectWS, onMessage, socket } from "../ws/client";
+import { connectWS, onMessage, socket, sendJoinParty } from "../ws/client";
 import PartyCard from "../components/PartyCard";
 import PartyCardSkeleton from "../components/PartyCardSkeleton";
 import type { ContactMethod, Message, Party } from "../types";
@@ -198,6 +198,17 @@ function PartyFeedPage() {
           // Track party creation success
           const newParty = msg.payload as Party;
           analytics.partyCreated(newParty.game, newParty.slots);
+          
+          // Если пользователь - создатель партии, добавляем в localStorage как "joined"
+          // чтобы кнопка сразу показывала контакты
+          if (profile && newParty.user_id && profile.id === newParty.user_id) {
+            const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+            if (!joinedParties.includes(newParty.id)) {
+              joinedParties.push(newParty.id);
+              localStorage.setItem("joined_parties", JSON.stringify(joinedParties));
+            }
+          }
+          
           setParties((prev) => {
             const updated = [msg.payload, ...prev];
             // Update cache
@@ -213,6 +224,14 @@ function PartyFeedPage() {
         case "party_remove":
           setParties((prev) => {
             const updated = prev.filter((p) => p.id !== msg.payload.id);
+            // Remove from joined_parties if present
+            try {
+              const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+              const filtered = joinedParties.filter((id) => id !== msg.payload.id);
+              localStorage.setItem("joined_parties", JSON.stringify(filtered));
+            } catch {
+              // Ignore storage errors
+            }
             // Update cache
             try {
               localStorage.setItem("cached_parties", JSON.stringify(updated));
@@ -225,7 +244,21 @@ function PartyFeedPage() {
           break;
         case "party_update":
           setParties((prev) => {
-            const updated = prev.map((p) => (p.id === msg.payload.id ? msg.payload : p));
+            const updated = prev.map((p) => {
+              if (p.id === msg.payload.id) {
+                const updatedParty = msg.payload as Party;
+                // Если пользователь вступил в эту партию, сохраняем в localStorage
+                if (profile && updatedParty.joined > p.joined) {
+                  const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+                  if (!joinedParties.includes(updatedParty.id)) {
+                    joinedParties.push(updatedParty.id);
+                    localStorage.setItem("joined_parties", JSON.stringify(joinedParties));
+                  }
+                }
+                return updatedParty;
+              }
+              return p;
+            });
             // Update cache
             try {
               localStorage.setItem("cached_parties", JSON.stringify(updated));
@@ -378,8 +411,31 @@ function PartyFeedPage() {
       }));
       setLoginModalOpen(true);
     } else {
-      // Пользователь залогинен - открываем модалку контактов
+      // Пользователь залогинен
+      // Проверяем, является ли пользователь создателем партии
+      if (profile && party.user_id && profile.id === party.user_id) {
+        // Создатель не может вступить в свою партию - просто показываем контакты
+        handleContactClick(party);
+        return;
+      }
+      
+      // Проверяем, не вступил ли пользователь уже в эту партию
+      // (используем localStorage для отслеживания на клиенте)
+      const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
+      if (joinedParties.includes(party.id)) {
+        // Пользователь уже вступил - показываем контакты
+        handleContactClick(party);
+        return;
+      }
+      
+      // Пользователь может вступить - отправляем запрос и открываем контакты
       handleContactClick(party);
+      // Отправляем join_party через WebSocket
+      sendJoinParty(party.id);
+      
+      // Сохраняем в localStorage, что пользователь вступил
+      joinedParties.push(party.id);
+      localStorage.setItem("joined_parties", JSON.stringify(joinedParties));
     }
   };
 

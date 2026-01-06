@@ -182,6 +182,38 @@ func UpdatePartyInDatabase(p *Party) {
 	}
 }
 
+// savePartyMember saves a party membership to the database
+func savePartyMember(partyID, userID string) {
+	if db == nil {
+		return
+	}
+	_, err := db.Exec(`
+		INSERT INTO party_members (party_id, user_id, joined_at)
+		VALUES ($1, $2, NOW())
+		ON CONFLICT (party_id, user_id) DO NOTHING
+	`, partyID, userID)
+	if err != nil {
+		log.Printf("Error saving party member: %v", err)
+	}
+}
+
+// isUserMemberOfParty checks if a user is already a member of a party
+func isUserMemberOfParty(partyID, userID string) bool {
+	if db == nil || userID == "" {
+		return false
+	}
+	var count int
+	err := db.QueryRow(`
+		SELECT COUNT(*) FROM party_members
+		WHERE party_id = $1 AND user_id = $2
+	`, partyID, userID).Scan(&count)
+	if err != nil {
+		log.Printf("Error checking party membership: %v", err)
+		return false
+	}
+	return count > 0
+}
+
 func SynchronizeMemoryWithDatabase() {
 	partiesFromDB := LoadPartiesFromDatabase()
 

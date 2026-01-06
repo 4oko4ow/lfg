@@ -82,14 +82,43 @@ func RemoveParty(id string) {
 	go RemovePartyFromDatabase(id)
 }
 
-func UpdatePartyJoined(id string) {
+func UpdatePartyJoined(id string, userID string) error {
 	partyLock.Lock()
 	defer partyLock.Unlock()
-	if p, ok := parties[id]; ok && p.Joined < p.Slots {
-		p.Joined++
-		go UpdatePartyInDatabase(p)
-		Broadcast(Message{Type: "party_update", Payload: p})
+	
+	p, ok := parties[id]
+	if !ok {
+		return nil // Party not found, silently ignore
 	}
+	
+	// Check if party is full
+	if p.Joined >= p.Slots {
+		return nil // Party is full, silently ignore
+	}
+	
+	// Check if user is the creator
+	if p.UserID != "" && p.UserID == userID {
+		return nil // Creator cannot join their own party, silently ignore
+	}
+	
+	// Check if user already joined
+	if userID != "" {
+		if isUserMemberOfParty(id, userID) {
+			return nil // User already joined, silently ignore
+		}
+	}
+	
+	// Increment joined count
+	p.Joined++
+	
+	// Save membership to database if user is authenticated
+	if userID != "" {
+		go savePartyMember(id, userID)
+	}
+	
+	go UpdatePartyInDatabase(p)
+	Broadcast(Message{Type: "party_update", Payload: p})
+	return nil
 }
 
 func StartPartyCleanupLoop() {
