@@ -63,10 +63,12 @@ const CONTACT_ICONS: Record<string, { icon: ReactNode; label: string }> = {
 export default function PartyCard({
   party,
   onContactClick,
+  onJoinClick,
   position,
 }: {
   party: Party;
   onContactClick: () => void;
+  onJoinClick: () => void;
   position?: number;
 }) {
   const { t } = useTranslation();
@@ -237,20 +239,33 @@ export default function PartyCard({
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
           {renderContacts(party.contacts)}
         </div>
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-900/60 border border-zinc-700/50 flex-shrink-0">
-          <UserGroupIcon className="w-4 h-4 text-zinc-400" />
-          <div className="flex items-center gap-1.5 text-sm">
-            <span className={`font-bold ${isFull ? 'text-red-400' : isAlmostFull ? 'text-yellow-400' : 'text-green-400'}`}>
-              {party.joined}
-            </span>
-            <span className="text-zinc-500">/</span>
-            <span className="text-zinc-300 font-medium">{party.slots}</span>
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-900/60 border border-zinc-700/50">
+            <UserGroupIcon className="w-4 h-4 text-zinc-400" />
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className={`font-bold ${isFull ? 'text-red-400' : isAlmostFull ? 'text-yellow-400' : 'text-green-400'}`}>
+                {party.joined}
+              </span>
+              <span className="text-zinc-500">/</span>
+              <span className="text-zinc-300 font-medium">{party.slots}</span>
+            </div>
+            {isFull && (
+              <span className="ml-2 text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/30 whitespace-nowrap">
+                {t("party.full")}
+              </span>
+            )}
           </div>
-          {isFull && (
-            <span className="ml-2 text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/30 whitespace-nowrap">
-              {t("party.full")}
-            </span>
-          )}
+          <button
+            onClick={onJoinClick}
+            disabled={isFull}
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+              isFull
+                ? "bg-zinc-800/50 text-zinc-500 border border-zinc-700/50 cursor-not-allowed opacity-50"
+                : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/50 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-xl hover:shadow-blue-500/60 hover:scale-105 active:scale-95"
+            }`}
+          >
+            {t("ui.join_party")}
+          </button>
         </div>
       </div>
     </div>

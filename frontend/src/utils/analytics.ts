@@ -215,6 +215,18 @@ export const analytics = {
     track("party_card_hover", { game, party_id: partyId });
   },
 
+  joinButtonClick: (game: string, partyId: string, isAuthenticated: boolean) => {
+    track("join_button_click", { game, party_id: partyId, is_authenticated: isAuthenticated ? 1 : 0 });
+  },
+
+  joinButtonClickUnauthenticated: (game: string, partyId: string) => {
+    track("join_button_click_unauthenticated", { game, party_id: partyId });
+  },
+
+  loginModalOpenedFromJoin: (game: string, partyId: string) => {
+    track("login_modal_opened_from_join", { game, party_id: partyId });
+  },
+
   contactModalClosed: (game: string, partyId: string, action: "copy" | "close" | "none") => {
     track("contact_modal_closed", { game, party_id: partyId, action });
   },

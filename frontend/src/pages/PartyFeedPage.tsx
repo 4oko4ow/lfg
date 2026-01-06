@@ -20,9 +20,11 @@ import Chat from "../components/Chat";
 import ChatDrawer from "../components/ChatDrawer";
 import SuggestGameModal from "../components/modals/SuggestGameModal";
 import CreatePartyModal from "../components/modals/CreatePartyModal";
+import LoginModal from "../components/modals/LoginModal";
 import { NoJoinSurvey } from "../components/NoJoinSurvey";
 import { DynamicMeta } from "../components/DynamicMeta";
 import { useOnlineCount } from "../context/OnlineCountContext";
+import { useAuth } from "../context/AuthContext";
 
 import { getGames } from "../constants/games";
 
@@ -107,10 +109,13 @@ function PartyFeedPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
   const [createPartyModalOpen, setCreatePartyModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const { onlineCount, setOnlineCount } = useOnlineCount();
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showSurvey, setShowSurvey] = useState(false);
   const [joinClicked, setJoinClicked] = useState(false);
+  const [pendingJoinParty, setPendingJoinParty] = useState<Party | null>(null);
 
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
@@ -127,6 +132,49 @@ function PartyFeedPage() {
     setContactModal(null);
     setContactPartyId("");
   };
+
+  // Проверяем, есть ли сохраненная пати для присоединения после авторизации
+  useEffect(() => {
+    if (profile && parties.length > 0) {
+      const pendingJoinData = sessionStorage.getItem("pending_join_party");
+      if (pendingJoinData) {
+        try {
+          const partyData = JSON.parse(pendingJoinData);
+          // Небольшая задержка, чтобы убедиться, что профиль полностью загружен
+          setTimeout(() => {
+            const party = parties.find(p => p.id === partyData.id);
+            if (party) {
+              // Открываем модалку контактов для сохраненной пати
+              analytics.joinPartyClick(party.game);
+              analytics.contactModalOpened(party.game, party.id);
+              
+              // Трекинг времени до присоединения
+              const feedStartTime = sessionStorage.getItem("feed_start_time");
+              if (feedStartTime) {
+                const duration = Date.now() - parseInt(feedStartTime);
+                analytics.timeToJoin(duration);
+                analytics.timeToFirstAction("join", duration);
+              }
+              
+              // Сохраняем game для трекинга в модалке
+              sessionStorage.setItem(`contact_modal_game_${party.id}`, party.game);
+              if (party.joined >= party.slots) {
+                analytics.partyFullClick(party.game);
+              }
+              setJoinClicked(true);
+              setContactPartyId(party.id);
+              setContactModal(party.contacts ?? []);
+            }
+            sessionStorage.removeItem("pending_join_party");
+          }, 100);
+        } catch (error) {
+          console.error("Failed to parse pending join party data:", error);
+          sessionStorage.removeItem("pending_join_party");
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, parties]);
 
   useEffect(() => {
     connectWS();
@@ -313,6 +361,39 @@ function PartyFeedPage() {
     setJoinClicked(true);
     setContactPartyId(party.id);
     setContactModal(party.contacts ?? []);
+  };
+
+  const handleJoinClick = (party: Party) => {
+    const isAuthenticated = profile !== null;
+    analytics.joinButtonClick(party.game, party.id, isAuthenticated);
+    
+    if (!isAuthenticated) {
+      // Пользователь не залогинен - открываем модалку авторизации
+      analytics.joinButtonClickUnauthenticated(party.game, party.id);
+      analytics.loginModalOpenedFromJoin(party.game, party.id);
+      // Сохраняем информацию о пати для открытия после авторизации
+      sessionStorage.setItem("pending_join_party", JSON.stringify({
+        id: party.id,
+        game: party.game,
+        contacts: party.contacts,
+      }));
+      setPendingJoinParty(party);
+      setLoginModalOpen(true);
+    } else {
+      // Пользователь залогинен - открываем модалку контактов
+      handleContactClick(party);
+    }
+  };
+
+  const handleLoginModalClose = () => {
+    setLoginModalOpen(false);
+    // Если пользователь закрыл модалку без авторизации, очищаем сохраненную пати
+    // Если авторизация прошла успешно, информация останется в sessionStorage
+    // и модалка контактов откроется автоматически через useEffect
+    if (!profile) {
+      sessionStorage.removeItem("pending_join_party");
+    }
+    setPendingJoinParty(null);
   };
 
   return (
@@ -528,6 +609,7 @@ function PartyFeedPage() {
                 <PartyCard 
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
+                  onJoinClick={() => handleJoinClick(party)}
                   position={index}
                 />
         </div>
@@ -570,6 +652,7 @@ function PartyFeedPage() {
                 <PartyCard 
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
+                  onJoinClick={() => handleJoinClick(party)}
                   position={index}
                 />
               </div>
@@ -588,6 +671,9 @@ function PartyFeedPage() {
             onClose={() => setCreatePartyModalOpen(false)} 
             parties={parties}
           />
+        )}
+        {loginModalOpen && (
+          <LoginModal onClose={handleLoginModalClose} />
         )}
       </main>
 
