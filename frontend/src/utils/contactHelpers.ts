@@ -44,7 +44,7 @@ export function normalizeContactHandle(
       if (/^\d{17,19}$/.test(trimmed)) {
         return {
           handle: trimmed,
-          url: `https://discord.com/users/${trimmed}`,
+          url: `https://discord.com/channels/@me/${trimmed}`,
         };
       }
       // Если это username с @, просто возвращаем handle без URL

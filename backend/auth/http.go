@@ -487,7 +487,7 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 	}
 
 	log.Printf("[Auth] Upserting Discord identity: provider_id=%s, linkUserID=%s", discordUser.ID, linkUserID)
-	profile, err := h.store.UpsertIdentity(linkUserID, ProviderDiscord, discordUser.ID, handle, "https://discord.com/users/"+discordUser.ID, token.AccessToken, token.RefreshToken)
+	profile, err := h.store.UpsertIdentity(linkUserID, ProviderDiscord, discordUser.ID, handle, "https://discord.com/channels/@me/"+discordUser.ID, token.AccessToken, token.RefreshToken)
 	if err != nil {
 		log.Printf("[Auth] Failed to upsert Discord identity: %v", err)
 		status := "discord_error"
