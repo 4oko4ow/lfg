@@ -466,12 +466,17 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 
 	// Use username instead of global_name
 	// IMPORTANT: Always use username, never global_name
+	// Discord API should always return username, but we have fallbacks for edge cases
 	handle := discordUser.Username
 	if handle == "" {
-		log.Printf("[Auth] WARNING: Discord username is empty, falling back to global_name")
+		// This should rarely happen - Discord API typically always returns username
+		// Fallback to global_name only if username is truly empty
+		log.Printf("[Auth] WARNING: Discord username is empty (unusual), falling back to global_name: %s", discordUser.GlobalName)
 		handle = discordUser.GlobalName
 		if handle == "" {
-			handle = discordUser.ID // Last resort: use user ID
+			// Last resort: use user ID (should never happen in practice)
+			log.Printf("[Auth] ERROR: Both username and global_name are empty, using user ID: %s", discordUser.ID)
+			handle = discordUser.ID
 		}
 	}
 	if discordUser.Discriminator != "0" && discordUser.Discriminator != "" {

@@ -29,11 +29,14 @@ DATABASE_URL="postgresql://user:pass@host:5432/db" ./update_discord_identities
 
 - Переменная окружения `DATABASE_URL` должна быть установлена
 - Доступ к базе данных PostgreSQL
-- Валидные `access_token` в таблице `auth_identities` для Discord провайдера
+- Для обновления через API: валидные `access_token` или `refresh_token` в таблице `auth_identities`
+- Для обновления через refresh: переменные окружения `DISCORD_CLIENT_ID` и `DISCORD_CLIENT_SECRET`
 
 ## Примечания
 
-- Скрипт безопасен для повторного запуска - он пропускает identities с валидными username
-- Если `access_token` истек или невалиден, identity будет пропущена
+- Скрипт безопасен для повторного запуска
+- Если `access_token` истек (401 ошибка), скрипт попытается обновить его через `refresh_token`
+- Если обновление токена не удалось, скрипт попытается использовать username из `auth_contacts`
 - Скрипт логирует все действия для отладки
+- Если ни API, ни `auth_contacts` не доступны, identity будет пропущена
 
