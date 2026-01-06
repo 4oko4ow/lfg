@@ -385,7 +385,11 @@ export default function ProfilePage() {
                   className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
                 >
                   <div className="mb-3">
-                    <PartyCard party={party} onContactClick={() => { }} />
+                    <PartyCard 
+                      party={party} 
+                      onContactClick={() => { }} 
+                      onJoinClick={() => { }}
+                    />
                   </div>
                   <div className="flex gap-2 border-t border-zinc-800 pt-3">
                     <button

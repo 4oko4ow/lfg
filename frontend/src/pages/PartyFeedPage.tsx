@@ -115,7 +115,6 @@ function PartyFeedPage() {
   const [loading, setLoading] = useState(true);
   const [showSurvey, setShowSurvey] = useState(false);
   const [joinClicked, setJoinClicked] = useState(false);
-  const [pendingJoinParty, setPendingJoinParty] = useState<Party | null>(null);
 
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
@@ -377,7 +376,6 @@ function PartyFeedPage() {
         game: party.game,
         contacts: party.contacts,
       }));
-      setPendingJoinParty(party);
       setLoginModalOpen(true);
     } else {
       // Пользователь залогинен - открываем модалку контактов
@@ -393,7 +391,6 @@ function PartyFeedPage() {
     if (!profile) {
       sessionStorage.removeItem("pending_join_party");
     }
-    setPendingJoinParty(null);
   };
 
   return (
