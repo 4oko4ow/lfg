@@ -6,3 +6,4 @@ ADD COLUMN IF NOT EXISTS added BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS idx_suggested_games_added ON suggested_games(added);
 
 
+
