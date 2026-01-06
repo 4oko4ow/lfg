@@ -84,6 +84,15 @@ export default function ContactModal({
       sendJoinParty(partyId);
       joinSentRef.current = true;
     }
+    
+    // Проверяем, что URL валидный
+    if (!url || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+      console.error("[ContactModal] Invalid URL:", url);
+      toast.error(t("contact.invalid_url", "Invalid URL"));
+      return;
+    }
+    
+    console.log("[ContactModal] Opening URL:", url);
     window.open(url, "_blank", "noopener");
     toast.success(t("contact.opened"), { duration: 4000 });
     onClose();
@@ -113,7 +122,17 @@ export default function ContactModal({
           </p>
         ) : (
           <div className="space-y-3">
-            {contacts.map((contact) => (
+            {contacts.map((contact) => {
+              // Логирование для отладки
+              if (process.env.NODE_ENV === "development") {
+                console.log("[ContactModal] Contact:", {
+                  type: contact.type,
+                  handle: contact.handle,
+                  url: contact.url,
+                  hasUrl: !!contact.url,
+                });
+              }
+              return (
               <div
                 key={`${contact.type}-${contact.handle}`}
                 className="rounded-lg border border-zinc-700/50 bg-zinc-800/50 backdrop-blur-sm p-4 hover:border-zinc-600 hover:bg-zinc-800/70 transition-all duration-200"
@@ -154,7 +173,8 @@ export default function ContactModal({
                   </button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
         <div className="flex justify-end pt-2">

@@ -29,6 +29,17 @@ export default function CreatePartyForm({
     const [expirationEnabled, setExpirationEnabled] = useState(false);
     const [expirationHours, setExpirationHours] = useState(24);
     const { contactHandles, profile } = useAuth();
+    
+    // Создаем мапу identity URL по провайдеру для быстрого доступа
+    const identityUrls = useMemo(() => {
+        const urls: Partial<Record<ContactMethodType, string>> = {};
+        profile?.identities?.forEach((identity) => {
+            if (identity.url) {
+                urls[identity.provider] = identity.url;
+            }
+        });
+        return urls;
+    }, [profile?.identities]);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showOtherGames, setShowOtherGames] = useState(false);
     const [gameSearchQuery, setGameSearchQuery] = useState("");
@@ -193,13 +204,19 @@ export default function CreatePartyForm({
                 : selectedMethods[0];
 
         const contacts = selectedMethods
-            .map((method) =>
-                contactHandleToMethod(
+            .map((method) => {
+                const contact = contactHandleToMethod(
                     method,
                     contactHandles[method],
                     method === effectivePreferred
-                )
-            )
+                );
+                // Если у контакта нет URL, но есть identity URL для этого провайдера, используем его
+                if (contact && !contact.url && identityUrls[method]) {
+                    console.log(`[CreatePartyForm] Using identity URL for ${method}:`, identityUrls[method]);
+                    contact.url = identityUrls[method];
+                }
+                return contact;
+            })
             .filter((contact): contact is NonNullable<typeof contact> => Boolean(contact));
 
         console.log("   contacts:", contacts);

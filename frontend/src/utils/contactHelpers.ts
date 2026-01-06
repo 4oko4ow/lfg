@@ -40,6 +40,15 @@ export function normalizeContactHandle(
       };
     }
     case "discord": {
+      // Если это Discord ID (только цифры, обычно 17-19 цифр)
+      if (/^\d{17,19}$/.test(trimmed)) {
+        return {
+          handle: trimmed,
+          url: `https://discord.com/users/${trimmed}`,
+        };
+      }
+      // Если это username с @, просто возвращаем handle без URL
+      // (Discord не позволяет открыть профиль по username без ID)
       if (/^@/.test(trimmed)) {
         return {
           handle: trimmed,
