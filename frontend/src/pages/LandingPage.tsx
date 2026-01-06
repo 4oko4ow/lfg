@@ -10,7 +10,6 @@ import {
   Trophy,
   ArrowRight,
   MessageCircle,
-  TrendingUp,
   CheckCircle2,
 } from "lucide-react";
 import { connectWS, onMessage, socket } from "../ws/client";
