@@ -146,12 +146,29 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 			continue
 		}
 
-		// Check if handle is a user ID
-		if !discordIDRegex.MatchString(contact.Handle) {
+		// Extract Discord user ID from URL or handle
+		discordUserID := ""
+		
+		// Try to extract from URL first (format: https://discord.com/channels/@me/{user_id})
+		if contact.URL != "" {
+			urlRegex := regexp.MustCompile(`discord\.com/channels/@me/(\d{17,19})`)
+			matches := urlRegex.FindStringSubmatch(contact.URL)
+			if len(matches) > 1 {
+				discordUserID = matches[1]
+			}
+		}
+		
+		// If not found in URL, check if handle is a user ID
+		if discordUserID == "" && discordIDRegex.MatchString(contact.Handle) {
+			discordUserID = contact.Handle
+		}
+		
+		// If we still don't have user_id, skip this contact
+		if discordUserID == "" {
+			log.Printf("Party %s: Skipped Discord contact (no user_id found): handle=%s, url=%s", 
+				party.PartyID, contact.Handle, contact.URL)
 			continue
 		}
-
-		discordUserID := contact.Handle
 
 		// First, try to get username from auth_identities
 		var username string
@@ -165,11 +182,16 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 		`, discordUserID).Scan(&username)
 
 		if err == nil && username != "" {
-			// Found username in database
-			updatedContacts[i].Handle = username
-			updated = true
-			log.Printf("Party %s: Updated Discord contact %s -> %s (from DB)", 
-				party.PartyID, discordUserID, username)
+			// Found username in database - update only if different from current handle
+			if username != contact.Handle {
+				updatedContacts[i].Handle = username
+				updated = true
+				log.Printf("Party %s: Updated Discord contact '%s' -> '%s' (from DB, user_id: %s)", 
+					party.PartyID, contact.Handle, username, discordUserID)
+			} else {
+				log.Printf("Party %s: Discord contact already correct: %s", 
+					party.PartyID, username)
+			}
 			continue
 		}
 
@@ -188,10 +210,16 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 			// Try to fetch username from Discord API
 			username, err := fetchDiscordUsername(accessToken.String)
 			if err == nil && username != "" {
-				updatedContacts[i].Handle = username
-				updated = true
-				log.Printf("Party %s: Updated Discord contact %s -> %s (from API)", 
-					party.PartyID, discordUserID, username)
+				// Update only if different from current handle
+				if username != contact.Handle {
+					updatedContacts[i].Handle = username
+					updated = true
+					log.Printf("Party %s: Updated Discord contact '%s' -> '%s' (from API, user_id: %s)", 
+						party.PartyID, contact.Handle, username, discordUserID)
+				} else {
+					log.Printf("Party %s: Discord contact already correct: %s", 
+						party.PartyID, username)
+				}
 				
 				// Also update auth_identities with the fetched username
 				_, _ = db.Exec(`
@@ -207,8 +235,8 @@ func updatePartyDiscordContacts(db *sql.DB, party PartyContact) (bool, error) {
 			}
 		}
 
-		log.Printf("Party %s: Skipped Discord contact %s (no username found)", 
-			party.PartyID, discordUserID)
+		log.Printf("Party %s: Skipped Discord contact (no username found): handle='%s', user_id=%s", 
+			party.PartyID, contact.Handle, discordUserID)
 	}
 
 	if !updated {

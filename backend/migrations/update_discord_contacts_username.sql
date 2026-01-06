@@ -1,11 +1,15 @@
--- Update Discord contacts in parties.contacts to use username instead of user ID
--- This migration updates contacts where we can find the username in auth_identities
+-- Update Discord contacts in parties.contacts to use username instead of user ID or global_name
+-- This migration updates ALL Discord contacts by matching with username in auth_identities
+-- It updates contacts where handle is either:
+-- 1. A user ID (17-19 digits)
+-- 2. A different value than the username in auth_identities (could be global_name)
 
 DO $$
 DECLARE
     party_record RECORD;
     contact_item JSONB;
     updated_contacts JSONB;
+    discord_handle TEXT;
     discord_user_id TEXT;
     discord_username TEXT;
     contact_updated BOOLEAN;
@@ -26,11 +30,22 @@ BEGIN
         LOOP
             -- Check if this is a Discord contact
             IF contact_item->>'type' = 'discord' THEN
-                discord_user_id := contact_item->>'handle';
+                discord_handle := contact_item->>'handle';
                 
-                -- Check if handle is a user ID (17-19 digits)
-                IF discord_user_id ~ '^\d{17,19}$' THEN
-                    -- Try to find username in auth_identities
+                -- Try to find the user_id from the contact URL or handle
+                -- Discord URLs are like: https://discord.com/channels/@me/{user_id}
+                IF contact_item->>'url' IS NOT NULL THEN
+                    -- Extract user_id from URL
+                    discord_user_id := substring(contact_item->>'url' from 'discord\.com/channels/@me/(\d{17,19})');
+                END IF;
+                
+                -- If we couldn't get user_id from URL, check if handle is a user ID
+                IF discord_user_id IS NULL AND discord_handle ~ '^\d{17,19}$' THEN
+                    discord_user_id := discord_handle;
+                END IF;
+                
+                -- If we have a user_id, try to find username in auth_identities
+                IF discord_user_id IS NOT NULL THEN
                     SELECT username INTO discord_username
                     FROM auth_identities
                     WHERE provider = 'discord'
@@ -38,16 +53,16 @@ BEGIN
                     AND username IS NOT NULL
                     AND username != '';
                     
-                    -- If we found a username, update the contact
-                    IF discord_username IS NOT NULL THEN
+                    -- If we found a username and it's different from current handle, update
+                    IF discord_username IS NOT NULL AND discord_username != discord_handle THEN
                         contact_item := jsonb_set(
                             contact_item,
                             '{handle}',
                             to_jsonb(discord_username)
                         );
                         contact_updated := true;
-                        RAISE NOTICE 'Updated Discord contact in party %: % -> %', 
-                            party_record.id, discord_user_id, discord_username;
+                        RAISE NOTICE 'Updated Discord contact in party %: "%" -> "%" (user_id: %)', 
+                            party_record.id, discord_handle, discord_username, discord_user_id;
                     END IF;
                 END IF;
             END IF;
