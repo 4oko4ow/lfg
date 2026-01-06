@@ -32,33 +32,58 @@ echo ""
 
 # Wait for database to be ready (with timeout)
 # Use psql with connection string directly - supports SSL automatically
-MAX_WAIT=60
+MAX_WAIT=120
 WAIT_COUNT=0
+RETRY_DELAY=3
 echo "Waiting for database to be ready..."
 until psql "$DB_URL" -c "SELECT 1" > /dev/null 2>&1; do
   if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
     echo "ERROR: Database not ready after ${MAX_WAIT} seconds"
     echo "Connection string format: postgres:// or postgresql://"
     echo "Make sure SSL parameters are included if required (e.g., ?sslmode=require)"
+    echo ""
+    echo "Troubleshooting:"
+    echo "  - Check DNS resolution: nslookup $DB_HOST"
+    echo "  - Check network connectivity from container"
+    echo "  - Verify DATABASE_URL is correct"
     exit 1
   fi
   echo "  Waiting... ($WAIT_COUNT/$MAX_WAIT seconds)"
-  sleep 2
-  WAIT_COUNT=$((WAIT_COUNT + 2))
+  sleep $RETRY_DELAY
+  WAIT_COUNT=$((WAIT_COUNT + RETRY_DELAY))
 done
 echo "✅ Database is ready!"
 echo ""
 
 # Run migrations in alphabetical order
 MIGRATION_COUNT=0
+MAX_RETRIES=3
+RETRY_DELAY=5
+
 for file in $(ls /migrations/*.sql 2>/dev/null | sort); do
   if [ -f "$file" ]; then
     MIGRATION_COUNT=$((MIGRATION_COUNT + 1))
     echo "[$MIGRATION_COUNT] Running $(basename $file)..."
-    if psql "$DB_URL" -f "$file"; then
-      echo "  ✅ Completed $(basename $file)"
-    else
-      echo "  ❌ Failed to run $(basename $file)"
+    
+    # Retry logic for network issues
+    RETRY_COUNT=0
+    SUCCESS=0
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+      if psql "$DB_URL" -f "$file" 2>&1; then
+        echo "  ✅ Completed $(basename $file)"
+        SUCCESS=1
+        break
+      else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+          echo "  ⚠️  Attempt $RETRY_COUNT failed, retrying in ${RETRY_DELAY} seconds..."
+          sleep $RETRY_DELAY
+        fi
+      fi
+    done
+    
+    if [ $SUCCESS -eq 0 ]; then
+      echo "  ❌ Failed to run $(basename $file) after $MAX_RETRIES attempts"
       exit 1
     fi
     echo ""

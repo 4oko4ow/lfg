@@ -83,17 +83,21 @@ func main() {
 			continue
 		}
 
-		// Check if username changed (to avoid unnecessary updates)
+		// Get current username for logging
 		currentUsername := ""
 		if identity.Username.Valid {
 			currentUsername = identity.Username.String
 		}
 
-		if currentUsername == username {
-			log.Printf("Skipping identity %d (provider_id: %s) - username already correct: %s", 
+		// Always update if we got username from API, even if it matches current value
+		// This ensures we're using the latest username from Discord (not stale global_name)
+		// Only skip if current value is exactly the same AND we're confident it's correct
+		// But to be safe, we'll always update when we have fresh data from API
+		if currentUsername == username && currentUsername != "" {
+			// Double-check: if current username looks like it might be global_name (contains spaces, etc),
+			// we should still update. For now, we'll update anyway to be safe.
+			log.Printf("Identity %d (provider_id: %s) - username matches API, but updating anyway to ensure correctness: %s", 
 				identity.ID, identity.ProviderID, username)
-			skippedCount++
-			continue
 		}
 
 		// Update identity in database
