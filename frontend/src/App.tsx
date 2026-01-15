@@ -1,9 +1,4 @@
-import { useEffect, useMemo } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-
-import RedirectOnRoot from "./components/RedirectOnRoot";
-import LangSync from "./components/LangSync";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import LandingPage from "./pages/LandingPage";
 import PartyFeedPage from "./pages/PartyFeedPage";
@@ -11,43 +6,17 @@ import ProfilePage from "./pages/ProfilePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 
 function App() {
-  const location = useLocation();
-  const { i18n } = useTranslation();
-
-  useEffect(() => {
-    const pathLang =
-      location.pathname.match(/^\/(en|ru)(\/|$)/i)?.[1]?.toLowerCase() || "en";
-    if (i18n.language !== pathLang) {
-      i18n.changeLanguage(pathLang);
-      document.documentElement.lang = pathLang;
-      try {
-        localStorage.setItem("lang", pathLang);
-      } catch {
-        // ignore storage errors
-      }
-    }
-  }, [location.pathname, i18n]);
-
-  const currentLang = useMemo(
-    () =>
-      location.pathname.match(/^\/(en|ru)(\/|$)/i)?.[1]?.toLowerCase() || "en",
-    [location.pathname]
-  );
-
   return (
     <>
-      <RedirectOnRoot />
-      <LangSync />
-      <Header currentLang={currentLang} />
+      <Header />
       <Routes>
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/:lang/feed" element={<PartyFeedPage />} />
-        <Route path="/:lang/profile" element={<ProfilePage />} />
-        <Route path="/:lang" element={<LandingPage />} />
+        <Route path="/feed" element={<PartyFeedPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route
-        
           path="*"
-          element={<Navigate to={`/${currentLang}`} replace />}
+          element={<Navigate to="/" replace />}
         />
       </Routes>
     </>

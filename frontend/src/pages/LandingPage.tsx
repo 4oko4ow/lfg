@@ -109,8 +109,7 @@ export default function LandingPage() {
       });
   }, []);
 
-  const currentLang = window.location.pathname.match(/^\/(en|ru)(\/|$)/i)?.[1]?.toLowerCase() || "en";
-  const feedPath = `/${currentLang}/feed`;
+  const feedPath = "/feed";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
@@ -144,7 +143,7 @@ export default function LandingPage() {
               </Link>
               {!profile && (
                 <button
-                  onClick={() => navigate(`/${currentLang}/profile`)}
+                  onClick={() => navigate("/profile")}
                   className="rounded-full border-2 border-zinc-600 bg-zinc-900/50 px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:border-zinc-400 hover:bg-zinc-800/50"
                 >
                   {t("landing.cta.create", "Create Your First Party")}
@@ -308,4 +307,3 @@ export default function LandingPage() {
     </div>
   );
 }
-

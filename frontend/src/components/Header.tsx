@@ -6,21 +6,15 @@ import { Users } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineCount } from "../context/OnlineCountContext";
 import LoginModal from "./modals/LoginModal";
-import LanguageSwitcher from "./LanguageSwitcher";
-
-export default function Header({
-  currentLang,
-}: {
-  currentLang: string;
-}) {
+export default function Header() {
   const { t } = useTranslation();
   const { profile, loading, signOut } = useAuth();
   const { onlineCount } = useOnlineCount();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const profilePath = `/${currentLang}/profile`;
-  const homePath = `/${currentLang}`;
+  const profilePath = "/profile";
+  const homePath = "/";
 
   const displayName =
     profile?.displayName || t("profile.anonymous");
@@ -62,7 +56,6 @@ export default function Header({
               </div>
             </div>
           )}
-          <LanguageSwitcher />
           {loading ? (
             <span className="text-zinc-400 text-xs sm:text-sm">
               {t("auth.loading")}

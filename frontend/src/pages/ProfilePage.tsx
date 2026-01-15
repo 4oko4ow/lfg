@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth, type SocialProvider } from "../context/AuthContext";
 import {
   contactHandleToInput,
@@ -44,7 +44,6 @@ const PROVIDERS: {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 export default function ProfilePage() {
-  const { lang } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
@@ -75,9 +74,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (loading === false && !profile) {
-      navigate(`/${lang ?? "en"}`, { replace: true });
+      navigate("/", { replace: true });
     }
-  }, [profile, loading, lang, navigate]);
+  }, [profile, loading, navigate]);
 
   useEffect(() => {
     if (profile) {
@@ -186,8 +185,7 @@ export default function ProfilePage() {
     );
   }
 
-  const currentLang = lang ?? "en";
-  const feedPath = `/${currentLang}/feed`;
+  const feedPath = "/feed";
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 text-white">

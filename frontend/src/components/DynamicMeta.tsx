@@ -1,12 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-/** распознаём язык из /:lang префикса */
-function getLangFromPath(pathname: string): "ru" | "en" {
-  const m = pathname.match(/^\/(en|ru)(\/|$)/i);
-  return (m?.[1]?.toLowerCase() as "ru" | "en") || "ru";
-}
-
 /** Канонический origin (SSR-safe) */
 function getOrigin() {
   if (typeof window !== "undefined") return window.location.origin;
@@ -14,31 +8,20 @@ function getOrigin() {
 }
 
 /** Мета для главной страницы (когда нет ?game) */
-const HOME_SEO: Record<"ru" | "en", { title: string; description: string }> = {
-  ru: {
-    title: "Сайт для поиска тиммейтов — FindParty Online | Поиск тиммейтов для Dota 2, CS2, Rust, Fortnite",
-    description:
-      "Сайт для поиска тиммейтов? FindParty — быстрый поиск тиммейтов для Dota 2, CS2, Rust, Fortnite, Valorant, Minecraft, Apex, PUBG, Tarkov, REPO и других игр. Поиск тиммейтов дота 2, поиск тиммейтов раст, поиск тиммейтов кс 2, поиск тиммейтов фортнайт, поиск тиммейтов валорант, поиск тиммейтов майнкрафт. Без регистрации, живой чат, всё бесплатно.",
-  },
-  en: {
-    title: "Find Teammates — FindParty Online | Find Partners for Co-op Games: CS2, Dota 2, Valorant, Apex",
-    description:
-      "Find teammates for co-op games? FindParty — quick way to find partners and teams for CS2, Dota 2, Valorant, Apex Legends, The Finals, Overwatch 2, Rust, Minecraft, Helldivers 2, Deep Rock Galactic, Lethal Company, Palworld and other top co-op games. Find Minecraft players, find teammates, esports teams. Free, no registration.",
-  },
+const HOME_SEO: { title: string; description: string } = {
+  title: "Сайт для поиска тиммейтов — FindParty Online | Поиск тиммейтов для Dota 2, CS2, Rust, Fortnite",
+  description:
+    "Сайт для поиска тиммейтов? FindParty — быстрый поиск тиммейтов для Dota 2, CS2, Rust, Fortnite, Valorant, Minecraft, Apex, PUBG, Tarkov, REPO и других игр. Поиск тиммейтов дота 2, поиск тиммейтов раст, поиск тиммейтов кс 2, поиск тиммейтов фортнайт, поиск тиммейтов валорант, поиск тиммейтов майнкрафт. Без регистрации, живой чат, всё бесплатно.",
 };
 
-/** Мульти-язычные тайтлы/описания для игр: ключ = slug из ?game */
+/** Тайтлы/описания для игр: ключ = slug из ?game */
 const GAME_SEO: Record<
-  "ru" | "en",
-  Record<
-    string,
-    {
-      title: string;
-      description: string;
-    }
-  >
+  string,
+  {
+    title: string;
+    description: string;
+  }
 > = {
-  ru: {
     repo: {
       title: "Поиск игроков для R.E.P.O — FindParty | Найти команду и тиммейтов",
       description:
@@ -250,223 +233,11 @@ const GAME_SEO: Record<
         "Ищешь команду для Standoff 2? Найди тиммейтов для тактических шутеров и командных матчей. Создай или вступи в пати прямо сейчас. Без регистрации.",
     },
   },
-  en: {
-    repo: {
-      title: "Find Players for R.E.P.O — FindParty | Find Team and Teammates",
-      description:
-        "Looking for players for R.E.P.O? FindParty — quick way to find a team and teammates for R.E.P.O game. Create a party or join an existing team in 10 seconds. Free, no registration.",
-    },
-    dota2: {
-      title: "Dota 2 LFG — Find a Party",
-      description:
-        "Easily find a Dota 2 team on FindParty. Create or join — no registration required.",
-    },
-    cs2: {
-      title: "Find Teammates for CS2 — FindParty",
-      description:
-        "Looking for teammates to play CS2? Find CS2 teammates by playstyle, with or without voice. Fast and convenient on FindParty.",
-    },
-    peak: {
-      title: "PEAK LFG — Find Players on FindParty",
-      description:
-        "PEAK is better in co-op. Find a party in 10 seconds on FindParty.",
-    },
-    pubg: {
-      title: "PUBG LFG — Find a Squad",
-      description:
-        "Want to play PUBG with a squad? Join or create a party now.",
-    },
-    rust: {
-      title: "Rust LFG — Find Survivors",
-      description:
-        "Rust needs coordination — find the right party on FindParty.",
-    },
-    minecraft: {
-      title: "Find Minecraft Players — Find Team and Teammates",
-      description:
-        "Looking for Minecraft players? FindParty — quick way to find a team and players for survival, creative, mini-games or modded Minecraft. Create a party or join an existing team. No registration.",
-    },
-    tarkov: {
-      title: "Escape from Tarkov LFG — Find Group and Teammates",
-      description:
-        "Looking for an Escape from Tarkov group? FindParty — quick way to find a squad with voice and experience. Create or join a group instantly. No registration.",
-    },
-    fortnite: {
-      title: "Fortnite LFG — Play Without Solo",
-      description:
-        "Playing Fortnite? Quickly find a squad without registration.",
-    },
-    roblox: {
-      title: "Roblox LFG — Find People to Play",
-      description:
-        "Roblox is better with friends — find teammates for your favorite modes.",
-    },
-    valorant: {
-      title: "Valorant LFG — Fast Teammate Finder",
-      description:
-        "Find ranked or casual teammates in Valorant. Active community, chat, listings.",
-    },
-    apex: {
-      title: "Apex Legends LFG — Find a Squad",
-      description:
-        "Apex is better with a team — find teammates fast on FindParty.",
-    },
-    thefinals: {
-      title: "The Finals LFG — Find a Team",
-      description:
-        "Find a like-minded squad for The Finals in a couple of clicks.",
-    },
-    marvelrivals: {
-      title: "Marvel Rivals LFG — Find a Party",
-      description:
-        "Create a party or join an existing team in Marvel Rivals. Simple and free.",
-    },
-    deeprockgalactic: {
-      title: "Deep Rock Galactic LFG — Find a Crew",
-      description:
-        "Deep Rock Galactic needs a synced crew. Find your dwarves on FindParty.",
-    },
-    baldursgate3: {
-      title: "Baldur's Gate 3 Co‑op — Find Teammates",
-      description:
-        "Looking for BG3 co-op? Easily find a party for a joint playthrough.",
-    },
-    abioticfactor: {
-      title: "Abiotic Factor LFG — Find a Co‑op Team",
-      description:
-        "Build a co‑op group for Abiotic Factor: survival, exploration, crafting. Create or join now.",
-    },
-    lethalcompany: {
-      title: "Lethal Company LFG — Find Teammates",
-      description:
-        "Find a crew for Lethal Company: co‑op runs, voice comms and coordination. No registration.",
-    },
-    arcraiders: {
-      title: "Find Teammates for Arc Raiders — FindParty",
-      description:
-        "Looking for teammates for Arc Raiders? Find a party for co-op raids and team play. Free, no registration. Create or join now on FindParty.",
-    },
-    lol: {
-      title: "League of Legends LFG — Find a Team",
-      description:
-        "Looking for a League of Legends team? Find teammates for ranked, normals or clash. Create or join a party in seconds. No registration.",
-    },
-    overwatch2: {
-      title: "Overwatch 2 LFG — Find Teammates",
-      description:
-        "Looking for an Overwatch 2 team? Find teammates for ranked, quick play or arcade. Create a party or join an existing team. Free.",
-    },
-    warzone: {
-      title: "Call of Duty: Warzone LFG — Find a Squad",
-      description:
-        "Looking for a Warzone squad? Find teammates for raids, battle royale or resurgence. Create or join a party now. No registration.",
-    },
-    r6siege: {
-      title: "Rainbow Six Siege LFG — Find Teammates",
-      description:
-        "Looking for a Rainbow Six Siege team? Find teammates for ranked, casual or unranked. Create a party or join an existing team. Free.",
-    },
-    helldivers2: {
-      title: "Helldivers 2 LFG — Find a Squad",
-      description:
-        "Looking for a Helldivers 2 squad? Find teammates for co-op missions and raids. Create or join a party in seconds. No registration.",
-    },
-    palworld: {
-      title: "Palworld LFG — Find Teammates",
-      description:
-        "Looking for a Palworld team? Find teammates for survival, crafting and adventures. Create a party or join an existing team. Free.",
-    },
-    destiny2: {
-      title: "Destiny 2 LFG — Find a Team",
-      description:
-        "Looking for a Destiny 2 team? Find teammates for raids, strikes, gambit or PvP. Create or join a party now. No registration.",
-    },
-    warframe: {
-      title: "Warframe LFG — Find Teammates",
-      description:
-        "Looking for a Warframe team? Find teammates for missions, raids or eidolons. Create a party or join an existing team. Free.",
-    },
-    lostark: {
-      title: "Lost Ark LFG — Find a Team",
-      description:
-        "Looking for a Lost Ark team? Find teammates for raids, dungeons or PvP. Create or join a party in seconds. No registration.",
-    },
-    seaofthieves: {
-      title: "Sea of Thieves LFG — Find Teammates",
-      description:
-        "Looking for a Sea of Thieves crew? Find teammates for pirate adventures, raids and treasure. Create a party or join an existing team. Free.",
-    },
-    phasmophobia: {
-      title: "Phasmophobia LFG — Find a Team",
-      description:
-        "Looking for a Phasmophobia team? Find teammates for ghost hunting and investigations. Create or join a party now. No registration.",
-    },
-    wewerehere: {
-      title: "We Were Here LFG — Find a Team",
-      description:
-        "Looking for a We Were Here team? Find teammates for cooperative puzzles and adventures. Create or join a party now. No registration.",
-    },
-    plateup: {
-      title: "Plate Up LFG — Find a Team",
-      description:
-        "Looking for a Plate Up team? Find teammates for cooperative restaurant simulation. Create or join a party now. No registration.",
-    },
-    stalcraft: {
-      title: "Stalcraft LFG — Find a Team",
-      description:
-        "Looking for a Stalcraft team? Find teammates for survival in the exclusion zone. Create or join a party now. No registration.",
-    },
-    drivebeyondhorizons: {
-      title: "Drive Beyond Horizons LFG — Find a Team",
-      description:
-        "Looking for a Drive Beyond Horizons team? Find teammates for cooperative racing and adventures. Create or join a party now. No registration.",
-    },
-    beamngdrive: {
-      title: "BeamNG Drive LFG — Find a Team",
-      description:
-        "Looking for a BeamNG Drive team? Find teammates for realistic simulations and racing. Create or join a party now. No registration.",
-    },
-    "7daystodie": {
-      title: "7 Days to Die LFG — Find a Team",
-      description:
-        "Looking for a 7 Days to Die team? Find teammates for zombie apocalypse survival. Create or join a party now. No registration.",
-    },
-    magearena: {
-      title: "Mage Arena LFG — Find a Team",
-      description:
-        "Looking for a Mage Arena team? Find teammates for magical battles and adventures. Create or join a party now. No registration.",
-    },
-    barotrauma: {
-      title: "Barotrauma LFG — Find a Team",
-      description:
-        "Looking for a Barotrauma team? Find teammates for cooperative underwater survival. Create or join a party now. No registration.",
-    },
-    nomansky: {
-      title: "No Man's Sky LFG — Find a Team",
-      description:
-        "Looking for a No Man's Sky team? Find teammates for space exploration and joint adventures. Create or join a party now. No registration.",
-    },
-    dontstarvetogether: {
-      title: "Don't Starve Together LFG — Find a Team",
-      description:
-        "Looking for a Don't Starve Together team? Find teammates for cooperative survival. Create or join a party now. No registration.",
-    },
-    readyornot: {
-      title: "Ready or Not LFG — Find a Team",
-      description:
-        "Looking for a Ready or Not team? Find teammates for tactical SWAT raids. Create or join a party now. No registration.",
-    },
-    standoff2: {
-      title: "Standoff 2 LFG — Find a Team",
-      description:
-        "Looking for a Standoff 2 team? Find teammates for tactical shooters and team matches. Create or join a party now. No registration.",
-    },
-  },
 };
 
 export function DynamicMeta() {
   const location = useLocation();
-  const lang = getLangFromPath(location.pathname);
+  const lang = "ru";
   const params = new URLSearchParams(location.search);
   const raw = params.get("game")?.toLowerCase() || "";
 
@@ -517,7 +288,7 @@ export function DynamicMeta() {
   ]);
 
   const game = knownSlugs.has(raw) ? raw : null;
-  const seo = game ? GAME_SEO[lang][game] : HOME_SEO[lang];
+  const seo = game ? GAME_SEO[game] : HOME_SEO;
 
   useEffect(() => {
     // <html lang>
@@ -574,7 +345,7 @@ export function DynamicMeta() {
     ogSiteName.setAttribute("content", "FindParty");
 
     const ogLocale = ensure("meta[property='og:locale']", "property", "og:locale");
-    ogLocale.setAttribute("content", lang === "ru" ? "ru_RU" : "en_US");
+    ogLocale.setAttribute("content", "ru_RU");
 
     // Twitter
     const twCard = ensure("meta[name='twitter:card']", "name", "twitter:card");
@@ -589,11 +360,9 @@ export function DynamicMeta() {
     const twImage = ensure("meta[name='twitter:image']", "name", "twitter:image");
     twImage.setAttribute("content", `${getOrigin()}/og-image.png`);
 
-    // canonical + hreflang
+    // canonical
     const origin = getOrigin();
-    // вырезаем /en|/ru чтобы собрать alternate
-    const pathNoLang = location.pathname.replace(/^\/(en|ru)/i, "");
-    const canonicalHref = `${origin}/${lang}${pathNoLang}${location.search}`;
+    const canonicalHref = `${origin}${location.pathname}${location.search}`;
 
     let linkCanonical = document.querySelector<HTMLLinkElement>("link[rel='canonical']");
     if (!linkCanonical) {
@@ -603,20 +372,6 @@ export function DynamicMeta() {
     }
     linkCanonical.setAttribute("href", canonicalHref);
 
-    const ensureLink = (hreflang: string, href: string) => {
-      let el = document.querySelector<HTMLLinkElement>(`link[rel='alternate'][hreflang='${hreflang}']`);
-      if (!el) {
-        el = document.createElement("link");
-        el.setAttribute("rel", "alternate");
-        el.setAttribute("hreflang", hreflang);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("href", href);
-    };
-
-    ensureLink("en", `${origin}/en${pathNoLang}${location.search}`);
-    ensureLink("ru", `${origin}/ru${pathNoLang}${location.search}`);
-    ensureLink("x-default", `${origin}/en/`);
   }, [lang, location.pathname, location.search, seo]);
 
   return null;

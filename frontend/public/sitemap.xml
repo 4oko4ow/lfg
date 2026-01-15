@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Главная -->
   <url>
     <loc>https://findparty.online/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -15,8 +12,6 @@
   <!-- Игры -->
   <url>
     <loc>https://findparty.online/?game=repo</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=repo" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=repo" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -24,8 +19,6 @@
 
   <url>
     <loc>https://findparty.online/?game=dota2</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=dota2" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=dota2" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -33,8 +26,6 @@
 
   <url>
     <loc>https://findparty.online/?game=cs2</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=cs2" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=cs2" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -42,8 +33,6 @@
 
   <url>
     <loc>https://findparty.online/?game=peak</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=peak" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=peak" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -51,8 +40,6 @@
 
   <url>
     <loc>https://findparty.online/?game=pubg</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=pubg" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=pubg" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -60,8 +47,6 @@
 
   <url>
     <loc>https://findparty.online/?game=rust</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=rust" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=rust" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -69,8 +54,6 @@
 
   <url>
     <loc>https://findparty.online/?game=minecraft</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=minecraft" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=minecraft" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -78,8 +61,6 @@
 
   <url>
     <loc>https://findparty.online/?game=tarkov</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=tarkov" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=tarkov" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -87,8 +68,6 @@
 
   <url>
     <loc>https://findparty.online/?game=fortnite</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=fortnite" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=fortnite" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -96,8 +75,6 @@
 
   <url>
     <loc>https://findparty.online/?game=roblox</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=roblox" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=roblox" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -105,8 +82,6 @@
 
   <url>
     <loc>https://findparty.online/?game=valorant</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=valorant" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=valorant" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -114,8 +89,6 @@
 
   <url>
     <loc>https://findparty.online/?game=apex</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=apex" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=apex" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -123,8 +96,6 @@
 
   <url>
     <loc>https://findparty.online/?game=thefinals</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=thefinals" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=thefinals" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -132,8 +103,6 @@
 
   <url>
     <loc>https://findparty.online/?game=marvelrivals</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=marvelrivals" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=marvelrivals" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -141,8 +110,6 @@
 
   <url>
     <loc>https://findparty.online/?game=deeprockgalactic</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=deeprockgalactic" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=deeprockgalactic" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -150,8 +117,6 @@
 
   <url>
     <loc>https://findparty.online/?game=baldursgate3</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=baldursgate3" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=baldursgate3" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -159,8 +124,6 @@
 
   <url>
     <loc>https://findparty.online/?game=lethalcompany</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=lethalcompany" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=lethalcompany" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -168,8 +131,6 @@
 
   <url>
     <loc>https://findparty.online/?game=abioticfactor</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=abioticfactor" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=abioticfactor" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -177,8 +138,6 @@
 
   <url>
     <loc>https://findparty.online/?game=arcraiders</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=arcraiders" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=arcraiders" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -187,8 +146,6 @@
   <!-- Дополнительные топовые игры -->
   <url>
     <loc>https://findparty.online/?game=lol</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=lol" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=lol" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -196,8 +153,6 @@
 
   <url>
     <loc>https://findparty.online/?game=overwatch2</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=overwatch2" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=overwatch2" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -205,8 +160,6 @@
 
   <url>
     <loc>https://findparty.online/?game=warzone</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=warzone" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=warzone" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -214,8 +167,6 @@
 
   <url>
     <loc>https://findparty.online/?game=r6siege</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=r6siege" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=r6siege" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -223,8 +174,6 @@
 
   <url>
     <loc>https://findparty.online/?game=helldivers2</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=helldivers2" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=helldivers2" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -232,8 +181,6 @@
 
   <url>
     <loc>https://findparty.online/?game=palworld</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=palworld" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=palworld" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -241,8 +188,6 @@
 
   <url>
     <loc>https://findparty.online/?game=destiny2</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=destiny2" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=destiny2" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -250,8 +195,6 @@
 
   <url>
     <loc>https://findparty.online/?game=warframe</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=warframe" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=warframe" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -259,8 +202,6 @@
 
   <url>
     <loc>https://findparty.online/?game=lostark</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=lostark" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=lostark" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -268,8 +209,6 @@
 
   <url>
     <loc>https://findparty.online/?game=seaofthieves</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=seaofthieves" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=seaofthieves" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -277,8 +216,6 @@
 
   <url>
     <loc>https://findparty.online/?game=phasmophobia</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=phasmophobia" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=phasmophobia" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -286,8 +223,6 @@
 
   <url>
     <loc>https://findparty.online/?game=worldoftanks</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://findparty.online/?game=worldoftanks" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/ru?game=worldoftanks" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -296,7 +231,6 @@
   <!-- Статические страницы -->
   <url>
     <loc>https://findparty.online/repo.html</loc>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://findparty.online/repo.html" />
     <lastmod>2025-12-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

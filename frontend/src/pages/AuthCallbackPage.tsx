@@ -23,7 +23,9 @@ export default function AuthCallbackPage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const redirect = params.get("redirect") || "/en";
+    const rawRedirect = params.get("redirect") || "/";
+    const normalized = rawRedirect.replace(/^\/(en|ru)(?=\/|$)/i, "");
+    const redirect = normalized === "" ? "/" : normalized;
     const status = params.get("status") ?? "";
     const messageMeta = statusToMessageKey[status] ?? {
       key: "auth.error",
@@ -167,4 +169,3 @@ export default function AuthCallbackPage() {
     </div>
   );
 }
-
