@@ -162,7 +162,8 @@ func main() {
 		userStatsHandler := api.NewUserStatsHandler(db, sessionManager)
 		partiesHandler := api.NewPartiesHandler(db, sessionManager)
 		statsHandler := api.NewStatsHandler(db)
-		
+		communityLeadsHandler := api.NewCommunityLeadsHandler(db)
+
 		mux.HandleFunc("/api/chat/messages", chatHandler.GetMessages)
 		mux.HandleFunc("/api/chat/messages/create", chatHandler.CreateMessage)
 		mux.HandleFunc("/api/games/suggest", gamesHandler.SuggestGame)
@@ -171,6 +172,7 @@ func main() {
 		mux.HandleFunc("/api/parties/delete", partiesHandler.DeleteParty)
 		mux.HandleFunc("/api/parties/update", partiesHandler.UpdateParty)
 		mux.HandleFunc("/api/stats", statsHandler.GetStats)
+		mux.HandleFunc("/api/community-leads", communityLeadsHandler.CreateLead)
 	}
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

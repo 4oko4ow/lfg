@@ -372,4 +372,34 @@ export const analytics = {
       error
     });
   },
+
+  // ===== COMMUNITIES PAGE (B2B) =====
+
+  communitiesPageView: () => {
+    track("communities_page_view");
+  },
+
+  communitiesCtaClick: () => {
+    track("communities_cta_click");
+  },
+
+  communitiesFormStart: () => {
+    track("communities_form_start");
+  },
+
+  communitiesFormSubmit: (data: { platform: string; community_size: string; willing_to_pay: string }) => {
+    track("communities_form_submit", data);
+  },
+
+  communitiesFormError: (field: string) => {
+    track("communities_form_error", { field });
+  },
+
+  communitiesLinkClickHeader: () => {
+    track("communities_link_click_header");
+  },
+
+  communitiesLinkClickBanner: () => {
+    track("communities_link_click_banner");
+  },
 };  

@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import PartyFeedPage from "./pages/PartyFeedPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import CommunitiesPage from "./pages/CommunitiesPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/feed" element={<PartyFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/communities" element={<CommunitiesPage />} />
         <Route path="/" element={<LandingPage />} />
         <Route
           path="*"

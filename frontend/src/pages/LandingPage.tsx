@@ -11,6 +11,7 @@ import {
   ArrowRight,
   MessageCircle,
   CheckCircle2,
+  Building2,
 } from "lucide-react";
 import { connectWS, onMessage, socket } from "../ws/client";
 import { analytics } from "../utils/analytics";
@@ -275,6 +276,35 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Communities Banner */}
+      <section className="px-4 py-12">
+        <div className="mx-auto max-w-4xl">
+          <Link
+            to="/communities"
+            onClick={() => analytics.communitiesLinkClickBanner()}
+            className="group block rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-900/20 to-cyan-900/20 p-6 transition-all duration-200 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10"
+          >
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                <Building2 className="h-6 w-6 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-1 text-lg font-semibold text-white">
+                  Управляете Discord или Telegram сообществом?
+                </h3>
+                <p className="text-sm text-zinc-400">
+                  Мы делаем инструменты для быстрого поиска пати в вашем комьюнити
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-emerald-400 transition-transform group-hover:translate-x-1">
+                <span className="text-sm font-medium">Узнать больше</span>
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 

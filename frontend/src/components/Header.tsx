@@ -6,6 +6,7 @@ import { Users } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineCount } from "../context/OnlineCountContext";
 import LoginModal from "./modals/LoginModal";
+import { analytics } from "../utils/analytics";
 export default function Header() {
   const { t } = useTranslation();
   const { profile, loading, signOut } = useAuth();
@@ -32,12 +33,21 @@ export default function Header() {
   return (
     <header className="w-full border-b border-zinc-800/50 bg-zinc-950/95 backdrop-blur-md text-white sticky top-0 z-40 shadow-lg shadow-zinc-900/50">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <Link 
-          to={homePath} 
-          className="text-base sm:text-lg font-bold tracking-tight hover:text-blue-400 transition-colors duration-200 flex-shrink-0"
-        >
-          FindParty
-        </Link>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <Link
+            to={homePath}
+            className="text-base sm:text-lg font-bold tracking-tight hover:text-blue-400 transition-colors duration-200 flex-shrink-0"
+          >
+            FindParty
+          </Link>
+          <Link
+            to="/communities"
+            onClick={() => analytics.communitiesLinkClickHeader()}
+            className="hidden sm:inline text-xs sm:text-sm text-zinc-400 hover:text-emerald-400 transition-colors duration-200"
+          >
+            Для сообществ
+          </Link>
+        </div>
         <div className="flex items-center gap-2 sm:gap-3 text-sm flex-shrink-0">
           {onlineCount > 0 && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 backdrop-blur-sm">
