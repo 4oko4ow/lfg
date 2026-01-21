@@ -510,6 +510,16 @@ function PartyFeedPage() {
               <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
               {t("hero.create_party")}
             </button>
+
+            {/* Communities hint */}
+            <a
+              href="/communities"
+              onClick={() => analytics.communitiesLinkClickBanner()}
+              className="mt-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-emerald-400 transition-colors"
+            >
+              <span>Управляете сообществом?</span>
+              <span className="text-emerald-400 font-medium">Интеграция для Discord / Telegram →</span>
+            </a>
           </div>
         </section>
 

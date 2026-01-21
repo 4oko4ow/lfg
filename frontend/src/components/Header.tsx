@@ -43,9 +43,12 @@ export default function Header() {
           <Link
             to="/communities"
             onClick={() => analytics.communitiesLinkClickHeader()}
-            className="hidden sm:inline text-xs sm:text-sm text-zinc-400 hover:text-emerald-400 transition-colors duration-200"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/20"
           >
-            Для сообществ
+            <span>Для сообществ</span>
+            <span className="rounded bg-emerald-500 px-1 py-0.5 text-[10px] font-bold text-black">
+              NEW
+            </span>
           </Link>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 text-sm flex-shrink-0">
