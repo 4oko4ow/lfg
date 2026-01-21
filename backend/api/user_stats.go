@@ -3,8 +3,10 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"lfg/auth"
@@ -37,6 +39,19 @@ type Achievement struct {
 	Type      string    `json:"type"`
 	Name      string    `json:"name"`
 	UnlockedAt time.Time `json:"unlocked_at"`
+}
+
+// PublicProfile is the public profile data returned for any user
+type PublicProfile struct {
+	UserID         string   `json:"user_id"`
+	DisplayName    string   `json:"display_name"`
+	AvatarURL      string   `json:"avatar_url,omitempty"`
+	Level          int      `json:"level"`
+	TotalXP        int      `json:"total_xp"`
+	PartiesCreated int      `json:"parties_created"`
+	PartiesJoined  int      `json:"parties_joined"`
+	CurrentStreak  int      `json:"current_streak"`
+	Achievements   []string `json:"achievements"` // just the types
 }
 
 func (h *UserStatsHandler) GetStats(w http.ResponseWriter, r *http.Request) {
@@ -203,5 +218,155 @@ func (h *UserStatsHandler) UnlockAchievement(userID, achievementType, achievemen
 		ON CONFLICT (user_id, achievement_type) DO NOTHING
 	`, userID, achievementType, achievementName)
 	return err
+}
+
+// GetPublicProfile returns the public profile for any user by ID
+func (h *UserStatsHandler) GetPublicProfile(w http.ResponseWriter, r *http.Request) {
+	// Extract user_id from URL path: /api/users/{user_id}/profile
+	path := r.URL.Path
+	// Expected format: /api/users/USER_ID/profile
+	var userID string
+	_, err := fmt.Sscanf(path, "/api/users/%s/profile", &userID)
+	if err != nil || userID == "" {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	// Remove trailing "/profile" if it got included
+	userID = strings.TrimSuffix(userID, "/profile")
+
+	profile, err := h.getPublicProfile(userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+		log.Printf("Error getting public profile: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(profile)
+}
+
+func (h *UserStatsHandler) getPublicProfile(userID string) (*PublicProfile, error) {
+	profile := &PublicProfile{
+		UserID:       userID,
+		Level:        1,
+		Achievements: []string{},
+	}
+
+	// Get user info from auth_users
+	row := h.db.QueryRow(`
+		SELECT COALESCE(display_name, ''), COALESCE(avatar_url, '')
+		FROM auth_users
+		WHERE id = $1
+	`, userID)
+	err := row.Scan(&profile.DisplayName, &profile.AvatarURL)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+
+	// Get stats
+	row = h.db.QueryRow(`
+		SELECT COALESCE(parties_created, 0), COALESCE(parties_joined, 0),
+		       COALESCE(total_xp, 0), COALESCE(level, 1), COALESCE(current_streak, 0)
+		FROM user_stats
+		WHERE user_id = $1
+	`, userID)
+	err = row.Scan(&profile.PartiesCreated, &profile.PartiesJoined,
+		&profile.TotalXP, &profile.Level, &profile.CurrentStreak)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+
+	// Get achievement types
+	rows, err := h.db.Query(`
+		SELECT achievement_type
+		FROM user_achievements
+		WHERE user_id = $1
+	`, userID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	if rows != nil {
+		defer rows.Close()
+		for rows.Next() {
+			var achType string
+			if err := rows.Scan(&achType); err == nil {
+				profile.Achievements = append(profile.Achievements, achType)
+			}
+		}
+	}
+
+	return profile, nil
+}
+
+// CheckAndUnlockAchievements checks all achievement conditions and unlocks them
+func (h *UserStatsHandler) CheckAndUnlockAchievements(userID string, isNightTime bool) {
+	stats, err := h.getUserStats(userID)
+	if err != nil {
+		log.Printf("Error getting stats for achievements: %v", err)
+		return
+	}
+
+	// Party creation achievements
+	if stats.PartiesCreated >= 1 {
+		h.UnlockAchievement(userID, "first_party", "Первая пати")
+	}
+	if stats.PartiesCreated >= 10 {
+		h.UnlockAchievement(userID, "activist", "Активист")
+	}
+	if stats.PartiesCreated >= 50 {
+		h.UnlockAchievement(userID, "veteran", "Ветеран")
+	}
+	if stats.PartiesCreated >= 100 {
+		h.UnlockAchievement(userID, "legend", "Легенда")
+	}
+
+	// Join achievements
+	if stats.PartiesJoined >= 10 {
+		h.UnlockAchievement(userID, "teammate", "Тиммейт")
+	}
+	if stats.PartiesJoined >= 50 {
+		h.UnlockAchievement(userID, "team_player", "Командный игрок")
+	}
+
+	// Streak achievements
+	if stats.CurrentStreak >= 7 || stats.LongestStreak >= 7 {
+		h.UnlockAchievement(userID, "week_streak", "Неделя огня")
+	}
+	if stats.CurrentStreak >= 30 || stats.LongestStreak >= 30 {
+		h.UnlockAchievement(userID, "month_streak", "Месяц огня")
+	}
+
+	// Night gamer (checked when party is created)
+	if isNightTime {
+		h.UnlockAchievement(userID, "night_gamer", "Ночной геймер")
+	}
+}
+
+// CheckQuickFillAchievement checks if party was filled within 5 minutes
+func (h *UserStatsHandler) CheckQuickFillAchievement(userID string, partyCreatedAt time.Time) {
+	if time.Since(partyCreatedAt) <= 5*time.Minute {
+		h.UnlockAchievement(userID, "quick_fill", "Быстрый старт")
+	}
+}
+
+// CheckSniperAchievement checks if user has 100% fill rate on 10+ parties
+func (h *UserStatsHandler) CheckSniperAchievement(userID string) {
+	var totalParties, filledParties int
+	row := h.db.QueryRow(`
+		SELECT COUNT(*), COUNT(*) FILTER (WHERE joined >= slots)
+		FROM parties
+		WHERE user_id = $1
+	`, userID)
+	if err := row.Scan(&totalParties, &filledParties); err != nil {
+		return
+	}
+
+	if totalParties >= 10 && totalParties == filledParties {
+		h.UnlockAchievement(userID, "sniper", "Снайпер")
+	}
 }
 

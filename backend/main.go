@@ -173,6 +173,7 @@ func main() {
 		mux.HandleFunc("/api/parties/update", partiesHandler.UpdateParty)
 		mux.HandleFunc("/api/stats", statsHandler.GetStats)
 		mux.HandleFunc("/api/community-leads", communityLeadsHandler.CreateLead)
+		mux.HandleFunc("/api/users/", userStatsHandler.GetPublicProfile)
 	}
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

@@ -14,6 +14,7 @@ import { StarIcon } from "@heroicons/react/20/solid";
 import { analytics } from "../utils/analytics";
 import { useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import CreatorBadge from "./CreatorBadge";
 
 /** Локализованное "time ago" для MVP */
 function timeAgo(isoDate: string, t: (k: string, o?: any) => string): string {
@@ -258,6 +259,13 @@ export default function PartyCard({
         </div>
         <p className="flex-1 leading-relaxed break-words">{party.goal}</p>
       </div>
+
+      {/* Creator badge */}
+      {party.user_id && (
+        <div className="flex items-center">
+          <CreatorBadge userId={party.user_id} />
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-zinc-700/50">
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">

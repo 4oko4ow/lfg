@@ -82,6 +82,8 @@ func AddParty(p *Party, save bool) {
 				// Increment user stats if user_id is present
 				if p.UserID != "" {
 					go incrementUserStats(p.UserID)
+					// Check night gamer achievement
+					go checkNightGamerAchievement(p.UserID, p.CreatedAt)
 				}
 				return // успешно сохранено
 			}
@@ -102,40 +104,57 @@ func RemoveParty(id string) {
 
 func UpdatePartyJoined(id string, userID string) error {
 	partyLock.Lock()
-	defer partyLock.Unlock()
-	
+
 	p, ok := parties[id]
 	if !ok {
+		partyLock.Unlock()
 		return nil // Party not found, silently ignore
 	}
-	
+
 	// Check if party is full
 	if p.Joined >= p.Slots {
+		partyLock.Unlock()
 		return nil // Party is full, silently ignore
 	}
-	
+
 	// Check if user is the creator
 	if p.UserID != "" && p.UserID == userID {
+		partyLock.Unlock()
 		return nil // Creator cannot join their own party, silently ignore
 	}
-	
+
 	// Check if user already joined
 	if userID != "" {
 		if isUserMemberOfParty(id, userID) {
+			partyLock.Unlock()
 			return nil // User already joined, silently ignore
 		}
 	}
-	
+
 	// Increment joined count
 	p.Joined++
-	
+	wasFull := p.Joined >= p.Slots
+	creatorID := p.UserID
+	createdAt := p.CreatedAt
+
+	partyLock.Unlock()
+
 	// Save membership to database if user is authenticated
 	if userID != "" {
 		go savePartyMember(id, userID)
+		// Increment parties_joined for the user who joined
+		go incrementPartiesJoined(userID)
 	}
-	
+
 	go UpdatePartyInDatabase(p)
 	Broadcast(Message{Type: "party_update", Payload: p})
+
+	// Check achievements for party creator when party becomes full
+	if wasFull && creatorID != "" {
+		go checkQuickFillAchievement(creatorID, createdAt)
+		go checkSniperAchievement(creatorID)
+	}
+
 	return nil
 }
 
@@ -244,57 +263,132 @@ func incrementUserStats(userID string) {
 	}
 }
 
-// checkAchievements checks and unlocks achievements
+// checkAchievements checks and unlocks all achievements
 func checkAchievements(userID string, streak int) {
 	if db == nil {
 		return
 	}
 
 	// Get current stats
-	var partiesCreated, totalXP int
+	var partiesCreated, partiesJoined, longestStreak int
 	err := db.QueryRow(`
-		SELECT parties_created, total_xp
+		SELECT COALESCE(parties_created, 0), COALESCE(parties_joined, 0), COALESCE(longest_streak, 0)
 		FROM user_stats
 		WHERE user_id = $1
-	`, userID).Scan(&partiesCreated, &totalXP)
+	`, userID).Scan(&partiesCreated, &partiesJoined, &longestStreak)
 	if err != nil {
 		return
 	}
 
-	// Achievement: First Party
-	if partiesCreated == 1 {
-		db.Exec(`
-			INSERT INTO user_achievements (user_id, achievement_type, achievement_name, unlocked_at)
-			VALUES ($1, 'first_party', 'First Party', NOW())
-			ON CONFLICT (user_id, achievement_type) DO NOTHING
-		`, userID)
+	// Use the maximum of current streak and longest streak
+	maxStreak := streak
+	if longestStreak > maxStreak {
+		maxStreak = longestStreak
 	}
 
-	// Achievement: Party Creator (10 parties)
-	if partiesCreated == 10 {
-		db.Exec(`
-			INSERT INTO user_achievements (user_id, achievement_type, achievement_name, unlocked_at)
-			VALUES ($1, 'party_creator', 'Party Creator', NOW())
-			ON CONFLICT (user_id, achievement_type) DO NOTHING
-		`, userID)
+	// Party creation achievements
+	if partiesCreated >= 1 {
+		unlockAchievement(userID, "first_party", "Первая пати")
+	}
+	if partiesCreated >= 10 {
+		unlockAchievement(userID, "activist", "Активист")
+	}
+	if partiesCreated >= 50 {
+		unlockAchievement(userID, "veteran", "Ветеран")
+	}
+	if partiesCreated >= 100 {
+		unlockAchievement(userID, "legend", "Легенда")
 	}
 
-	// Achievement: Streak Master (7 day streak)
-	if streak == 7 {
-		db.Exec(`
-			INSERT INTO user_achievements (user_id, achievement_type, achievement_name, unlocked_at)
-			VALUES ($1, 'streak_master', 'Streak Master', NOW())
-			ON CONFLICT (user_id, achievement_type) DO NOTHING
-		`, userID)
+	// Join achievements
+	if partiesJoined >= 10 {
+		unlockAchievement(userID, "teammate", "Тиммейт")
+	}
+	if partiesJoined >= 50 {
+		unlockAchievement(userID, "team_player", "Командный игрок")
 	}
 
-	// Achievement: Level Up (Level 5)
-	level := int(float64(totalXP) / 10.0)
-	if level >= 5 {
-		db.Exec(`
-			INSERT INTO user_achievements (user_id, achievement_type, achievement_name, unlocked_at)
-			VALUES ($1, 'level_up', 'Level Up', NOW())
-			ON CONFLICT (user_id, achievement_type) DO NOTHING
-		`, userID)
+	// Streak achievements
+	if maxStreak >= 7 {
+		unlockAchievement(userID, "week_streak", "Неделя огня")
+	}
+	if maxStreak >= 30 {
+		unlockAchievement(userID, "month_streak", "Месяц огня")
+	}
+}
+
+// unlockAchievement unlocks an achievement for a user
+func unlockAchievement(userID, achievementType, achievementName string) {
+	if db == nil {
+		return
+	}
+	_, err := db.Exec(`
+		INSERT INTO user_achievements (user_id, achievement_type, achievement_name, unlocked_at)
+		VALUES ($1, $2, $3, NOW())
+		ON CONFLICT (user_id, achievement_type) DO NOTHING
+	`, userID, achievementType, achievementName)
+	if err != nil {
+		log.Printf("Error unlocking achievement %s for user %s: %v", achievementType, userID, err)
+	}
+}
+
+// checkNightGamerAchievement checks if party was created after midnight (00:00 - 05:00)
+func checkNightGamerAchievement(userID string, createdAt time.Time) {
+	hour := createdAt.Hour()
+	if hour >= 0 && hour < 5 {
+		unlockAchievement(userID, "night_gamer", "Ночной геймер")
+	}
+}
+
+// incrementPartiesJoined increments parties_joined counter and checks achievements
+func incrementPartiesJoined(userID string) {
+	if db == nil || userID == "" {
+		return
+	}
+
+	// Increment parties_joined and add XP
+	_, err := db.Exec(`
+		INSERT INTO user_stats (user_id, parties_joined, total_xp, level, updated_at)
+		VALUES ($1, 1, 5, 1, NOW())
+		ON CONFLICT (user_id) DO UPDATE SET
+			parties_joined = user_stats.parties_joined + 1,
+			total_xp = user_stats.total_xp + 5,
+			level = GREATEST(1, FLOOR(SQRT(user_stats.total_xp + 5) / 10)::INTEGER),
+			updated_at = NOW()
+	`, userID)
+	if err != nil {
+		log.Printf("Error incrementing parties_joined: %v", err)
+		return
+	}
+
+	// Check achievements after join
+	checkAchievements(userID, 0)
+}
+
+// checkQuickFillAchievement checks if party was filled within 5 minutes
+func checkQuickFillAchievement(userID string, createdAt time.Time) {
+	if time.Since(createdAt) <= 5*time.Minute {
+		unlockAchievement(userID, "quick_fill", "Быстрый старт")
+	}
+}
+
+// checkSniperAchievement checks if user has 100% fill rate on 10+ parties
+func checkSniperAchievement(userID string) {
+	if db == nil || userID == "" {
+		return
+	}
+
+	var totalParties, filledParties int
+	err := db.QueryRow(`
+		SELECT COUNT(*), COUNT(*) FILTER (WHERE joined >= slots)
+		FROM parties
+		WHERE user_id = $1
+	`, userID).Scan(&totalParties, &filledParties)
+	if err != nil {
+		return
+	}
+
+	if totalParties >= 10 && totalParties == filledParties {
+		unlockAchievement(userID, "sniper", "Снайпер")
 	}
 }
