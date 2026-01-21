@@ -515,9 +515,9 @@ function PartyFeedPage() {
             <a
               href="/communities"
               onClick={() => analytics.communitiesLinkClickBanner()}
-              className="mt-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-emerald-400 transition-colors"
+              className="mt-4 flex flex-col items-center text-xs hover:opacity-80 transition-opacity"
             >
-              <span>Управляете сообществом?</span>
+              <span className="text-zinc-500">Управляете сообществом?</span>
               <span className="text-emerald-400 font-medium">Интеграция для Discord / Telegram →</span>
             </a>
           </div>
