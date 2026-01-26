@@ -33,7 +33,6 @@ export default function LandingPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const hasReceivedDataRef = useRef(false);
-  const landingStartTime = useRef(Date.now());
 
   useEffect(() => {
     analytics.landingPageView();
@@ -42,13 +41,6 @@ export default function LandingPage() {
     const lastVisit = localStorage.getItem("last_visit");
     const isReturning = !!lastVisit;
     analytics.sessionStart(isReturning);
-
-    if (lastVisit) {
-      const daysSince = Math.floor((Date.now() - parseInt(lastVisit)) / (1000 * 60 * 60 * 24));
-      if (daysSince > 0) {
-        analytics.userReturned(daysSince);
-      }
-    }
     localStorage.setItem("last_visit", Date.now().toString());
 
     connectWS();
@@ -132,11 +124,6 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 to={feedPath}
-                onClick={() => {
-                  const duration = Date.now() - landingStartTime.current;
-                  analytics.timeToFeed(duration);
-                  analytics.timeToFirstAction("feed", duration);
-                }}
                 className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
               >
                 {t("landing.cta.browse", "Browse Parties")}
@@ -284,7 +271,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-4xl">
           <Link
             to="/communities"
-            onClick={() => analytics.communitiesLinkClickBanner()}
+            onClick={() => analytics.communitiesLinkClick("banner")}
             className="group block rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-900/20 to-cyan-900/20 p-6 transition-all duration-200 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10"
           >
             <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
@@ -322,11 +309,6 @@ export default function LandingPage() {
           </p>
           <Link
             to={feedPath}
-            onClick={() => {
-              const duration = Date.now() - landingStartTime.current;
-              analytics.timeToFeed(duration);
-              analytics.timeToFirstAction("feed", duration);
-            }}
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
           >
             {t("landing.cta_section.button", "Get Started Now")}

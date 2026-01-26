@@ -34,6 +34,8 @@ export default function CommunitiesPage() {
   const [formStarted, setFormStarted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const formRef = useRef<HTMLDivElement>(null);
+  const pricingRef = useRef<HTMLDivElement>(null);
+  const pricingTracked = useRef(false);
 
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -48,8 +50,25 @@ export default function CommunitiesPage() {
     analytics.communitiesPageView();
   }, []);
 
+  // Track pricing section view
+  useEffect(() => {
+    if (!pricingRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !pricingTracked.current) {
+          analytics.communitiesPricingViewed();
+          pricingTracked.current = true;
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(pricingRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const handleCtaClick = () => {
-    analytics.communitiesCtaClick();
     setShowForm(true);
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -204,7 +223,7 @@ export default function CommunitiesPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="px-4 py-16">
+      <section ref={pricingRef} className="px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-10 text-center text-3xl font-bold">Тарифы</h2>
           <div className="grid gap-6 md:grid-cols-2">

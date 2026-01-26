@@ -343,12 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     (provider: SocialProvider) => {
-      const loginStartTime = Date.now();
       analytics.loginAttempt(provider);
-      analytics.loginStart(provider);
-
-      // Сохраняем время начала для трекинга длительности
-      sessionStorage.setItem(`login_start_${provider}`, loginStartTime.toString());
 
       if (provider === "telegram") {
         void handleTelegramAuth();
@@ -364,7 +359,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const linkProvider = useCallback(
     (provider: SocialProvider) => {
-      analytics.providerLink(provider);
+      analytics.providerLinked(provider);
       if (provider === "telegram") {
         void handleTelegramAuth();
         return;

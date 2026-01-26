@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { analytics } from "../utils/analytics";
 import { useTranslation } from "react-i18next";
 
 export function NoJoinSurvey({ visible }: { visible: boolean }) {
     const { t } = useTranslation();
     const [dismissed, setDismissed] = useState(false);
-    const surveyShownTime = useRef<number | null>(null);
-    const hasResponded = useRef(false);
+    const [surveyTracked, setSurveyTracked] = useState(false);
 
     // безопасно тянем массив причин из i18n
     const reasons = useMemo(() => {
@@ -28,27 +27,19 @@ export function NoJoinSurvey({ visible }: { visible: boolean }) {
     }, []);
 
     useEffect(() => {
-        if (visible && !dismissed) {
+        if (visible && !dismissed && !surveyTracked) {
             analytics.noJoinSurveyShown();
-            surveyShownTime.current = Date.now();
+            setSurveyTracked(true);
         }
-    }, [visible, dismissed]);
+    }, [visible, dismissed, surveyTracked]);
 
     const handleClick = (reason: string) => {
-        hasResponded.current = true;
         analytics.noJoinFeedback(reason);
-        const timeShown = surveyShownTime.current ? Date.now() - surveyShownTime.current : 0;
-        analytics.noJoinSurveyClosed(timeShown, true);
         localStorage.setItem("noJoinDismissed", "true");
         setDismissed(true);
     };
 
     const handleClose = () => {
-        const timeShown = surveyShownTime.current ? Date.now() - surveyShownTime.current : 0;
-        if (!hasResponded.current) {
-            analytics.noJoinSurveyClosed(timeShown, false);
-            analytics.noJoinSurveyDismissed(timeShown);
-        }
         localStorage.setItem("noJoinDismissed", "true");
         setDismissed(true);
     };

@@ -101,3 +101,94 @@ PostgreSQL with direct connections (no ORM). Migrations in `backend/migrations/`
 - `auth_users` - User accounts
 - `sessions` - Active sessions
 - `chat_messages` - Chat history
+- `user_stats` - User statistics (XP, level, streaks)
+- `user_achievements` - Unlocked achievements
+- `community_leads` - B2B lead capture
+
+## Analytics Events (Umami)
+
+All analytics tracked via Umami. Events defined in `frontend/src/utils/analytics.ts`.
+
+### Page Views
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `page_landing` | - | Landing page opened |
+| `page_feed` | `parties_count` | Party feed opened |
+| `page_profile` | - | Profile page opened |
+| `page_communities` | - | B2B communities page opened |
+
+### Party Lifecycle
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `party_create_start` | `game` | User started filling party form |
+| `party_create_submit` | `game`, `slots` | Party creation form submitted |
+| `party_create_error` | `game`, `field` | Validation error on form |
+| `party_deleted` | `game` | Party deleted by creator |
+
+### Join Funnel
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `join_click` | `game`, `party_id` | Join button clicked |
+| `join_click_unauth` | `game` | Unauthenticated user tried to join |
+| `contact_opened` | `game` | Contact modal opened |
+| `contact_copied` | `game`, `type` | Contact info copied |
+| `contact_closed` | `copied` | Contact modal closed (1 if copied, 0 if not) |
+
+### Authentication
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `auth_login_attempt` | `provider` | Login flow started |
+| `auth_login_success` | `provider` | Login successful |
+| `auth_login_error` | `provider`, `error` | Login failed |
+| `auth_logout` | - | User logged out |
+
+### Chat
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `chat_opened` | - | Chat panel opened |
+| `chat_message_sent` | - | Message sent successfully |
+
+### Filters
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `filter_applied` | `game`, `parties_count` | Filter applied with results |
+| `filter_cleared` | - | Filters cleared |
+
+### Profile
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `profile_tab` | `tab` | Profile tab changed |
+| `contact_saved` | `provider` | Contact info saved |
+| `provider_linked` | `provider` | OAuth provider linked |
+
+### Session
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `session_start` | `returning` | Session began (1 if returning, 0 if new) |
+
+### Survey
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `survey_shown` | - | No-join survey displayed |
+| `survey_response` | `reason` | User selected reason |
+
+### B2B Communities
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `communities_click` | `source` | Link clicked (header/banner/feed) |
+| `communities_pricing_viewed` | - | Pricing section scrolled into view |
+| `communities_form_start` | - | Form interaction started |
+| `communities_form_submit` | `platform`, `community_size`, `willing_to_pay` | Form submitted |
+| `communities_form_error` | `field` | Validation error |
+
+### Errors
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `error_api` | `endpoint`, `status` | API request failed |
+
+### Other
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `feedback_click` | - | Feedback button clicked |
+| `game_suggested` | `game` | Game suggestion submitted |
+| `language_switch` | `to` | Language changed |

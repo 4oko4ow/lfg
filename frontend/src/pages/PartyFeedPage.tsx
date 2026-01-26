@@ -127,7 +127,7 @@ function PartyFeedPage() {
   }, [isMobile]);
 
   const handleCloseModal = () => {
-    analytics.contactClose();
+    analytics.contactModalClosed(false);
     setContactModal(null);
     setContactPartyId("");
   };
@@ -162,22 +162,8 @@ function PartyFeedPage() {
               }
               
               // Открываем модалку контактов для сохраненной пати
-              analytics.joinPartyClick(party.game);
-              analytics.contactModalOpened(party.game, party.id);
-              
-              // Трекинг времени до присоединения
-              const feedStartTime = sessionStorage.getItem("feed_start_time");
-              if (feedStartTime) {
-                const duration = Date.now() - parseInt(feedStartTime);
-                analytics.timeToJoin(duration);
-                analytics.timeToFirstAction("join", duration);
-              }
-              
-              // Сохраняем game для трекинга в модалке
-              sessionStorage.setItem(`contact_modal_game_${party.id}`, party.game);
-              if (party.joined >= party.slots) {
-                analytics.partyFullClick(party.game);
-              }
+              analytics.joinClick(party.game, party.id);
+              analytics.contactModalOpened(party.game);
               setJoinClicked(true);
               setContactPartyId(party.id);
               setContactModal(party.contacts ?? []);
@@ -213,10 +199,7 @@ function PartyFeedPage() {
           }
           break;
         case "new_party":
-          // Track party creation success
           const newParty = msg.payload as Party;
-          analytics.partyCreated(newParty.game, newParty.slots);
-          
           // Если пользователь - создатель партии, добавляем в localStorage как "joined"
           // чтобы кнопка сразу показывала контакты
           if (profile && newParty.user_id && profile.id === newParty.user_id) {
@@ -292,12 +275,7 @@ function PartyFeedPage() {
           break;
       }
     });
-    analytics.enableAutoPageviews();
-    analytics.feedPageView();
-    
-    // Трекинг времени до первого присоединения
-    const feedStartTime = Date.now();
-    sessionStorage.setItem("feed_start_time", feedStartTime.toString());
+    analytics.feedPageView(parties.length);
 
     return () => clearTimeout(fallbackTimeout);
   }, []);
@@ -415,22 +393,8 @@ function PartyFeedPage() {
       }
     }
     
-    analytics.joinPartyClick(party.game);
-    analytics.contactModalOpened(party.game, party.id);
-    
-    // Трекинг времени до присоединения
-    const feedStartTime = sessionStorage.getItem("feed_start_time");
-    if (feedStartTime) {
-      const duration = Date.now() - parseInt(feedStartTime);
-      analytics.timeToJoin(duration);
-      analytics.timeToFirstAction("join", duration);
-    }
-    
-    // Сохраняем game для трекинга в модалке
-    sessionStorage.setItem(`contact_modal_game_${party.id}`, party.game);
-    if (party.joined >= party.slots) {
-      analytics.partyFullClick(party.game);
-    }
+    analytics.joinClick(party.game, party.id);
+    analytics.contactModalOpened(party.game);
     setJoinClicked(true);
     setContactPartyId(party.id);
     setContactModal(party.contacts ?? []);
@@ -438,12 +402,11 @@ function PartyFeedPage() {
 
   const handleJoinClick = (party: Party) => {
     const isAuthenticated = profile !== null;
-    analytics.joinButtonClick(party.game, party.id, isAuthenticated);
-    
+    analytics.joinClick(party.game, party.id);
+
     if (!isAuthenticated) {
       // Пользователь не залогинен - открываем модалку авторизации
-      analytics.joinButtonClickUnauthenticated(party.game, party.id);
-      analytics.loginModalOpenedFromJoin(party.game, party.id);
+      analytics.joinClickUnauthenticated(party.game);
       // Сохраняем информацию о пати для открытия после авторизации
       sessionStorage.setItem("pending_join_party", JSON.stringify({
         id: party.id,
@@ -514,7 +477,7 @@ function PartyFeedPage() {
             {/* Communities hint */}
             <a
               href="/communities"
-              onClick={() => analytics.communitiesLinkClickBanner()}
+              onClick={() => analytics.communitiesLinkClick("feed")}
               className="mt-4 flex flex-col items-center text-xs hover:opacity-80 transition-opacity"
             >
               <span className="text-zinc-500">Управляете сообществом?</span>
@@ -714,8 +677,7 @@ function PartyFeedPage() {
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
-                  position={index}
-                />
+                                  />
         </div>
             ))}
             {/* Show skeleton for new items being loaded */}
@@ -757,8 +719,7 @@ function PartyFeedPage() {
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
-                  position={index}
-                />
+                                  />
               </div>
             ))}
           </div>

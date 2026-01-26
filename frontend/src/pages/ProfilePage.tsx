@@ -167,7 +167,7 @@ export default function ProfilePage() {
     try {
       const handle = normalizeContactHandle(provider, values[provider]);
       await updateContactHandle(provider, handle);
-      analytics.contactSave(provider);
+      analytics.contactSaved(provider);
       toast.success(t("profile.saved", "Saved"));
     } catch (error) {
       console.error(error);

@@ -59,14 +59,6 @@ export default function AuthCallbackPage() {
                 // Determine provider from redirect URL or status
                 const provider = redirect.includes("steam") ? "steam" : redirect.includes("discord") ? "discord" : redirect.includes("telegram") ? "telegram" : "unknown";
                 analytics.loginSuccess(provider);
-
-                // Трекинг времени авторизации
-                const loginStartTime = sessionStorage.getItem(`login_start_${provider}`);
-                if (loginStartTime) {
-                  const duration = Date.now() - parseInt(loginStartTime);
-                  analytics.loginComplete(provider, duration);
-                  sessionStorage.removeItem(`login_start_${provider}`);
-                }
                 break;
               } else {
                 console.warn(`Profile not loaded yet (attempt ${attempt + 1}/${maxRetries})`);
@@ -93,15 +85,12 @@ export default function AuthCallbackPage() {
         }
       } else if (status === "discord_conflict") {
         analytics.loginError("discord", "conflict");
-        analytics.loginFailed("discord", "conflict", "Account already linked");
         toast.error(t(messageMeta.key));
       } else if (status === "steam_conflict") {
         analytics.loginError("steam", "conflict");
-        analytics.loginFailed("steam", "conflict", "Account already linked");
         toast.error(t(messageMeta.key));
       } else if (status === "telegram_conflict") {
         analytics.loginError("telegram", "conflict");
-        analytics.loginFailed("telegram", "conflict", "Account already linked");
         toast.error(t(messageMeta.key));
       } else if (status === "telegram_error") {
         // For telegram_error, try refreshing profile anyway with retries
@@ -130,28 +119,19 @@ export default function AuthCallbackPage() {
           if (profileLoaded) {
             // Auth actually succeeded, show success
             analytics.loginSuccess("telegram");
-            const loginStartTime = sessionStorage.getItem("login_start_telegram");
-            if (loginStartTime) {
-              const duration = Date.now() - parseInt(loginStartTime);
-              analytics.loginComplete("telegram", duration);
-              sessionStorage.removeItem("login_start_telegram");
-            }
             toast.success(t("auth.success"));
           } else {
             analytics.loginError("telegram", "error");
-            analytics.loginFailed("telegram", "error", "Profile not loaded after retries");
             toast.error(t(messageMeta.key));
           }
         } catch (error) {
           console.error("Failed to refresh profile on telegram_error:", error);
           analytics.loginError("telegram", "error");
-          analytics.loginFailed("telegram", "error", error instanceof Error ? error.message : "unknown");
           toast.error(t(messageMeta.key));
         }
       } else {
         const provider = status.includes("discord") ? "discord" : status.includes("steam") ? "steam" : status.includes("telegram") ? "telegram" : "unknown";
         analytics.loginError(provider, status);
-        analytics.loginFailed(provider, status, `Status: ${status}`);
         toast.error(t(messageMeta.key));
       }
       navigate(redirect, { replace: true });

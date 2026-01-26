@@ -28,39 +28,28 @@ export default function ContactModal({
   const [discordTooltipVisible, setDiscordTooltipVisible] = useState<string | null>(null);
   // Флаг для отслеживания, было ли уже отправлено join для этого объявления
   const joinSentRef = useRef(false);
-  const modalOpenTime = useRef(Date.now());
   const actionTaken = useRef(false);
-  const game = useRef<string | null>(null);
 
   useEffect(() => {
-    // Получаем game из sessionStorage (сохраняется при открытии модалки)
-    const storedGame = sessionStorage.getItem(`contact_modal_game_${partyId}`);
-    game.current = storedGame;
-
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
-  }, [onClose, partyId]);
+  }, [onClose]);
 
   // Сбрасываем флаг при закрытии модального окна
   useEffect(() => {
     return () => {
       joinSentRef.current = false;
-      // Трекинг закрытия модалки
-      const timeOpen = Date.now() - modalOpenTime.current;
-      const gameName = game.current || "unknown";
       if (!actionTaken.current) {
-        analytics.contactModalClosedWithoutAction(gameName, partyId, timeOpen);
-        analytics.contactModalClosed(gameName, partyId, "none");
+        analytics.contactModalClosed(false);
       }
     };
   }, []);
 
-  const handleCopy = async (value: string) => {
+  const handleCopy = async (value: string, contactType: string) => {
     actionTaken.current = true;
-    analytics.contactCopy();
-    const gameName = game.current || "unknown";
-    analytics.contactModalClosed(gameName, partyId, "copy");
+    analytics.contactCopied("unknown", contactType);
+    analytics.contactModalClosed(true);
 
     // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
@@ -78,9 +67,8 @@ export default function ContactModal({
 
   const handleAddToDiscord = async (contact: ContactMethod) => {
     actionTaken.current = true;
-    analytics.contactCopy();
-    const gameName = game.current || "unknown";
-    analytics.contactModalClosed(gameName, partyId, "copy");
+    analytics.contactCopied("unknown", "discord");
+    analytics.contactModalClosed(true);
 
     // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
@@ -105,11 +93,10 @@ export default function ContactModal({
     }
   };
 
-  const handleOpen = (url: string) => {
+  const handleOpen = (url: string, contactType: string) => {
     actionTaken.current = true;
-    analytics.contactCopy();
-    const gameName = game.current || "unknown";
-    analytics.contactModalClosed(gameName, partyId, "copy");
+    analytics.contactCopied("unknown", contactType);
+    analytics.contactModalClosed(true);
 
     // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
@@ -131,9 +118,8 @@ export default function ContactModal({
   };
 
   const handleClose = () => {
-    const gameName = game.current || "unknown";
     if (!actionTaken.current) {
-      analytics.contactModalClosed(gameName, partyId, "close");
+      analytics.contactModalClosed(false);
     }
     onClose();
   };
@@ -208,7 +194,7 @@ export default function ContactModal({
                   <div className="flex flex-wrap gap-2 relative">
                     {contact.type === "steam" && steamID64 ? (
                       <button
-                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`)}
+                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`, "steam")}
                         className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95 flex items-center gap-2"
                       >
                         <UserIcon className="w-4 h-4" />
@@ -233,14 +219,14 @@ export default function ContactModal({
                       </div>
                     ) : normalizedUrl ? (
                       <button
-                        onClick={() => handleOpen(normalizedUrl)}
+                        onClick={() => handleOpen(normalizedUrl, contact.type)}
                         className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
                       >
                         {t("contact.open")}
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleCopy(contact.handle)}
+                        onClick={() => handleCopy(contact.handle, contact.type)}
                         className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
                       >
                         {t("ui.copy_contact")}
