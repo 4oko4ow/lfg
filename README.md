@@ -1,103 +1,77 @@
-# LFG MVP
+# LFG - FindParty
 
-Looking For Group (LFG) MVP - A platform for finding gaming parties.
+Platform for finding gaming teammates. Create or join parties, chat in real-time, authenticate via Discord, Steam, or Telegram.
 
-## Features
-
-- 🎮 Game party listings
-- 💬 Real-time chat
-- 🔐 OAuth authentication (Discord, Steam, Telegram)
-- 🌐 Multi-language support (EN/RU)
-- 📱 Responsive design
-- 🐳 Dockerized for easy deployment
+**Live:** [findparty.online](https://findparty.online)
 
 ## Tech Stack
 
-- **Backend:** Go (Golang) - Dockerized
-- **Frontend:** React + TypeScript + Vite - Deployed on Vercel
+- **Backend:** Go - Dockerized, Traefik reverse proxy
+- **Frontend:** React + TypeScript + Vite - deployed on Vercel
 - **Database:** PostgreSQL
-- **WebSocket:** Gorilla WebSocket
-- **Reverse Proxy:** Traefik (for production backend)
+- **Real-time:** Gorilla WebSocket
+- **Auth:** Discord OAuth, Steam OpenID, Telegram Login
 
 ## Quick Start
 
-### Prerequisites
-
-- Docker and Docker Compose
-- PostgreSQL (or use included service)
-- OAuth credentials (Discord, Steam, Telegram)
-
-### Setup
-
-1. **Clone the repository**
+1. **Clone**
    ```bash
-   git clone <repository-url>
-   cd lfg-mvp
+   git clone https://github.com/4oko4ow/lfg.git
+   cd lfg
    ```
 
-2. **Configure environment variables**
+2. **Configure environment**
    ```bash
    cp .env.example .env
-   # Edit .env with your values
+   # Fill in required values (see .env.example for reference)
    ```
 
 3. **Start services**
    ```bash
    # With local PostgreSQL
    docker-compose --profile local-db up -d --build
-   
-   # Or without local PostgreSQL (provide DATABASE_URL)
+
+   # With external database (set DATABASE_URL in .env)
    docker-compose up -d --build
    ```
 
-4. **Access the application**
-   - Frontend: Deployed on Vercel at `https://findparty.online`
-   - Backend API: `http://localhost:8080` (or `https://lfg.findparty.online` in production)
-   - Health check: `http://localhost:8080/healthz` (or `https://lfg.findparty.online/healthz` in production)
-
-## Documentation
-
-- **[ENV.md](./ENV.md)** - Complete environment variables documentation
-- **[DOCKER.md](./DOCKER.md)** - Docker setup and deployment guide
-- **[backend/README.md](./backend/README.md)** - Backend configuration
-- **[frontend/README.md](./frontend/README.md)** - Frontend setup
+4. **Access**
+   - Frontend: http://localhost:5173 (or https://findparty.online)
+   - API: http://localhost:8080
+   - Health: http://localhost:8080/healthz
 
 ## Development
 
-### Backend
-
+**Backend**
 ```bash
 cd backend
 go mod download
 go run main.go
 ```
 
-### Frontend
-
+**Frontend**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Environment Variables
+## Required Environment Variables
 
-See **[ENV.md](./ENV.md)** for complete documentation.
-
-**Required variables:**
 - `DATABASE_URL` - PostgreSQL connection string
-- `VITE_BACKEND_URL` - Backend URL for frontend (e.g., `https://lfg.findparty.online`)
-- `AUTH_JWT_SECRET` - Session secret (generate with `openssl rand -hex 32`)
-- `FRONTEND_URL` - Frontend URL (e.g., `https://findparty.online`)
-- `BACKEND_URL` - Backend URL (e.g., `https://lfg.findparty.online`)
+- `AUTH_JWT_SECRET` - Session secret (`openssl rand -hex 32`)
+- `FRONTEND_URL` - Frontend URL
+- `BACKEND_URL` - Backend URL
 - OAuth credentials (Discord, Steam, Telegram)
+
+See `.env.example` for the full list.
 
 ## Project Structure
 
 ```
-lfg-mvp/
+lfg/
 ├── backend/           # Go backend
-│   ├── auth/         # Authentication
+│   ├── auth/         # Authentication (JWT, OAuth)
 │   ├── ws/           # WebSocket handlers
 │   ├── api/          # REST API endpoints
 │   └── migrations/   # Database migrations
@@ -107,9 +81,7 @@ lfg-mvp/
 │   │   ├── pages/
 │   │   └── context/
 │   └── public/
-├── docker-compose.yml # Docker Compose configuration
-├── .env.example       # Environment variables template
-└── ENV.md            # Environment variables documentation
+└── docker-compose.yml
 ```
 
 ## API Endpoints
@@ -118,9 +90,8 @@ lfg-mvp/
 - `POST /api/chat/messages/create` - Create chat message
 - `POST /api/games/suggest` - Suggest a game
 - `GET /healthz` - Health check
-- `WS /ws` - WebSocket for party updates
+- `WS /ws` - WebSocket for real-time party updates
 
 ## License
 
-[Your License Here]
-
+MIT
