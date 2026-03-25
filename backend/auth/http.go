@@ -231,29 +231,16 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) getCurrentProfile(r *http.Request) (*Profile, error) {
-	// Log all cookies for debugging
-	cookies := r.Cookies()
-	log.Printf("[Auth] Request cookies: %d cookies found", len(cookies))
-	for _, cookie := range cookies {
-		log.Printf("[Auth] Cookie: %s (Domain: %s, Path: %s)", cookie.Name, cookie.Domain, cookie.Path)
-	}
-
 	userID, err := h.sessions.Extract(r)
 	if err != nil {
-		log.Printf("[Auth] Failed to extract session: %v", err)
-		return nil, nil // No session - return nil profile, no error (will result in 204)
+		return nil, nil
 	}
-	log.Printf("[Auth] Extracted userID from session: %s", userID)
 	profile, err := h.store.GetProfile(userID)
 	if err != nil {
-		log.Printf("[Auth] Error getting profile for user %s: %v", userID, err)
-		return nil, err // Database error - return error (will result in 500)
+		return nil, err
 	}
 	if profile == nil {
-		log.Printf("[Auth] WARNING: Session valid for user %s but profile not found - data inconsistency!", userID)
-		// Session is valid but user doesn't exist - this is a data inconsistency
-		// Return nil profile but no error (will result in 204)
-		// This can happen if user was deleted but session still exists
+		log.Printf("[Auth] WARNING: session valid for user %s but profile not found", userID)
 		return nil, nil
 	}
 	return profile, nil
@@ -266,25 +253,13 @@ func (h *Handler) handleSession(w http.ResponseWriter, r *http.Request) {
 	}
 	profile, err := h.getCurrentProfile(r)
 	if err != nil {
-		log.Printf("[Auth] Error getting profile: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if profile == nil {
-		log.Printf("[Auth] No profile found for session")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	log.Printf("[Auth] Returning profile for user: %s with %d identities: %v",
-		profile.User.ID,
-		len(profile.Identities),
-		func() []string {
-			providers := make([]string, len(profile.Identities))
-			for i, ident := range profile.Identities {
-				providers[i] = string(ident.Provider)
-			}
-			return providers
-		}())
 	w.WriteHeader(http.StatusOK)
 	writeJSON(w, profile)
 }
@@ -409,13 +384,10 @@ func (h *Handler) handleDiscordLogin(w http.ResponseWriter, r *http.Request) {
 		"state":         {state},
 	}
 	authURL := "https://discord.com/oauth2/authorize?" + params.Encode()
-	log.Printf("[Auth] Discord OAuth URL: redirect_uri=%s", h.discordConfig.redirectURL)
-	log.Printf("[Auth] Full Discord auth URL: %s", authURL)
 	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
 func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) {
-	log.Printf("[Auth] Discord callback received")
 	if h.discordConfig.clientID == "" || h.discordConfig.clientSecret == "" {
 		http.Error(w, "discord login not configured", http.StatusServiceUnavailable)
 		return
@@ -426,7 +398,6 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "missing state", http.StatusBadRequest)
 		return
 	}
-	log.Printf("[Auth] State cookie read: link=%v, redirect=%s", payload.Link, payload.Redirect)
 	h.clearStateCookie(w)
 
 	if payload.Nonce != r.URL.Query().Get("state") {
@@ -465,44 +436,28 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Use username instead of global_name
 	// IMPORTANT: Always use username, never global_name
-	// Discord API should always return username, but we have fallbacks for edge cases
 	handle := discordUser.Username
 	if handle == "" {
-		// This should rarely happen - Discord API typically always returns username
-		// Fallback to global_name only if username is truly empty
-		log.Printf("[Auth] WARNING: Discord username is empty (unusual), falling back to global_name: %s", discordUser.GlobalName)
 		handle = discordUser.GlobalName
 		if handle == "" {
-			// Last resort: use user ID (should never happen in practice)
-			log.Printf("[Auth] ERROR: Both username and global_name are empty, using user ID: %s", discordUser.ID)
 			handle = discordUser.ID
 		}
 	}
 	if discordUser.Discriminator != "0" && discordUser.Discriminator != "" {
 		handle = fmt.Sprintf("%s#%s", handle, discordUser.Discriminator)
 	}
-	log.Printf("[Auth] Discord handle: %s (username: %s, global_name: %s)", handle, discordUser.Username, discordUser.GlobalName)
 
 	var linkUserID string
 	if payload.Link {
 		if current, err := h.sessions.Extract(r); err == nil {
 			linkUserID = current
-			log.Printf("[Auth] Linking Discord identity to existing user: %s", linkUserID)
-		} else {
-			log.Printf("[Auth] Warning: link=1 but no session found: %v. Will create new user instead.", err)
-			// If link was requested but no session exists, we'll create a new user
-			// This can happen if session expired or was cleared
 		}
-	} else {
-		log.Printf("[Auth] Creating new user for Discord identity")
 	}
 
-	log.Printf("[Auth] Upserting Discord identity: provider_id=%s, linkUserID=%s", discordUser.ID, linkUserID)
 	profile, err := h.store.UpsertIdentity(linkUserID, ProviderDiscord, discordUser.ID, handle, "https://discord.com/channels/@me/"+discordUser.ID, token.AccessToken, token.RefreshToken)
 	if err != nil {
-		log.Printf("[Auth] Failed to upsert Discord identity: %v", err)
+		log.Printf("[Auth] Discord upsert failed: %v", err)
 		status := "discord_error"
 		if errors.Is(err, ErrIdentityLinked) {
 			status = "discord_conflict"
@@ -510,41 +465,16 @@ func (h *Handler) handleDiscordCallback(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, h.frontendRedirect(payload.Redirect, status), http.StatusFound)
 		return
 	}
-	log.Printf("[Auth] Successfully upserted Discord identity for user: %s", profile.User.ID)
-	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
-		func() []string {
-			providers := make([]string, len(profile.Identities))
-			for i, ident := range profile.Identities {
-				providers[i] = string(ident.Provider)
-			}
-			return providers
-		}())
 
-	// Only issue new session if not linking (linking keeps existing session)
 	if !payload.Link {
 		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
 			log.Printf("[Auth] Failed to issue session: %v", err)
 			http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
 			return
 		}
-		log.Printf("[Auth] Session issued for new user")
-		// Log Set-Cookie header to verify it's being set
-		if setCookie := w.Header().Get("Set-Cookie"); setCookie != "" {
-			log.Printf("[Auth] Set-Cookie header present in response (length: %d)", len(setCookie))
-		} else {
-			log.Printf("[Auth] ⚠️  WARNING: Set-Cookie header NOT present in response!")
-		}
-	} else {
-		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
-		// Verify that the session user matches the profile user
-		if linkUserID != profile.User.ID {
-			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
-		}
 	}
 
-	redirectURL := h.frontendRedirect(payload.Redirect, "success")
-	log.Printf("[Auth] Redirecting to: %s", redirectURL)
-	http.Redirect(w, r, redirectURL, http.StatusFound)
+	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success", "discord"), http.StatusFound)
 }
 
 type discordToken struct {
@@ -586,9 +516,17 @@ func (h *Handler) exchangeDiscordCode(ctx context.Context, code string) (*discor
 	return &token, nil
 }
 
-func (h *Handler) frontendRedirect(path, status string) string {
-	target := sanitizeRedirect(path)
-	return fmt.Sprintf("%s/auth/callback?status=%s&redirect=%s", strings.TrimRight(h.frontendURL, "/"), url.QueryEscape(status), url.QueryEscape(target))
+func (h *Handler) frontendRedirect(redirectPath, status string, provider ...string) string {
+	target := sanitizeRedirect(redirectPath)
+	u := fmt.Sprintf("%s/auth/callback?status=%s&redirect=%s",
+		strings.TrimRight(h.frontendURL, "/"),
+		url.QueryEscape(status),
+		url.QueryEscape(target),
+	)
+	if len(provider) > 0 && provider[0] != "" {
+		u += "&provider=" + url.QueryEscape(provider[0])
+	}
+	return u
 }
 
 func (h *Handler) handleSteamLogin(w http.ResponseWriter, r *http.Request) {
@@ -659,41 +597,15 @@ func (h *Handler) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("[Auth] Steam login successful for user: %s", profile.User.ID)
-	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
-		func() []string {
-			providers := make([]string, len(profile.Identities))
-			for i, ident := range profile.Identities {
-				providers[i] = string(ident.Provider)
-			}
-			return providers
-		}())
-
-	// Only issue new session if not linking (linking keeps existing session)
 	if !payload.Link {
 		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
 			log.Printf("[Auth] Failed to issue session: %v", err)
 			http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "session_error"), http.StatusFound)
 			return
 		}
-		log.Printf("[Auth] Session issued for new user")
-		// Log Set-Cookie header to verify it's being set
-		if setCookie := w.Header().Get("Set-Cookie"); setCookie != "" {
-			log.Printf("[Auth] Set-Cookie header present in response (length: %d)", len(setCookie))
-		} else {
-			log.Printf("[Auth] ⚠️  WARNING: Set-Cookie header NOT present in response!")
-		}
-	} else {
-		log.Printf("[Auth] Linking mode: keeping existing session (user: %s)", linkUserID)
-		// Verify that the session user matches the profile user
-		if linkUserID != "" && linkUserID != profile.User.ID {
-			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
-		}
 	}
 
-	redirectURL := h.frontendRedirect(payload.Redirect, "success")
-	log.Printf("[Auth] Redirecting to: %s", redirectURL)
-	http.Redirect(w, r, redirectURL, http.StatusFound)
+	http.Redirect(w, r, h.frontendRedirect(payload.Redirect, "success", "steam"), http.StatusFound)
 }
 
 func (h *Handler) verifySteamResponse(r *http.Request) error {
@@ -795,15 +707,10 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var linkUserID string
-	// Check if we have an existing session (for linking from profile page)
-	// If session exists, we're in linking mode
 	hasSession := false
 	if current, err := h.sessions.Extract(r); err == nil {
 		linkUserID = current
 		hasSession = true
-		log.Printf("[Auth] Found existing session, linking Telegram identity to user: %s", linkUserID)
-	} else {
-		log.Printf("[Auth] No session found, will create new user for Telegram identity")
 	}
 
 	handle := body.Username
@@ -811,10 +718,9 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		handle = strings.TrimSpace(body.FirstName + " " + body.LastName)
 	}
 
-	log.Printf("[Auth] Upserting Telegram identity: provider_id=%s, linkUserID=%s, hasSession=%v", body.ID, linkUserID, hasSession)
 	profile, err := h.store.UpsertIdentity(linkUserID, ProviderTelegram, body.ID, handle, "https://t.me/"+body.Username, "", "")
 	if err != nil {
-		log.Printf("[Auth] Failed to upsert Telegram identity: %v", err)
+		log.Printf("[Auth] Telegram upsert failed: %v", err)
 		status := http.StatusInternalServerError
 		if errors.Is(err, ErrIdentityLinked) {
 			status = http.StatusConflict
@@ -822,36 +728,13 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), status)
 		return
 	}
-	log.Printf("[Auth] Successfully upserted Telegram identity for user: %s", profile.User.ID)
-	log.Printf("[Auth] Profile has %d identities: %v", len(profile.Identities),
-		func() []string {
-			providers := make([]string, len(profile.Identities))
-			for i, ident := range profile.Identities {
-				providers[i] = string(ident.Provider)
-			}
-			return providers
-		}())
 
-	// Only issue new session if:
-	// 1. We didn't have a session (new user created)
-	// 2. OR the identity was already linked to a different user (linkUserID was set but profile.User.ID is different)
-	// If we had a session and profile.User.ID matches linkUserID, we're linking to existing user, so keep existing session
+	// Issue session for new users or if identity belonged to a different user
 	if !hasSession || (linkUserID != "" && linkUserID != profile.User.ID) {
 		if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
 			log.Printf("[Auth] Failed to issue session: %v", err)
 			http.Error(w, "failed to issue session", http.StatusInternalServerError)
 			return
-		}
-		if !hasSession {
-			log.Printf("[Auth] Session issued for new user")
-		} else {
-			log.Printf("[Auth] Session issued for user (identity was linked to different user)")
-		}
-	} else {
-		log.Printf("[Auth] Linking to existing user: keeping existing session (user: %s)", linkUserID)
-		// Verify that the session user matches the profile user
-		if linkUserID != profile.User.ID {
-			log.Printf("[Auth] ⚠️  WARNING: linkUserID (%s) != profile.User.ID (%s)", linkUserID, profile.User.ID)
 		}
 	}
 

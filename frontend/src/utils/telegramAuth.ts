@@ -4,7 +4,7 @@ export type TelegramAuthData = {
   last_name?: string;
   username?: string;
   photo_url?: string;
-  auth_date: number; // Unix timestamp, Telegram sends as number
+  auth_date: number;
   hash: string;
 };
 
@@ -48,24 +48,15 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
         clearTimeout(closeTimeout);
         closeTimeout = null;
       }
-      try {
-        popup.close();
-      } catch {
-        // ignore
-      }
+      try { popup.close(); } catch { /* ignore */ }
     };
 
     const onMessage = (event: MessageEvent) => {
-      // Only accept messages from Telegram OAuth origin
-      if (event.origin !== "https://oauth.telegram.org") {
-        return;
-      }
+      if (event.origin !== "https://oauth.telegram.org") return;
       const data = event.data as { event?: string; data?: TelegramAuthData };
 
-      // Handle auth_user event (successful authentication)
       if (data?.event === "auth_user" && data.data) {
         if (!resolved && !rejected) {
-          console.log("[Telegram Auth] Received auth_user event with data:", data.data);
           resolved = true;
           cleanup();
           resolve(data.data);
@@ -73,42 +64,28 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
         return;
       }
 
-      // Handle auth_cancel event (user cancelled)
       if (data?.event === "auth_cancel") {
         if (!resolved && !rejected) {
-          console.log("[Telegram Auth] User cancelled authentication");
           rejected = true;
           cleanup();
-          reject(new Error("Telegram authentication cancelled by user"));
+          reject(new Error("Telegram authentication cancelled"));
         }
-        return;
-      }
-
-      // Log other events for debugging
-      if (data?.event) {
-        console.log("[Telegram Auth] Received event:", data.event, data);
       }
     };
 
     window.addEventListener("message", onMessage);
 
+    // Poll for popup close - give 1 second after close for message to arrive
     const intervalId = window.setInterval(() => {
       if (popup.closed && !resolved && !rejected && closeTimeout === null) {
-        // Give a longer delay before rejecting to allow message to arrive
-        // Telegram sometimes closes the popup right after sending the message
-        // Keep listening for messages even after popup closes
-        // Increased delay to 5 seconds to give more time for the message to arrive
-        console.log("[Telegram Auth] Popup closed, waiting for message (max 5 seconds)...");
         closeTimeout = window.setTimeout(() => {
           if (!resolved && !rejected) {
-            console.log("[Telegram Auth] No message received after popup closed, rejecting");
             rejected = true;
             cleanup();
-            reject(new Error("Telegram popup closed without authentication data"));
+            reject(new Error("Telegram popup closed"));
           }
-        }, 5000) as unknown as number;
+        }, 1000) as unknown as number;
       }
     }, 200);
   });
 }
-

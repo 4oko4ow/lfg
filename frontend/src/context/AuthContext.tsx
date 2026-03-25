@@ -129,43 +129,21 @@ async function readProfile(): Promise<{
   contacts: ContactHandlesMap;
 }> {
   try {
-    const url = buildBackendUrl("/auth/session");
-    console.log("[Auth] Fetching profile from:", url);
-    console.log("[Auth] Current origin:", window.location.origin);
-    console.log("[Auth] Backend URL:", backendBaseUrl);
-
-    const response = await fetch(url, {
+    const response = await fetch(buildBackendUrl("/auth/session"), {
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
-    console.log("[Auth] Session response status:", response.status);
-    console.log("[Auth] Response headers:", Object.fromEntries(response.headers.entries()));
-
-    if (response.status === 204) {
-      console.log("[Auth] No session found (204 No Content)");
-      return { profile: null, contacts: {} };
-    }
+    if (response.status === 204) return { profile: null, contacts: {} };
     if (!response.ok) {
-      // Don't throw for 401/403 - just return no profile
       if (response.status === 401 || response.status === 403) {
-        console.log("[Auth] Unauthorized (401/403)");
         return { profile: null, contacts: {} };
       }
-      const errorText = await response.text().catch(() => "unknown error");
-      console.error("[Auth] Failed to load session:", response.status, errorText);
       throw new Error(`Failed to load session: ${response.status}`);
     }
     const data = (await response.json()) as RawProfile;
-    if (!data?.user) {
-      console.log("[Auth] Response missing user data");
-      return { profile: null, contacts: {} };
-    }
-    console.log("[Auth] Profile loaded successfully for user:", data.user.id);
+    if (!data?.user) return { profile: null, contacts: {} };
     return mapProfile(data);
   } catch (error) {
-    // Network errors or other failures - log but don't crash
     console.error("[Auth] Failed to read profile:", error);
     return { profile: null, contacts: {} };
   }
@@ -244,102 +222,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void loadConfig();
   }, [loadConfig]);
 
-  const redirectToCallback = useCallback((status: string, redirect: string) => {
-    window.location.href = `/auth/callback?status=${status}&redirect=${encodeURIComponent(
-      redirect,
-    )}`;
+  const redirectToCallback = useCallback((status: string, provider: string, redirect: string) => {
+    window.location.href = `/auth/callback?status=${status}&provider=${provider}&redirect=${encodeURIComponent(redirect)}`;
   }, []);
 
   const handleTelegramAuth = useCallback(async () => {
     const redirect = getRedirectPath();
     let botId = telegramBotId;
 
-    // Если botId еще не загружен, загружаем его
-    if (!botId || botId.trim() === "") {
+    if (!botId) {
       botId = await loadConfig();
     }
 
-    // Проверяем, что botId не пустой
-    if (!botId || botId.trim() === "") {
-      console.error("Telegram bot ID is not configured. Please check backend configuration.");
-      redirectToCallback("telegram_error", redirect);
+    if (!botId) {
+      redirectToCallback("telegram_error", "telegram", redirect);
       return;
     }
 
     try {
-      console.log("[Telegram Auth] Opening Telegram OAuth popup...");
-      const payload = await openTelegramAuth(botId.trim());
-      console.log("[Telegram Auth] Received payload from Telegram:", payload);
-
-      // Convert numeric fields to string as backend expects strings for all fields
-      const requestBody = {
-        id: String(payload.id),
-        first_name: payload.first_name,
-        last_name: payload.last_name,
-        username: payload.username,
-        photo_url: payload.photo_url,
-        auth_date: String(payload.auth_date),
-        hash: payload.hash,
-      };
-
-      console.log("[Telegram Auth] Sending verification request to backend...");
+      const payload = await openTelegramAuth(botId);
       const response = await fetch(buildBackendUrl("/auth/telegram/verify"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          id: String(payload.id),
+          first_name: payload.first_name,
+          last_name: payload.last_name,
+          username: payload.username,
+          photo_url: payload.photo_url,
+          auth_date: String(payload.auth_date),
+          hash: payload.hash,
+        }),
       });
 
-      console.log("[Telegram Auth] Backend response status:", response.status);
-
       if (response.ok) {
-        const profile = await response.json();
-        console.log("[Telegram Auth] Verification successful, profile:", profile);
-        redirectToCallback("success", redirect);
+        redirectToCallback("success", "telegram", redirect);
         return;
       }
 
-      const errorText = await response.text().catch(() => "unknown error");
-      console.error("[Telegram Auth] Backend verification failed:", response.status, errorText);
-
-      const status =
-        response.status === 409 ? "telegram_conflict" : "telegram_error";
-      redirectToCallback(status, redirect);
+      const status = response.status === 409 ? "telegram_conflict" : "telegram_error";
+      redirectToCallback(status, "telegram", redirect);
     } catch (error) {
-      console.error("[Telegram Auth] Error during authentication:", error);
-
-      // Если ошибка связана с bot ID, показываем более понятное сообщение
-      if (error instanceof Error && error.message.includes("bot ID")) {
-        console.error("Telegram bot ID is missing or invalid. Please check backend configuration (TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_ID).");
-        redirectToCallback("telegram_error", redirect);
-        return;
-      }
-
-      // Если ошибка "popup closed", возможно auth все-таки прошел
-      // Проверим профиль перед редиректом на ошибку
-      if (error instanceof Error && (error.message.includes("popup closed") || error.message.includes("cancelled"))) {
-        console.log("[Telegram Auth] Popup closed/cancelled, checking if auth succeeded anyway...");
-        try {
-          // Дадим немного времени для обработки на бэкенде
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // Проверим, обновился ли профиль
-          const profileLoaded = await refreshProfile();
-          if (profileLoaded) {
-            console.log("[Telegram Auth] Profile loaded successfully despite popup error - auth succeeded!");
-            redirectToCallback("success", redirect);
-            return;
-          }
-        } catch (refreshError) {
-          console.warn("[Telegram Auth] Failed to refresh profile after popup error:", refreshError);
-        }
-      }
-
-      redirectToCallback("telegram_error", redirect);
+      console.error("[Telegram Auth] Error:", error);
+      redirectToCallback("telegram_error", "telegram", redirect);
     }
-  }, [redirectToCallback, telegramBotId, loadConfig, refreshProfile]);
+  }, [redirectToCallback, telegramBotId, loadConfig]);
 
   const signIn = useCallback(
     (provider: SocialProvider) => {
