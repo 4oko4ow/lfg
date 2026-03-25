@@ -4,7 +4,7 @@ export type TelegramAuthData = {
   last_name?: string;
   username?: string;
   photo_url?: string;
-  auth_date: string;
+  auth_date: number; // Unix timestamp, Telegram sends as number
   hash: string;
 };
 

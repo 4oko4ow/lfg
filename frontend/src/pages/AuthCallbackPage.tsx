@@ -143,9 +143,16 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex min-h-[50vh] items-center justify-center text-white">
-      <span className="text-sm text-zinc-300">
-        {t("auth.loading")}
-      </span>
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-4 border-zinc-700" />
+          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-medium text-white">{t("auth.loading")}</p>
+          <p className="text-xs text-zinc-500">{t("auth.loading_hint", "Это займёт пару секунд")}</p>
+        </div>
+      </div>
     </div>
   );
 }

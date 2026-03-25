@@ -25,7 +25,7 @@ export default function ContactModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const [discordTooltipVisible, setDiscordTooltipVisible] = useState<string | null>(null);
+  const [copiedHandle, setCopiedHandle] = useState<string | null>(null);
   // Флаг для отслеживания, было ли уже отправлено join для этого объявления
   const joinSentRef = useRef(false);
   const actionTaken = useRef(false);
@@ -70,24 +70,15 @@ export default function ContactModal({
     analytics.contactCopied("unknown", "discord");
     analytics.contactModalClosed(true);
 
-    // Отправляем join только один раз при первом реальном действии
     if (!joinSentRef.current) {
       sendJoinParty(partyId);
       joinSentRef.current = true;
     }
 
-    // Use contact.handle as username (users typically enter username in contacts)
-    // If handle is a Discord ID (numeric), we'll still copy it (user can use it)
-    const usernameToCopy = contact.handle;
-
     try {
-      await navigator.clipboard.writeText(usernameToCopy);
-      // Show tooltip
-      setDiscordTooltipVisible(contact.handle);
-      // Hide tooltip after 4 seconds
-      setTimeout(() => {
-        setDiscordTooltipVisible(null);
-      }, 4000);
+      await navigator.clipboard.writeText(contact.handle);
+      toast.success(t("contact.discord_copied", "Никнейм скопирован — найди в Discord: Добавить друга"), { duration: 5000 });
+      onClose();
     } catch {
       toast.error(t("toasts.error"), { duration: 5000 });
     }
@@ -191,45 +182,59 @@ export default function ContactModal({
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2 relative">
+                  <div className="flex flex-wrap gap-2">
                     {contact.type === "steam" && steamID64 ? (
-                      <button
-                        onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`, "steam")}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95 flex items-center gap-2"
-                      >
-                        <UserIcon className="w-4 h-4" />
-                        {t("contact.open_profile_steam")}
-                      </button>
-                    ) : contact.type === "discord" ? (
-                      <div className="relative">
+                      <>
                         <button
-                          onClick={() => handleAddToDiscord(contact)}
-                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-indigo-500/50 active:scale-95"
+                          onClick={() => handleOpen(`https://steamcommunity.com/profiles/${steamID64}`, "steam")}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md active:scale-95 flex items-center gap-2"
                         >
-                          {t("contact.add_to_discord")}
+                          <UserIcon className="w-4 h-4" />
+                          {t("contact.open_profile_steam")}
                         </button>
-                        {discordTooltipVisible === contact.handle && (
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-zinc-800 text-white text-xs rounded-lg shadow-lg border border-zinc-700 whitespace-nowrap z-10 animate-fadeIn">
-                            {t("contact.discord_tooltip")}
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                              <div className="border-4 border-transparent border-t-zinc-800"></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : normalizedUrl ? (
+                        <button
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(contact.handle);
+                            setCopiedHandle(contact.handle);
+                            setTimeout(() => setCopiedHandle(null), 2000);
+                          }}
+                          className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
+                        >
+                          {copiedHandle === contact.handle ? t("ui.copied", "Скопировано!") : t("ui.copy_contact", "Скопировать")}
+                        </button>
+                      </>
+                    ) : contact.type === "discord" ? (
                       <button
-                        onClick={() => handleOpen(normalizedUrl, contact.type)}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-blue-500/50 active:scale-95"
+                        onClick={() => handleAddToDiscord(contact)}
+                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md active:scale-95"
                       >
-                        {t("contact.open")}
+                        {t("contact.add_to_discord")}
                       </button>
+                    ) : normalizedUrl ? (
+                      <>
+                        <button
+                          onClick={() => handleOpen(normalizedUrl, contact.type)}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md active:scale-95"
+                        >
+                          {t("contact.open")}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(contact.handle);
+                            setCopiedHandle(contact.handle);
+                            setTimeout(() => setCopiedHandle(null), 2000);
+                          }}
+                          className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
+                        >
+                          {copiedHandle === contact.handle ? t("ui.copied", "Скопировано!") : t("ui.copy_contact", "Скопировать")}
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={() => handleCopy(contact.handle, contact.type)}
-                        className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-sm rounded-lg font-medium transition-all duration-200 active:scale-95"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-sm rounded-lg font-medium transition-all duration-200 shadow-md active:scale-95"
                       >
-                        {t("ui.copy_contact")}
+                        {t("ui.copy_contact", "Скопировать")}
                       </button>
                     )}
                   </div>

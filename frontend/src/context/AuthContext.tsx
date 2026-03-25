@@ -271,14 +271,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const payload = await openTelegramAuth(botId.trim());
       console.log("[Telegram Auth] Received payload from Telegram:", payload);
 
-      // Convert id from number to string as backend expects string
+      // Convert numeric fields to string as backend expects strings for all fields
       const requestBody = {
         id: String(payload.id),
         first_name: payload.first_name,
         last_name: payload.last_name,
         username: payload.username,
         photo_url: payload.photo_url,
-        auth_date: payload.auth_date,
+        auth_date: String(payload.auth_date),
         hash: payload.hash,
       };
 

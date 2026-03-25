@@ -21,7 +21,6 @@ import ChatDrawer from "../components/ChatDrawer";
 import SuggestGameModal from "../components/modals/SuggestGameModal";
 import CreatePartyModal from "../components/modals/CreatePartyModal";
 import LoginModal from "../components/modals/LoginModal";
-import { NoJoinSurvey } from "../components/NoJoinSurvey";
 import { DynamicMeta } from "../components/DynamicMeta";
 import { useOnlineCount } from "../context/OnlineCountContext";
 import { useAuth } from "../context/AuthContext";
@@ -110,11 +109,10 @@ function PartyFeedPage() {
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
   const [createPartyModalOpen, setCreatePartyModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginModalGame, setLoginModalGame] = useState<string | undefined>();
   const { onlineCount, setOnlineCount } = useOnlineCount();
   const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [showSurvey, setShowSurvey] = useState(false);
-  const [joinClicked, setJoinClicked] = useState(false);
 
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
@@ -164,7 +162,6 @@ function PartyFeedPage() {
               // Открываем модалку контактов для сохраненной пати
               analytics.joinClick(party.game, party.id);
               analytics.contactModalOpened(party.game);
-              setJoinClicked(true);
               setContactPartyId(party.id);
               setContactModal(party.contacts ?? []);
             }
@@ -357,17 +354,6 @@ function PartyFeedPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showGameFilter]);
 
-  useEffect(() => {
-    const alreadyShown = sessionStorage.getItem("no_join_survey_shown") === "true";
-    if (filteredParties.length > 0 && !joinClicked && !alreadyShown) {
-      const timeout = setTimeout(() => {
-        analytics.noJoinSurveyShown();
-        setShowSurvey(true);
-        sessionStorage.setItem("no_join_survey_shown", "true");
-      }, 15000);
-      return () => clearTimeout(timeout);
-    }
-  }, [filter, filteredParties.length, joinClicked]);
 
   const handleContactClick = (party: Party) => {
     const isFull = party.joined >= party.slots;
@@ -395,7 +381,6 @@ function PartyFeedPage() {
     
     analytics.joinClick(party.game, party.id);
     analytics.contactModalOpened(party.game);
-    setJoinClicked(true);
     setContactPartyId(party.id);
     setContactModal(party.contacts ?? []);
   };
@@ -413,6 +398,7 @@ function PartyFeedPage() {
         game: party.game,
         contacts: party.contacts,
       }));
+      setLoginModalGame(party.game);
       setLoginModalOpen(true);
     } else {
       // Пользователь залогинен
@@ -445,6 +431,7 @@ function PartyFeedPage() {
 
   const handleLoginModalClose = () => {
     setLoginModalOpen(false);
+    setLoginModalGame(undefined);
     // Если пользователь закрыл модалку без авторизации, очищаем сохраненную пати
     // Если авторизация прошла успешно, информация останется в sessionStorage
     // и модалка контактов откроется автоматически через useEffect
@@ -725,7 +712,6 @@ function PartyFeedPage() {
           </div>
         )}
 
-        <NoJoinSurvey visible={showSurvey} />
 
         <FeedbackButton />
         {suggestModalOpen && (
@@ -738,7 +724,7 @@ function PartyFeedPage() {
           />
         )}
         {loginModalOpen && (
-          <LoginModal onClose={handleLoginModalClose} />
+          <LoginModal onClose={handleLoginModalClose} game={loginModalGame} />
         )}
       </main>
 

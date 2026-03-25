@@ -12,10 +12,10 @@ const PROVIDERS: {
   textColor: string;
 }[] = [
   {
-    id: "steam",
-    label: "Steam",
-    brandColor: "bg-[#171a21]",
-    hoverColor: "hover:bg-[#1b2838]",
+    id: "telegram",
+    label: "Telegram",
+    brandColor: "bg-[#0088cc]",
+    hoverColor: "hover:bg-[#006699]",
     textColor: "text-white",
   },
   {
@@ -25,17 +25,16 @@ const PROVIDERS: {
     hoverColor: "hover:bg-[#4752C4]",
     textColor: "text-white",
   },
-  // Temporarily hidden
-  // {
-  //   id: "telegram",
-  //   label: "Telegram",
-  //   brandColor: "bg-[#0088cc]",
-  //   hoverColor: "hover:bg-[#006699]",
-  //   textColor: "text-white",
-  // },
+  {
+    id: "steam",
+    label: "Steam",
+    brandColor: "bg-[#171a21]",
+    hoverColor: "hover:bg-[#1b2838]",
+    textColor: "text-white",
+  },
 ];
 
-export default function LoginModal({ onClose }: { onClose: () => void }) {
+export default function LoginModal({ onClose, game }: { onClose: () => void; game?: string }) {
   const { t } = useTranslation();
   const { signIn } = useAuth();
 
@@ -74,9 +73,15 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <p className="text-sm text-zinc-400 mb-6">
-          {t("auth.choose_provider", "Choose your preferred sign-in method:")}
-        </p>
+        {game ? (
+          <p className="text-sm text-zinc-300 mb-6">
+            {t("auth.sign_in_to_join", "Войдите, чтобы увидеть контакты для вступления в пати по {{game}}", { game })}
+          </p>
+        ) : (
+          <p className="text-sm text-zinc-400 mb-6">
+            {t("auth.choose_provider", "Choose your preferred sign-in method:")}
+          </p>
+        )}
 
         <div className="space-y-3">
           {PROVIDERS.map((provider) => (

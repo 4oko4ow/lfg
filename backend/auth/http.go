@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -787,6 +788,11 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid telegram signature", http.StatusUnauthorized)
 		return
 	}
+	if err := h.checkTelegramAuthDate(body.AuthDate); err != nil {
+		log.Printf("[Auth] Telegram auth_date rejected: %v", err)
+		http.Error(w, "auth data expired", http.StatusUnauthorized)
+		return
+	}
 
 	var linkUserID string
 	// Check if we have an existing session (for linking from profile page)
@@ -850,6 +856,23 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, profile)
+}
+
+const telegramAuthMaxAge = 86400 // 24 hours in seconds
+
+func (h *Handler) checkTelegramAuthDate(authDateStr string) error {
+	ts, err := strconv.ParseInt(authDateStr, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid auth_date format: %w", err)
+	}
+	age := time.Now().Unix() - ts
+	if age > telegramAuthMaxAge {
+		return fmt.Errorf("auth_date too old: %d seconds ago", age)
+	}
+	if age < -60 {
+		return fmt.Errorf("auth_date is in the future: %d seconds", -age)
+	}
+	return nil
 }
 
 func (h *Handler) verifyTelegram(data telegramVerifyRequest) bool {
