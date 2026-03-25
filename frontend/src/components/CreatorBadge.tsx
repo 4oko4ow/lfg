@@ -17,7 +17,7 @@ export default function CreatorBadge({ userId }: CreatorBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState<"top" | "bottom">("top");
   const badgeRef = useRef<HTMLDivElement>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (!userId || loading || !profile) {
     return null;
