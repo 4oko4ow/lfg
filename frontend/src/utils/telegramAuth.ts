@@ -17,9 +17,10 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
     }
 
     const origin = window.location.origin;
+    const returnTo = `${origin}/telegram-auth-relay`;
     const url = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(
       trimmedBotId
-    )}&origin=${encodeURIComponent(origin)}&embed=1&request_access=write`;
+    )}&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
 
     const width = 500;
     const height = 600;
@@ -53,7 +54,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
 
     const onMessage = (event: MessageEvent) => {
       console.log("[Telegram Auth] Message from:", event.origin, "data:", event.data);
-      if (event.origin !== "https://oauth.telegram.org") return;
+      if (event.origin !== origin) return;
       const data = event.data as { event?: string; data?: TelegramAuthData };
 
       if (data?.event === "auth_user" && data.data) {
