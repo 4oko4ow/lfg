@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from "react";
 type Props = {
   botUsername: string;
   authUrl: string;
+  /** When true, renders children as the visible button and overlays the invisible widget on top */
+  masked?: boolean;
+  children?: React.ReactNode;
 };
 
-export default function TelegramLoginButton({ botUsername, authUrl }: Props) {
+export default function TelegramLoginButton({ botUsername, authUrl, masked, children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -26,7 +29,6 @@ export default function TelegramLoginButton({ botUsername, authUrl }: Props) {
     script.setAttribute("data-auth-url", authUrl);
     script.setAttribute("data-request-access", "write");
     script.setAttribute("data-userpic", "false");
-    // Small delay after load to let the iframe render inside the container
     script.onload = () => setTimeout(() => setLoaded(true), 200);
 
     container.appendChild(script);
@@ -37,6 +39,29 @@ export default function TelegramLoginButton({ botUsername, authUrl }: Props) {
       }
     };
   }, [botUsername, authUrl]);
+
+  if (masked) {
+    return (
+      <div className="relative inline-block">
+        {/* Visible custom button — not interactive, just decorative */}
+        <div className="pointer-events-none">{children}</div>
+        {/* Invisible widget iframe stretched over the button — captures the click */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ opacity: 0.001 }}
+        >
+          <div
+            ref={ref}
+            className="scale-150 origin-top-left"
+            style={{ width: "200%", height: "200%" }}
+          />
+        </div>
+        {!loaded && (
+          <div className="absolute inset-0 cursor-wait" />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex justify-center" style={{ minHeight: 42 }}>

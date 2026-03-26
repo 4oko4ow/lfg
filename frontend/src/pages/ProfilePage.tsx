@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth, type SocialProvider } from "../context/AuthContext";
+import TelegramLoginButton from "../components/TelegramLoginButton";
 import {
   contactHandleToInput,
   normalizeContactHandle,
@@ -58,7 +59,10 @@ export default function ProfilePage() {
     contactHandles,
     linkProvider,
     updateContactHandle,
+    telegramBotUsername,
   } = useAuth();
+
+  const telegramAuthUrl = `${BACKEND_URL}/auth/telegram/callback?redirect=${encodeURIComponent("/profile")}`;
 
   const [values, setValues] = useState<Record<SocialProvider, string>>({
     steam: "",
@@ -428,14 +432,28 @@ export default function ProfilePage() {
                       {t(provider.description)}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleLink(provider.id)}
-                    className="rounded border border-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300 transition hover:bg-blue-500/10"
-                  >
-                    {isLinked
-                      ? t("profile.relink", "Reconnect")
-                      : t("profile.connect", "Connect")}
-                  </button>
+                  {provider.id === "telegram" && telegramBotUsername ? (
+                    <TelegramLoginButton
+                      botUsername={telegramBotUsername}
+                      authUrl={telegramAuthUrl}
+                      masked
+                    >
+                      <span className="rounded border border-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300">
+                        {isLinked
+                          ? t("profile.relink", "Reconnect")
+                          : t("profile.connect", "Connect")}
+                      </span>
+                    </TelegramLoginButton>
+                  ) : (
+                    <button
+                      onClick={() => handleLink(provider.id)}
+                      className="rounded border border-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300 transition hover:bg-blue-500/10"
+                    >
+                      {isLinked
+                        ? t("profile.relink", "Reconnect")
+                        : t("profile.connect", "Connect")}
+                    </button>
+                  )}
                 </div>
 
                 <label className="mb-1.5 block text-xs font-medium text-zinc-400">
