@@ -20,7 +20,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
     const returnTo = `${origin}/telegram-auth-relay`;
     const url = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(
       trimmedBotId
-    )}&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
+    )}&origin=${encodeURIComponent(origin)}&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
 
     const width = 500;
     const height = 600;
