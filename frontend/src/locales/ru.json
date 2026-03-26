@@ -295,7 +295,8 @@
     "saved": "Сохранено",
     "placeholders": {
       "steam": "https://steamcommunity.com/id/username",
-      "discord": "username или @username"
+      "discord": "username или @username",
+      "telegram": "@username"
     },
     "tabs": {
       "stats": "Статистика и достижения",

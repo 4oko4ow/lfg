@@ -39,6 +39,12 @@ const PROVIDERS: {
       description: "profile.discord_description",
       placeholderKey: "profile.placeholders.discord",
     },
+    {
+      id: "telegram",
+      title: "Telegram",
+      description: "profile.telegram_description",
+      placeholderKey: "profile.placeholders.telegram",
+    },
   ];
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";

@@ -302,7 +302,8 @@
     "saved": "Saved",
     "placeholders": {
       "steam": "https://steamcommunity.com/id/username",
-      "discord": "username or @username"
+      "discord": "username or @username",
+      "telegram": "@username"
     },
     "tabs": {
       "stats": "Stats & Achievements",
