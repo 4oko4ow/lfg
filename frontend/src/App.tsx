@@ -6,6 +6,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import TelegramAuthRelayPage from "./pages/TelegramAuthRelayPage";
+import TelegramCallbackPage from "./pages/TelegramCallbackPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/telegram-auth-relay" element={<TelegramAuthRelayPage />} />
+        <Route path="/auth/telegram/callback" element={<TelegramCallbackPage />} />
         <Route path="/feed" element={<PartyFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/communities" element={<CommunitiesPage />} />

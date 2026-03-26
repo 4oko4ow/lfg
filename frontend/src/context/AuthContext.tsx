@@ -12,7 +12,6 @@ import type {
   ContactHandlesMap,
   ContactMethodType,
 } from "../types";
-import { openTelegramAuth } from "../utils/telegramAuth";
 import { analytics } from "../utils/analytics";
 
 export type SocialProvider = ContactMethodType;
@@ -226,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = `/auth/callback?status=${status}&provider=${provider}&redirect=${encodeURIComponent(redirect)}`;
   }, []);
 
-  const handleTelegramAuth = useCallback(async () => {
+  const handleTelegramAuth = useCallback(async (link = false) => {
     const redirect = getRedirectPath();
     let botId = telegramBotId;
 
@@ -239,35 +238,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    try {
-      const payload = await openTelegramAuth(botId);
-      const response = await fetch(buildBackendUrl("/auth/telegram/verify"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          id: String(payload.id),
-          first_name: payload.first_name,
-          last_name: payload.last_name,
-          username: payload.username,
-          photo_url: payload.photo_url,
-          auth_date: String(payload.auth_date),
-          hash: payload.hash,
-        }),
-      });
+    // Save redirect path to restore after callback
+    sessionStorage.setItem("telegram_auth_redirect", redirect);
 
-      if (response.ok) {
-        redirectToCallback("success", "telegram", redirect);
-        return;
-      }
-
-      const status = response.status === 409 ? "telegram_conflict" : "telegram_error";
-      redirectToCallback(status, "telegram", redirect);
-    } catch (error) {
-      console.error("[Telegram Auth] Error:", error);
-      redirectToCallback("telegram_error", "telegram", redirect);
+    const origin = window.location.origin;
+    const callbackUrl = `${origin}/auth/telegram/callback`;
+    const params = new URLSearchParams({
+      bot_id: botId,
+      origin,
+      return_to: callbackUrl,
+      request_access: "write",
+    });
+    if (link) {
+      params.set("link", "1");
     }
-  }, [redirectToCallback, telegramBotId, loadConfig]);
+    window.location.href = `https://oauth.telegram.org/auth?${params.toString()}`;
+  }, [telegramBotId, loadConfig, redirectToCallback]);
 
   const signIn = useCallback(
     (provider: SocialProvider) => {
@@ -289,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (provider: SocialProvider) => {
       analytics.providerLinked(provider);
       if (provider === "telegram") {
-        void handleTelegramAuth();
+        void handleTelegramAuth(true);
         return;
       }
       const redirect = encodeURIComponent(getRedirectPath());
