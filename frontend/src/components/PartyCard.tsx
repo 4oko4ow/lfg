@@ -64,10 +64,12 @@ export default function PartyCard({
   party,
   onContactClick,
   onJoinClick,
+  onFullClick,
 }: {
   party: Party;
   onContactClick: () => void;
   onJoinClick: () => void;
+  onFullClick?: () => void;
 }) {
   const { t } = useTranslation();
   const { profile } = useAuth();
@@ -269,17 +271,19 @@ export default function PartyCard({
               </span>
             )}
           </div>
-          <button
-            onClick={onJoinClick}
-            disabled={isFull}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-              isFull
-                ? "bg-zinc-800/50 text-zinc-500 border border-zinc-700/50 cursor-not-allowed opacity-50"
-                : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/50 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-xl hover:shadow-blue-500/60 hover:scale-105 active:scale-95"
-            }`}
-          >
-            {t("ui.join_party")}
-          </button>
+          <div onClick={isFull ? onFullClick : undefined}>
+            <button
+              onClick={onJoinClick}
+              disabled={isFull}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+                isFull
+                  ? "bg-zinc-800/50 text-zinc-500 border border-zinc-700/50 cursor-not-allowed opacity-50"
+                  : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/50 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-xl hover:shadow-blue-500/60 hover:scale-105 active:scale-95"
+              }`}
+            >
+              {t("ui.join_party")}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import CreatePartyForm from "../../forms/CreatePartyForm";
 import type { Party } from "../../types";
+import { analytics } from "../../utils/analytics";
 
 export default function CreatePartyModal({ 
   onClose, 
@@ -20,6 +21,10 @@ export default function CreatePartyModal({
     return () => {
       document.body.style.overflow = "";
     };
+  }, []);
+
+  useEffect(() => {
+    analytics.createPartyModalOpen();
   }, []);
 
   const modalContent = (

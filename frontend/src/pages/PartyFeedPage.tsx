@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -113,6 +113,7 @@ function PartyFeedPage() {
   const { onlineCount, setOnlineCount } = useOnlineCount();
   const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const emptyStateTracked = useRef(false);
 
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 768 : false;
@@ -154,16 +155,20 @@ function PartyFeedPage() {
                 
                 // Если пользователь не создатель и не участник - не показываем контакты
                 if (!isCreator && !isMember) {
+                  analytics.pendingJoinResolved(false, "full_not_member");
                   sessionStorage.removeItem("pending_join_party");
                   return;
                 }
               }
-              
+
               // Открываем модалку контактов для сохраненной пати
+              analytics.pendingJoinResolved(true, "ok");
               analytics.joinClick(party.game, party.id);
               analytics.contactModalOpened(party.game);
               setContactPartyId(party.id);
               setContactModal(party.contacts ?? []);
+            } else {
+              analytics.pendingJoinResolved(false, "party_not_found");
             }
             sessionStorage.removeItem("pending_join_party");
           }, 100);
@@ -340,6 +345,19 @@ function PartyFeedPage() {
     });
   }, [parties, filter, ALL_LABEL, games]);
 
+  // Track empty state - when user sees 0 results after loading completes
+  useEffect(() => {
+    if (loading) return;
+    if (filteredParties.length === 0) {
+      if (!emptyStateTracked.current) {
+        emptyStateTracked.current = true;
+        analytics.feedEmptyState(filter);
+      }
+    } else {
+      emptyStateTracked.current = false;
+    }
+  }, [filteredParties.length, loading, filter]);
+
   // Close game filter when clicking outside
   useEffect(() => {
     if (!showGameFilter) return;
@@ -432,12 +450,14 @@ function PartyFeedPage() {
   const handleLoginModalClose = () => {
     setLoginModalOpen(false);
     setLoginModalGame(undefined);
-    // Если пользователь закрыл модалку без авторизации, очищаем сохраненную пати
-    // Если авторизация прошла успешно, информация останется в sessionStorage
-    // и модалка контактов откроется автоматически через useEffect
     if (!profile) {
+      analytics.loginModalDismissed("join");
       sessionStorage.removeItem("pending_join_party");
     }
+  };
+
+  const handleFullPartyClick = (party: Party) => {
+    analytics.joinFullPartyAttempt(party.game, party.id);
   };
 
   return (
@@ -664,6 +684,7 @@ function PartyFeedPage() {
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
+                  onFullClick={() => handleFullPartyClick(party)}
                                   />
         </div>
             ))}
@@ -706,6 +727,7 @@ function PartyFeedPage() {
                   party={party} 
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
+                  onFullClick={() => handleFullPartyClick(party)}
                                   />
               </div>
             ))}

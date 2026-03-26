@@ -177,6 +177,44 @@ export const analytics = {
     track("communities_form_error", { field });
   },
 
+  // ===== CREATE PARTY - MODAL & BLOCKERS =====
+
+  createPartyModalOpen: () => {
+    track("party_create_modal_open");
+  },
+
+  createPartyBlockedNoContacts: (game: string) => {
+    track("party_create_blocked_no_contacts", { game });
+  },
+
+  createPartyAbandonedWithText: (game: string) => {
+    track("party_create_abandoned_with_text", { game });
+  },
+
+  // ===== JOIN - FULL PARTY =====
+
+  joinFullPartyAttempt: (game: string, partyId: string) => {
+    track("join_full_attempt", { game, party_id: partyId });
+  },
+
+  // ===== LOGIN MODAL =====
+
+  loginModalDismissed: (source: string) => {
+    track("login_modal_dismissed", { source });
+  },
+
+  // ===== PENDING JOIN FLOW =====
+
+  pendingJoinResolved: (success: boolean, reason: string) => {
+    track("pending_join_resolved", { success: success ? 1 : 0, reason });
+  },
+
+  // ===== FEED EMPTY STATE =====
+
+  feedEmptyState: (game: string) => {
+    track("feed_empty_state", { game });
+  },
+
   // ===== ERRORS (only critical) =====
 
   apiError: (endpoint: string, status: number) => {

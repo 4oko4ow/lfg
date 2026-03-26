@@ -28,6 +28,9 @@ export default function CreatePartyForm({
     const [slots, setSlots] = useState(5);
     const { contactHandles, profile } = useAuth();
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const noContactsTracked = useRef(false);
+    const goalRef = useRef(goal);
+    const gameRef = useRef(game);
     const [showOtherGames, setShowOtherGames] = useState(false);
     const [gameSearchQuery, setGameSearchQuery] = useState("");
     const otherGamesRef = useRef<HTMLDivElement>(null);
@@ -61,12 +64,34 @@ export default function CreatePartyForm({
         [effectiveContactHandles]
     );
 
+    // Keep refs in sync for unmount cleanup
+    useEffect(() => { goalRef.current = goal; }, [goal]);
+    useEffect(() => { gameRef.current = game; }, [game]);
+
+    // Track abandonment when form unmounts with text already entered
+    useEffect(() => {
+        return () => {
+            if (goalRef.current.trim()) {
+                analytics.createPartyAbandonedWithText(gameRef.current);
+            }
+        };
+    }, []);
+
     // Track form start only once user is logged in and the form is usable
     useEffect(() => {
         if (!profile || formStartTracked.current) return;
         formStartTracked.current = true;
         analytics.createPartyStart(game);
     }, [profile, game]);
+
+    // Track when logged-in user is blocked by missing contacts
+    useEffect(() => {
+        if (!profile) return;
+        if (availableMethods.length === 0 && !noContactsTracked.current) {
+            noContactsTracked.current = true;
+            analytics.createPartyBlockedNoContacts(game);
+        }
+    }, [profile, availableMethods.length, game]);
 
     // Calculate game popularity from parties
     const gameCounts = useMemo(() => {
