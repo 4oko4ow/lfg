@@ -43,8 +43,9 @@ type SteamConfig struct {
 }
 
 type TelegramConfig struct {
-	BotToken string
-	BotID    string
+	BotToken    string
+	BotID       string
+	BotUsername string
 }
 
 type Handler struct {
@@ -101,11 +102,21 @@ func NewHandler(store StoreInterface, sessions *SessionManager, cfg Config) *Han
 	}
 
 	telegramConfig := cfg.Telegram
-	if telegramConfig.BotID == "" && telegramConfig.BotToken != "" {
-		if botID, err := resolveTelegramBotID(telegramConfig.BotToken); err != nil {
-			log.Printf("failed to resolve telegram bot id: %v", err)
-		} else {
-			telegramConfig.BotID = botID
+	if telegramConfig.BotToken != "" {
+		if telegramConfig.BotID == "" {
+			if botID, err := resolveTelegramBotID(telegramConfig.BotToken); err != nil {
+				log.Printf("failed to resolve telegram bot id: %v", err)
+			} else {
+				telegramConfig.BotID = botID
+			}
+		}
+		if telegramConfig.BotUsername == "" {
+			if username, err := resolveTelegramBotUsername(telegramConfig.BotToken); err != nil {
+				log.Printf("failed to resolve telegram bot username: %v", err)
+			} else {
+				telegramConfig.BotUsername = username
+				log.Printf("[Auth] Telegram bot username: %s", username)
+			}
 		}
 	}
 
@@ -228,6 +239,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/auth/steam/callback", h.handleSteamCallback)
 
 	mux.HandleFunc("/auth/telegram/verify", h.handleTelegramVerify)
+	mux.HandleFunc("/auth/telegram/callback", h.handleTelegramCallback)
 }
 
 func (h *Handler) getCurrentProfile(r *http.Request) (*Profile, error) {
@@ -270,7 +282,8 @@ func (h *Handler) handleConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, map[string]any{
-		"telegram_bot_id": h.telegram.BotID,
+		"telegram_bot_id":       h.telegram.BotID,
+		"telegram_bot_username": h.telegram.BotUsername,
 	})
 }
 
@@ -658,6 +671,27 @@ func (h *Handler) fetchSteamPersona(ctx context.Context, steamID string) string 
 	return steamID
 }
 
+func resolveTelegramBotUsername(token string) (string, error) {
+	resp, err := http.Get("https://api.telegram.org/bot" + token + "/getMe")
+	if err != nil {
+		return "", fmt.Errorf("getMe request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	var result struct {
+		OK     bool `json:"ok"`
+		Result struct {
+			Username string `json:"username"`
+		} `json:"result"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("getMe decode failed: %w", err)
+	}
+	if !result.OK || result.Result.Username == "" {
+		return "", errors.New("getMe returned no username")
+	}
+	return result.Result.Username, nil
+}
+
 func resolveTelegramBotID(token string) (string, error) {
 	// Bot token format is: {bot_id}:{secret_hash}
 	// Extract the bot ID (the part before the colon)
@@ -742,6 +776,82 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, profile)
+}
+
+// handleTelegramCallback handles the GET redirect from the Telegram Login Widget.
+// The widget redirects to this URL with auth params in the query string.
+func (h *Handler) handleTelegramCallback(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if h.telegram.BotToken == "" {
+		http.Error(w, "telegram login disabled", http.StatusServiceUnavailable)
+		return
+	}
+	q := r.URL.Query()
+	redirect := sanitizeRedirect(q.Get("redirect"))
+	link := q.Get("link") == "1"
+
+	body := telegramVerifyRequest{
+		ID:        q.Get("id"),
+		FirstName: q.Get("first_name"),
+		LastName:  q.Get("last_name"),
+		Username:  q.Get("username"),
+		PhotoURL:  q.Get("photo_url"),
+		AuthDate:  q.Get("auth_date"),
+		Hash:      q.Get("hash"),
+	}
+
+	if body.ID == "" || body.Hash == "" {
+		log.Printf("[Telegram] Callback missing required params")
+		http.Redirect(w, r, h.frontendRedirect(redirect, "telegram_error", "telegram"), http.StatusFound)
+		return
+	}
+
+	log.Printf("[Telegram] Callback: id=%s username=%s auth_date=%s", body.ID, body.Username, body.AuthDate)
+
+	if !h.verifyTelegram(body) {
+		log.Printf("[Telegram] Signature invalid for id=%s", body.ID)
+		http.Redirect(w, r, h.frontendRedirect(redirect, "telegram_error", "telegram"), http.StatusFound)
+		return
+	}
+	if err := h.checkTelegramAuthDate(body.AuthDate); err != nil {
+		log.Printf("[Auth] Telegram auth_date rejected: %v", err)
+		http.Redirect(w, r, h.frontendRedirect(redirect, "telegram_error", "telegram"), http.StatusFound)
+		return
+	}
+
+	var linkUserID string
+	if link {
+		if current, err := h.sessions.Extract(r); err == nil {
+			linkUserID = current
+		}
+	}
+
+	handle := body.Username
+	if handle == "" {
+		handle = strings.TrimSpace(body.FirstName + " " + body.LastName)
+	}
+
+	profile, err := h.store.UpsertIdentity(linkUserID, ProviderTelegram, body.ID, handle, "https://t.me/"+body.Username, "", "")
+	if err != nil {
+		log.Printf("[Auth] Telegram upsert failed: %v", err)
+		status := "telegram_error"
+		if errors.Is(err, ErrIdentityLinked) {
+			status = "telegram_conflict"
+		}
+		http.Redirect(w, r, h.frontendRedirect(redirect, status, "telegram"), http.StatusFound)
+		return
+	}
+
+	if err := h.sessions.Issue(w, profile.User.ID, 0); err != nil {
+		log.Printf("[Auth] Failed to issue session: %v", err)
+		http.Redirect(w, r, h.frontendRedirect(redirect, "session_error", "telegram"), http.StatusFound)
+		return
+	}
+
+	http.Redirect(w, r, h.frontendRedirect(redirect, "success", "telegram"), http.StatusFound)
 }
 
 const telegramAuthMaxAge = 86400 // 24 hours in seconds

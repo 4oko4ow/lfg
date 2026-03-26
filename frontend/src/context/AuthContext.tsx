@@ -35,6 +35,7 @@ type AuthContextValue = {
   profile: AuthProfile | null;
   loading: boolean;
   contactHandles: ContactHandlesMap;
+  telegramBotUsername: string | null;
   refreshProfile: () => Promise<boolean>;
   signIn: (provider: SocialProvider) => void;
   signOut: () => Promise<void>;
@@ -153,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [contactHandles, setContactHandles] = useState<ContactHandlesMap>({});
   const [loading, setLoading] = useState(true);
   const [telegramBotId, setTelegramBotId] = useState<string | null>(null);
+  const [telegramBotUsername, setTelegramBotUsername] = useState<string | null>(null);
 
   const loadConfig = useCallback(async (): Promise<string | null> => {
     try {
@@ -164,17 +166,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const data = (await response.json()) as {
         telegram_bot_id?: string | null;
+        telegram_bot_username?: string | null;
       };
-      // Обрабатываем случай, когда бэкенд возвращает пустую строку или null
       const rawBotId = data.telegram_bot_id;
       const botId = rawBotId && typeof rawBotId === 'string' && rawBotId.trim() !== ''
         ? rawBotId.trim()
         : null;
       setTelegramBotId(botId);
+      const rawUsername = data.telegram_bot_username;
+      const botUsername = rawUsername && typeof rawUsername === 'string' && rawUsername.trim() !== ''
+        ? rawUsername.trim()
+        : null;
+      setTelegramBotUsername(botUsername);
       return botId;
     } catch (error) {
       console.error("Failed to load auth config", error);
       setTelegramBotId(null);
+      setTelegramBotUsername(null);
       return null;
     }
   }, []);
@@ -346,6 +354,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       loading,
       contactHandles,
+      telegramBotUsername,
       refreshProfile,
       signIn,
       signOut,
@@ -357,6 +366,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       loading,
       contactHandles,
+      telegramBotUsername,
       refreshProfile,
       signIn,
       signOut,

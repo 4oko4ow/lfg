@@ -3,6 +3,12 @@ import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { useAuth, type SocialProvider } from "../../context/AuthContext";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import TelegramLoginButton from "../TelegramLoginButton";
+
+const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
+const backendBaseUrl = rawBackendBaseUrl.endsWith("/")
+  ? rawBackendBaseUrl.slice(0, -1)
+  : rawBackendBaseUrl;
 
 const PROVIDERS: {
   id: SocialProvider;
@@ -11,13 +17,6 @@ const PROVIDERS: {
   hoverColor: string;
   textColor: string;
 }[] = [
-  {
-    id: "telegram",
-    label: "Telegram",
-    brandColor: "bg-[#0088cc]",
-    hoverColor: "hover:bg-[#006699]",
-    textColor: "text-white",
-  },
   {
     id: "discord",
     label: "Discord",
@@ -36,7 +35,14 @@ const PROVIDERS: {
 
 export default function LoginModal({ onClose, game }: { onClose: () => void; game?: string }) {
   const { t } = useTranslation();
-  const { signIn } = useAuth();
+  const { signIn, telegramBotUsername } = useAuth();
+
+  const redirectPath = typeof window !== "undefined"
+    ? window.location.pathname + window.location.search
+    : "/";
+  const telegramAuthUrl = backendBaseUrl
+    ? `${backendBaseUrl}/auth/telegram/callback?redirect=${encodeURIComponent(redirectPath)}`
+    : `/auth/telegram/callback?redirect=${encodeURIComponent(redirectPath)}`;
 
   // Block body scroll when modal is open
   useEffect(() => {
@@ -84,6 +90,12 @@ export default function LoginModal({ onClose, game }: { onClose: () => void; gam
         )}
 
         <div className="space-y-3">
+          {telegramBotUsername && (
+            <TelegramLoginButton
+              botUsername={telegramBotUsername}
+              authUrl={telegramAuthUrl}
+            />
+          )}
           {PROVIDERS.map((provider) => (
             <button
               key={provider.id}
