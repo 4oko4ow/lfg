@@ -693,10 +693,13 @@ func (h *Handler) handleTelegramVerify(w http.ResponseWriter, r *http.Request) {
 	}
 	var body telegramVerifyRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		log.Printf("[Telegram] Failed to decode body: %v", err)
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
+	log.Printf("[Telegram] Verify request: id=%s username=%s auth_date=%s hash_len=%d", body.ID, body.Username, body.AuthDate, len(body.Hash))
 	if !h.verifyTelegram(body) {
+		log.Printf("[Telegram] Signature invalid for id=%s", body.ID)
 		http.Error(w, "invalid telegram signature", http.StatusUnauthorized)
 		return
 	}
