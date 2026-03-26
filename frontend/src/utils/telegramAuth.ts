@@ -52,6 +52,7 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
     };
 
     const onMessage = (event: MessageEvent) => {
+      console.log("[Telegram Auth] Message from:", event.origin, "data:", event.data);
       if (event.origin !== "https://oauth.telegram.org") return;
       const data = event.data as { event?: string; data?: TelegramAuthData };
 
@@ -75,16 +76,19 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
 
     window.addEventListener("message", onMessage);
 
-    // Poll for popup close - give 1 second after close for message to arrive
+    // Poll for popup close - Telegram sometimes closes popup before sending postMessage,
+    // so we wait up to 5 seconds after close to allow the message to arrive
     const intervalId = window.setInterval(() => {
       if (popup.closed && !resolved && !rejected && closeTimeout === null) {
+        console.log("[Telegram Auth] Popup closed, waiting up to 5s for message...");
         closeTimeout = window.setTimeout(() => {
           if (!resolved && !rejected) {
+            console.log("[Telegram Auth] No message received after popup closed, rejecting");
             rejected = true;
             cleanup();
-            reject(new Error("Telegram popup closed"));
+            reject(new Error("Telegram popup closed without authentication data"));
           }
-        }, 1000) as unknown as number;
+        }, 5000) as unknown as number;
       }
     }, 200);
   });
