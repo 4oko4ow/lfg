@@ -245,7 +245,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const callbackUrl = `${origin}/auth/telegram/callback`;
     const params = new URLSearchParams({
       bot_id: botId,
-      origin,
       return_to: callbackUrl,
       request_access: "write",
     });
