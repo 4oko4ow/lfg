@@ -8,6 +8,8 @@ export type TelegramAuthData = {
   hash: string;
 };
 
+const STORAGE_KEY = "telegram_auth_pending";
+
 export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
   return new Promise((resolve, reject) => {
     const trimmedBotId = botId?.trim();
@@ -16,11 +18,14 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
       return;
     }
 
+    // Clear any stale auth data from previous attempts
+    localStorage.removeItem(STORAGE_KEY);
+
     const origin = window.location.origin;
     const returnTo = `${origin}/telegram-auth-relay`;
     const url = `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(
       trimmedBotId
-    )}&origin=${encodeURIComponent(origin)}&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
+    )}&origin=${encodeURIComponent(origin)}&embed=1&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
 
     const width = 500;
     const height = 600;
@@ -43,53 +48,62 @@ export function openTelegramAuth(botId: string): Promise<TelegramAuthData> {
     let closeTimeout: number | null = null;
 
     const cleanup = () => {
-      window.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
       clearInterval(intervalId);
       if (closeTimeout !== null) {
         clearTimeout(closeTimeout);
         closeTimeout = null;
       }
+      localStorage.removeItem(STORAGE_KEY);
       try { popup.close(); } catch { /* ignore */ }
     };
 
-    const onMessage = (event: MessageEvent) => {
-      console.log("[Telegram Auth] Message from:", event.origin, "data:", event.data);
-      if (event.origin !== origin) return;
-      const data = event.data as { event?: string; data?: TelegramAuthData };
-
-      if (data?.event === "auth_user" && data.data) {
-        if (!resolved && !rejected) {
-          resolved = true;
-          cleanup();
-          resolve(data.data);
-        }
-        return;
-      }
-
-      if (data?.event === "auth_cancel") {
-        if (!resolved && !rejected) {
-          rejected = true;
-          cleanup();
-          reject(new Error("Telegram authentication cancelled"));
-        }
+    const handleAuthData = (data: TelegramAuthData) => {
+      if (!resolved && !rejected) {
+        resolved = true;
+        cleanup();
+        resolve(data);
       }
     };
 
-    window.addEventListener("message", onMessage);
+    // Primary channel: localStorage storage event (fired when popup writes to localStorage)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      console.log("[Telegram Auth] Got auth data via storage event");
+      try {
+        const data = JSON.parse(e.newValue) as TelegramAuthData;
+        handleAuthData(data);
+      } catch {
+        console.error("[Telegram Auth] Failed to parse storage data");
+      }
+    };
+    window.addEventListener("storage", onStorage);
 
-    // Poll for popup close - Telegram sometimes closes popup before sending postMessage,
-    // so we wait up to 5 seconds after close to allow the message to arrive
+    // Polling interval: checks localStorage (fallback if storage event missed)
+    // and detects popup close
     const intervalId = window.setInterval(() => {
+      // Fallback: check localStorage directly
+      const pending = localStorage.getItem(STORAGE_KEY);
+      if (pending && !resolved && !rejected) {
+        console.log("[Telegram Auth] Got auth data via localStorage poll");
+        try {
+          const data = JSON.parse(pending) as TelegramAuthData;
+          handleAuthData(data);
+          return;
+        } catch { /* ignore */ }
+      }
+
+      // Detect popup close without receiving auth data
       if (popup.closed && !resolved && !rejected && closeTimeout === null) {
-        console.log("[Telegram Auth] Popup closed, waiting up to 5s for message...");
+        console.log("[Telegram Auth] Popup closed, waiting up to 3s for data...");
         closeTimeout = window.setTimeout(() => {
           if (!resolved && !rejected) {
-            console.log("[Telegram Auth] No message received after popup closed, rejecting");
+            console.log("[Telegram Auth] No auth data received after popup closed");
             rejected = true;
             cleanup();
             reject(new Error("Telegram popup closed without authentication data"));
           }
-        }, 5000) as unknown as number;
+        }, 3000) as unknown as number;
       }
     }, 200);
   });

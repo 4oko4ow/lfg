@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 
-// This page is opened as a popup by Telegram's return_to redirect.
-// It relays the auth data to the opener window via postMessage, then closes itself.
+// This page handles Telegram's return_to redirect after successful auth.
+// It stores auth data in localStorage so the opener window can pick it up
+// via the 'storage' event (more reliable than postMessage across popups).
 export default function TelegramAuthRelayPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -13,7 +14,7 @@ export default function TelegramAuthRelayPage() {
     const username = params.get("username") ?? undefined;
     const photo_url = params.get("photo_url") ?? undefined;
 
-    if (id && hash && auth_date && window.opener) {
+    if (id && hash && auth_date) {
       const data = {
         id: Number(id),
         first_name,
@@ -23,18 +24,16 @@ export default function TelegramAuthRelayPage() {
         auth_date: Number(auth_date),
         hash,
       };
-      window.opener.postMessage(
-        { event: "auth_user", data },
-        window.location.origin
-      );
-    } else if (window.opener) {
-      window.opener.postMessage(
-        { event: "auth_cancel" },
-        window.location.origin
-      );
+      localStorage.setItem("telegram_auth_pending", JSON.stringify(data));
     }
 
+    // Close popup; if browser blocks close, redirect to home
     window.close();
+    setTimeout(() => {
+      if (!window.closed) {
+        window.location.href = "/";
+      }
+    }, 500);
   }, []);
 
   return null;
