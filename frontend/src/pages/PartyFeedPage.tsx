@@ -475,7 +475,7 @@ function PartyFeedPage() {
           </p>
             <button
               onClick={() => setCreatePartyModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60 mt-2"
+              className="sm:hidden inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60 mt-2"
             >
               <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
               {t("hero.create_party")}
@@ -495,17 +495,20 @@ function PartyFeedPage() {
 
         {/* Game Filter Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-center gap-2.5 mb-4">
+          {/* Title - mobile only */}
+          <div className="flex sm:hidden items-center justify-center gap-2.5 mb-4">
             <div className="relative flex items-center justify-center w-5 h-5">
               <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full"></div>
               <Sparkles className="h-5 w-5 text-blue-400 relative" />
             </div>
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-100 leading-tight">
+            <h2 className="text-base font-semibold text-zinc-100 leading-tight">
               {t("filters.title")}
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          {/* Desktop: chips + create button in one row */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             {/* "All" button - always first */}
             <button
               onClick={() => setFilter(ALL_LABEL)}
@@ -656,6 +659,16 @@ function PartyFeedPage() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Desktop create button - right side */}
+          <button
+            onClick={() => setCreatePartyModalOpen(true)}
+            className="hidden sm:inline-flex items-center gap-2 flex-shrink-0 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
+          >
+            <Sparkles className="h-4 w-4" />
+            {t("hero.create_party")}
+          </button>
           </div>
         </div>
 
