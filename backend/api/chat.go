@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"lfg/auth"
 	"log"
 	"net/http"
 	"time"
@@ -11,11 +12,12 @@ import (
 )
 
 type ChatHandler struct {
-	db *sql.DB
+	db             *sql.DB
+	sessionManager *auth.SessionManager
 }
 
-func NewChatHandler(db *sql.DB) *ChatHandler {
-	return &ChatHandler{db: db}
+func NewChatHandler(db *sql.DB, sessionManager *auth.SessionManager) *ChatHandler {
+	return &ChatHandler{db: db, sessionManager: sessionManager}
 }
 
 type ChatMessage struct {
@@ -84,23 +86,40 @@ func (h *ChatHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
-	var req CreateMessageRequest
+	userID, err := h.sessionManager.Extract(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var displayName string
+	err = h.db.QueryRow(`SELECT COALESCE(display_name, '') FROM auth_users WHERE id = $1`, userID).Scan(&displayName)
+	if err != nil {
+		log.Printf("Error fetching display name for user %s: %v", userID, err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var req struct {
+		Message     string `json:"message"`
+		ClientMsgID string `json:"client_msg_id"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	if req.Message == "" || req.UserID == "" {
-		http.Error(w, "Message and user_id are required", http.StatusBadRequest)
+	if req.Message == "" {
+		http.Error(w, "Message is required", http.StatusBadRequest)
 		return
 	}
 
 	var id string
-	err := h.db.QueryRow(`
+	err = h.db.QueryRow(`
 		INSERT INTO chat_messages (user_id, user_display_name, message, client_msg_id, created_at)
 		VALUES ($1, $2, $3, $4, NOW())
 		RETURNING id
-	`, req.UserID, req.UserDisplayName, req.Message, req.ClientMsgID).Scan(&id)
+	`, userID, displayName, req.Message, req.ClientMsgID).Scan(&id)
 
 	if err != nil {
 		log.Printf("Error creating chat message: %v", err)

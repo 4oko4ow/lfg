@@ -157,7 +157,7 @@ func main() {
 	// API endpoints
 	db := ws.GetDB()
 	if db != nil {
-		chatHandler := api.NewChatHandler(db)
+		chatHandler := api.NewChatHandler(db, sessionManager)
 		gamesHandler := api.NewGamesHandler(db)
 		userStatsHandler := api.NewUserStatsHandler(db, sessionManager)
 		partiesHandler := api.NewPartiesHandler(db, sessionManager)
