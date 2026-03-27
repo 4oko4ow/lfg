@@ -595,8 +595,6 @@ export function PartyFeedPageContent() {
               </div>
             )}
           </div>
-
-          </div>
         </div>
 
         {loading && parties.length === 0 ? (
