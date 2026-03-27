@@ -51,6 +51,12 @@ export default function Header() {
               NEW
             </span>
           </Link>
+          <Link
+            to="/changelog"
+            className="rounded-lg border border-zinc-700/60 px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-zinc-200 transition-all duration-200 hover:border-blue-500/60 hover:text-blue-400 hover:scale-105 active:scale-95 whitespace-nowrap"
+          >
+            {t("nav.changelog", "Changelog")}
+          </Link>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 text-sm flex-shrink-0">
           {onlineCount > 0 && (

@@ -7,6 +7,7 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import TelegramAuthRelayPage from "./pages/TelegramAuthRelayPage";
 import TelegramCallbackPage from "./pages/TelegramCallbackPage";
+import ChangelogPage from "./pages/ChangelogPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/feed" element={<PartyFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/communities" element={<CommunitiesPage />} />
+        <Route path="/changelog" element={<ChangelogPage />} />
         <Route path="/" element={<LandingPage />} />
         <Route
           path="*"
