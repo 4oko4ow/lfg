@@ -423,7 +423,7 @@ export function PartyFeedPageContent() {
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
         {/* Game Filter Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-center gap-4 mb-4">
             <h2 className="text-base sm:text-lg font-semibold text-zinc-100 leading-tight">
               {t("filters.title")}
             </h2>
