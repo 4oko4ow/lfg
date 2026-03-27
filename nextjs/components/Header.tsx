@@ -45,6 +45,12 @@ export default function Header() {
             FindParty
           </Link>
           <Link
+            href="/changelog"
+            className="hidden sm:inline text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-200"
+          >
+            Changelog
+          </Link>
+          <Link
             href="/communities"
             onClick={() => analytics.communitiesLinkClick("header")}
             className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-1.5 sm:px-2.5 py-1 text-[10px] sm:text-xs font-medium text-emerald-400 transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/20"
