@@ -102,6 +102,63 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 		case "heartbeat":
 			// опционально: обработка, если нужна (например, log/пинг)
+
+		case "send_chat":
+			var payload SendChatPayload
+			if err := parsePayload(message.Payload, &payload); err != nil {
+				log.Println("invalid send_chat payload:", err)
+				continue
+			}
+			if payload.Message == "" {
+				continue
+			}
+			// Auth check
+			var userID string
+			if sessionManager != nil {
+				if uid, err := sessionManager.Extract(r); err == nil {
+					userID = uid
+				}
+			}
+			if userID == "" {
+				log.Println("send_chat: unauthenticated")
+				continue
+			}
+
+			db := GetDB()
+			if db == nil {
+				continue
+			}
+
+			// Fetch display name
+			var displayName string
+			db.QueryRow(`SELECT COALESCE(display_name, '') FROM auth_users WHERE id = $1`, userID).Scan(&displayName)
+
+			// Save to DB
+			var msgID string
+			var createdAt time.Time
+			err := db.QueryRow(`
+				INSERT INTO chat_messages (user_id, user_display_name, message, client_msg_id, created_at)
+				VALUES ($1, $2, $3, $4, NOW())
+				RETURNING id, created_at
+			`, userID, displayName, payload.Message, payload.ClientMsgID).Scan(&msgID, &createdAt)
+			if err != nil {
+				log.Printf("send_chat DB error: %v", err)
+				continue
+			}
+
+			// Broadcast to all clients
+			chatMsg := Message{
+				Type: "chat_message",
+				Payload: ChatMessagePayload{
+					ID:              msgID,
+					UserID:          userID,
+					UserDisplayName: displayName,
+					Message:         payload.Message,
+					ClientMsgID:     payload.ClientMsgID,
+					CreatedAt:       createdAt,
+				},
+			}
+			Broadcast(chatMsg)
 		}
 	}
 }

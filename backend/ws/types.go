@@ -38,3 +38,17 @@ type CreatePartyPayload struct {
 type JoinPartyPayload struct {
 	ID string `json:"id"`
 }
+
+type SendChatPayload struct {
+	Message     string `json:"message"`
+	ClientMsgID string `json:"client_msg_id"`
+}
+
+type ChatMessagePayload struct {
+	ID              string    `json:"id"`
+	UserID          string    `json:"user_id"`
+	UserDisplayName string    `json:"user_display_name"`
+	Message         string    `json:"message"`
+	ClientMsgID     string    `json:"client_msg_id,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
+}
