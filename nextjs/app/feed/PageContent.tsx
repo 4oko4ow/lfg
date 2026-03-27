@@ -306,20 +306,30 @@ export function PartyFeedPageContent() {
       return !(isOldFull || isStaleUnfilled);
     });
 
-    return pruned.sort((a, b) => {
-      const getPriority = (p: Party) => {
-        if (p.pinned) return 100;
-        const createdAgoMin = (Date.now() - new Date(p.created_at).getTime()) / 60000;
-        if (createdAgoMin < 60) return 50;
-        if (p.joined === p.slots - 1 && p.slots > 2) return 10;
-        if (p.joined >= p.slots) return -10;
-        return 0;
-      };
+    const now = Date.now();
+    const active = pruned.filter((p) => !p.scheduled_at || new Date(p.scheduled_at).getTime() <= now);
+    const scheduled = pruned.filter((p) => p.scheduled_at && new Date(p.scheduled_at).getTime() > now);
 
+    const getPriority = (p: Party) => {
+      if (p.pinned) return 100;
+      const createdAgoMin = (now - new Date(p.created_at).getTime()) / 60000;
+      if (createdAgoMin < 60) return 50;
+      if (p.joined === p.slots - 1 && p.slots > 2) return 10;
+      if (p.joined >= p.slots) return -10;
+      return 0;
+    };
+
+    active.sort((a, b) => {
       const d = getPriority(b) - getPriority(a);
       if (d !== 0) return d;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
+
+    scheduled.sort((a, b) =>
+      new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime()
+    );
+
+    return [...active, ...scheduled];
   }, [parties, filter, ALL_LABEL, games]);
 
   useEffect(() => {
