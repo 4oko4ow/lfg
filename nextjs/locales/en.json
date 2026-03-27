@@ -84,7 +84,10 @@
     "created": "Created",
     "copy_contact_to_join": "Copy the contact to join the party",
     "preferred": "Primary",
-    "expires_in": "Expires in"
+    "expires_in": "Expires in",
+    "scheduled_at": "starts at {{time}}",
+    "scheduled_today": "today at {{time}}",
+    "scheduled_tomorrow": "tomorrow at {{time}}"
   },
   "form": {
     "title": "Create a party",
@@ -133,6 +136,13 @@
       "days": "days",
       "custom_hours": "Custom hours",
       "hint": "The listing will automatically be hidden after the specified time"
+    },
+    "schedule": {
+      "label": "When",
+      "now": "Now",
+      "in_2h": "In 2 hours",
+      "tonight": "Tonight",
+      "tomorrow": "Tomorrow"
     }
   },
   "auth": {

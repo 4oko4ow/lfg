@@ -31,6 +31,7 @@ export default function CreatePartyForm({
     const [game, setGame] = useState<GameSlug>(games[0]?.slug ?? "abioticfactor");
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
+    const [scheduleOption, setScheduleOption] = useState<'now' | 'in_2h' | 'tonight' | 'tomorrow'>('now');
     const { contactHandles, profile } = useAuth();
     const [showLoginModal, setShowLoginModal] = useState(false);
     const noContactsTracked = useRef(false);
@@ -146,6 +147,27 @@ export default function CreatePartyForm({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showOtherGames]);
 
+    function getScheduledAt(option: string): string | undefined {
+        if (option === 'now') return undefined;
+        const now = new Date();
+        if (option === 'in_2h') {
+            return new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString();
+        }
+        if (option === 'tonight') {
+            const t = new Date(now);
+            t.setHours(20, 0, 0, 0);
+            if (t <= now) t.setDate(t.getDate() + 1);
+            return t.toISOString();
+        }
+        if (option === 'tomorrow') {
+            const t = new Date(now);
+            t.setDate(t.getDate() + 1);
+            t.setHours(20, 0, 0, 0);
+            return t.toISOString();
+        }
+        return undefined;
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!goal.trim() || availableMethods.length === 0) return;
@@ -160,7 +182,7 @@ export default function CreatePartyForm({
 
         if (contacts.length === 0) return;
 
-        sendCreateParty({ game, goal, slots, contacts });
+        sendCreateParty({ game, goal, slots, contacts, scheduled_at: getScheduledAt(scheduleOption) });
         setGoal("");
         onSuccess?.();
     };
@@ -342,6 +364,29 @@ export default function CreatePartyForm({
                     >
                         <Plus className="h-3 w-3" />
                     </button>
+                </div>
+            </div>
+
+            {/* Schedule selector */}
+            <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    {t("form.schedule.label")}
+                </p>
+                <div className="flex gap-1.5 flex-wrap">
+                    {(['now', 'in_2h', 'tonight', 'tomorrow'] as const).map((opt) => (
+                        <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setScheduleOption(opt)}
+                            className={`rounded-md px-3 py-1.5 text-xs font-semibold border transition-all ${
+                                scheduleOption === opt
+                                    ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/25"
+                                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                            }`}
+                        >
+                            {t(`form.schedule.${opt}`)}
+                        </button>
+                    ))}
                 </div>
             </div>
 

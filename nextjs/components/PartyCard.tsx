@@ -130,6 +130,24 @@ const renderContacts = (contacts?: ContactMethod[]) => {
   const timeUntilExpiration = getTimeUntilExpiration();
   const isExpiringSoon = party.expires_at && new Date(party.expires_at).getTime() - Date.now() < 2 * 60 * 60 * 1000;
 
+  const getScheduledLabel = () => {
+    if (!party.scheduled_at) return null;
+    const scheduledDate = new Date(party.scheduled_at);
+    const now = new Date();
+    const timeStr = scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const isToday = scheduledDate.toDateString() === now.toDateString();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const isTomorrow = scheduledDate.toDateString() === tomorrow.toDateString();
+
+    if (isToday) return t("party.scheduled_today", { time: timeStr });
+    if (isTomorrow) return t("party.scheduled_tomorrow", { time: timeStr });
+    return t("party.scheduled_at", { time: timeStr });
+  };
+
+  const scheduledLabel = getScheduledLabel();
+
   return (
     <div
       className={`group relative rounded-xl p-5 sm:p-6 border transition-all duration-300 text-white space-y-4 w-full backdrop-blur-sm
@@ -166,6 +184,13 @@ const renderContacts = (contacts?: ContactMethod[]) => {
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-200 bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-3 py-1.5 rounded-lg border border-blue-500/40 shadow-md shadow-blue-500/10 backdrop-blur-sm animate-pulse">
                 <ClockIcon className="w-4 h-4" />
                 {t("party.new")}
+              </span>
+            )}
+
+            {scheduledLabel && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-200 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 px-3 py-1.5 rounded-lg border border-emerald-500/40 shadow-md shadow-emerald-500/10 backdrop-blur-sm">
+                <ClockIcon className="w-4 h-4" />
+                {scheduledLabel}
               </span>
             )}
 
