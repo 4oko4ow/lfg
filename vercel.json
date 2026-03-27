@@ -1,6 +1,1 @@
-{
-  "buildCommand": "cd nextjs && npm run build",
-  "installCommand": "cd nextjs && npm install",
-  "framework": "nextjs",
-  "devCommand": "cd nextjs && npm run dev"
-}
+{}
