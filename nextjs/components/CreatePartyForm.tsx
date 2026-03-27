@@ -184,16 +184,6 @@ export default function CreatePartyForm({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-3 mb-1">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full" />
-                    <BoltIcon className="h-6 w-6 text-blue-400 relative" />
-                </div>
-                <h2 className="text-xl font-bold text-white bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
-                    {t("form.title")}
-                </h2>
-            </div>
-
             {/* Game selection */}
             <div className="space-y-3">
                 <label className="block text-sm font-semibold text-zinc-300 mb-2">

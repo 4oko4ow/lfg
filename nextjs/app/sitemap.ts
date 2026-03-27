@@ -1,16 +1,13 @@
 import type { MetadataRoute } from "next";
+import { GAME_SLUGS } from "@/lib/constants/games";
 
 const BASE_URL = "https://findparty.online";
-
-const TOP_GAME_SLUGS = [
-  "repo", "dota2", "cs2", "rust", "fortnite",
-  "minecraft", "valorant", "apex", "tarkov", "peak"
-];
+const LAST_MODIFIED = new Date("2025-03-20");
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const gamePages = TOP_GAME_SLUGS.map((slug) => ({
+  const gamePages = GAME_SLUGS.map((slug) => ({
     url: `${BASE_URL}/game/${slug}`,
-    lastModified: new Date(),
+    lastModified: LAST_MODIFIED,
     changeFrequency: "daily" as const,
     priority: 0.8,
   }));
@@ -18,13 +15,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: BASE_URL,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: "daily" as const,
       priority: 1.0,
     },
     {
       url: `${BASE_URL}/feed`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: "always" as const,
       priority: 0.9,
     },

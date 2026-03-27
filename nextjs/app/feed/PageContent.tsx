@@ -421,45 +421,19 @@ export function PartyFeedPageContent() {
   return (
     <>
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
-        {/* Hero Section */}
-        <section className="mb-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-            {t("hero.title")}
-          </h1>
-            <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
-            {t("hero.subtitle")}
-          </p>
-            <button
-              onClick={() => setCreatePartyModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-blue-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60 mt-2"
-            >
-              <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-              {t("hero.create_party")}
-            </button>
-
-            {/* Communities hint */}
-            <a
-              href="/communities"
-              onClick={() => analytics.communitiesLinkClick("feed")}
-              className="mt-4 flex flex-col items-center text-xs hover:opacity-80 transition-opacity"
-            >
-              <span className="text-zinc-500">Управляете сообществом?</span>
-              <span className="text-emerald-400 font-medium">Интеграция для Discord / Telegram →</span>
-            </a>
-          </div>
-        </section>
-
         {/* Game Filter Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-center gap-2.5 mb-4">
-            <div className="relative flex items-center justify-center w-5 h-5">
-              <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-full"></div>
-              <Sparkles className="h-5 w-5 text-blue-400 relative" />
-            </div>
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-base sm:text-lg font-semibold text-zinc-100 leading-tight">
               {t("filters.title")}
             </h2>
+            <button
+              onClick={() => setCreatePartyModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
+            >
+              <Sparkles className="h-4 w-4" />
+              {t("hero.create_party")}
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
@@ -475,8 +449,7 @@ export function PartyFeedPageContent() {
               {filter === ALL_LABEL && (
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-sm"></div>
               )}
-              <span className="relative flex items-center gap-1.5">
-                {filter === ALL_LABEL && <Sparkles className="h-3 w-3" />}
+              <span className="relative">
                 {ALL_LABEL}
               </span>
             </button>
@@ -601,11 +574,21 @@ export function PartyFeedPageContent() {
                           })}
                         </div>
                       ) : (
-                        <div className="p-6 text-center">
+                        <div className="p-6 text-center space-y-3">
                           <Search className="h-8 w-8 text-zinc-600 mx-auto mb-2" />
                           <p className="text-sm text-zinc-500 font-medium">
                             {t("filters.no_games_found")}
                           </p>
+                          <button
+                            onClick={() => {
+                              setShowGameFilter(false);
+                              setSuggestModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+                          >
+                            <HelpCircle className="h-3.5 w-3.5" />
+                            {t("hero.suggest_game")}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -731,15 +714,6 @@ export function PartyFeedPageContent() {
         </button>
       )}
 
-      <button
-        onClick={() => setSuggestModalOpen(true)}
-        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-600 via-pink-500 to-rose-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xl shadow-pink-500/50 transition-all duration-300 hover:from-pink-500 hover:via-pink-400 hover:to-rose-400 hover:shadow-2xl hover:shadow-pink-500/70 hover:scale-105 active:scale-95 z-50 animate-fadeIn border border-pink-400/30"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-md"></div>
-        <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 relative" />
-        <span className="hidden sm:inline relative">{t("hero.suggest_game")}</span>
-        <span className="sm:hidden relative">{t("hero.suggest_game_short")}</span>
-      </button>
     </>
   );
 }

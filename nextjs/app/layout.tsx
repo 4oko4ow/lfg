@@ -25,13 +25,11 @@ export const metadata: Metadata = {
     siteName: "FindParty",
     locale: "ru_RU",
     type: "website",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: HOME_SEO.title,
     description: HOME_SEO.description,
-    images: ["/og-image.png"],
   },
 };
 

@@ -12,8 +12,6 @@ import { Timer } from "lucide-react";
 import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getGameName } from "@/lib/constants/games";
-import { StarIcon } from "@heroicons/react/20/solid";
-import { useAuth } from "@/components/providers/AuthProvider";
 import CreatorBadge from "@/components/CreatorBadge";
 
 /** Локализованное "time ago" для MVP */
@@ -73,28 +71,13 @@ export default function PartyCard({
   onFullClick?: () => void;
 }) {
   const { t } = useTranslation();
-  const { profile } = useAuth();
 
   const isFull = party.joined >= party.slots;
   const isAlmostFull = party.joined === party.slots - 1 && party.slots > 2;
   const isPinned = party.pinned;
 
-  const canViewContacts = (() => {
-    if (!isFull) return true;
-    if (!profile) return false;
-    const isCreator = party.user_id && profile.id === party.user_id;
-    if (isCreator) return true;
-    try {
-      const joinedParties = JSON.parse(localStorage.getItem("joined_parties") || "[]") as string[];
-      return joinedParties.includes(party.id);
-    } catch {
-      return false;
-    }
-  })();
-
-  const renderContacts = (contacts?: ContactMethod[]) => {
+const renderContacts = (contacts?: ContactMethod[]) => {
     if (!contacts || contacts.length === 0) return null;
-    const showPreferred = contacts.length > 1;
     return (
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-zinc-300">
         {contacts.map((contact) => {
@@ -102,35 +85,18 @@ export default function PartyCard({
             icon: <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />,
             label: contact.type,
           };
-          const content = (
-            <>
-              {config.icon}
-              <span className="font-medium text-zinc-200 hidden sm:inline">{config.label}</span>
-              <span className="text-zinc-400 truncate max-w-[100px] sm:max-w-none">{contact.handle}</span>
-              {contact.preferred && showPreferred && (
-                <span className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full bg-blue-500/20 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold uppercase text-blue-200">
-                  <StarIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                  <span className="hidden sm:inline">{t("party.preferred")}</span>
-                </span>
-              )}
-            </>
-          );
-
           return (
-            <button
+            <span
               key={`${contact.type}-${contact.handle}`}
-              type="button"
-              onClick={onContactClick}
-              disabled={!canViewContacts}
-              className={`inline-flex items-center gap-1 sm:gap-2 rounded-full border-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all duration-200 ${!canViewContacts
-                  ? "border-zinc-700/40 bg-zinc-800/30 opacity-50 cursor-not-allowed"
-                  : contact.preferred
-                    ? "border-blue-500/50 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105 active:scale-95 cursor-pointer"
-                    : "border-zinc-700/50 bg-zinc-800/40 hover:border-zinc-600/70 hover:bg-zinc-800/60 hover:shadow-md hover:scale-105 active:scale-95 cursor-pointer"
-                }`}
+              className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-full border px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold ${
+                contact.preferred
+                  ? "border-blue-500/40 bg-blue-500/10 text-blue-300"
+                  : "border-zinc-700/50 bg-zinc-800/40 text-zinc-400"
+              }`}
             >
-              {content}
-            </button>
+              {config.icon}
+              <span>{config.label}</span>
+            </span>
           );
         })}
       </div>
@@ -257,11 +223,6 @@ export default function PartyCard({
               <span className="text-zinc-500">/</span>
               <span className="text-zinc-300 font-medium">{party.slots}</span>
             </div>
-            {isFull && (
-              <span className="ml-2 text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-1 rounded border border-red-500/30 whitespace-nowrap">
-                {t("party.full")}
-              </span>
-            )}
           </div>
           <div onClick={isFull ? onFullClick : undefined}>
             <button
@@ -273,7 +234,7 @@ export default function PartyCard({
                   : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/50 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-xl hover:shadow-blue-500/60 hover:scale-105 active:scale-95"
               }`}
             >
-              {t("ui.join_party")}
+              {isFull ? t("party.full") : t("ui.join_party")}
             </button>
           </div>
         </div>

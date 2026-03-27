@@ -38,3 +38,4 @@ CLEANUP_SUMMARY.md
 nextjs/.next/
 nextjs/.env*.local
 nextjs/node_modules/
+.vercel

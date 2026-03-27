@@ -75,7 +75,7 @@ export default function ProfilePage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [userParties, setUserParties] = useState<Party[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [activeTab, setActiveTab] = useState<"contacts" | "parties" | "stats">("stats");
+  const [activeTab, setActiveTab] = useState<"contacts" | "parties" | "stats">("contacts");
 
   useEffect(() => {
     setValues({
@@ -215,15 +215,15 @@ export default function ProfilePage() {
       <div className="mb-6 flex gap-2 border-b border-zinc-800">
         <button
           onClick={() => {
-            setActiveTab("stats");
-            analytics.profileTabSwitch("stats");
+            setActiveTab("contacts");
+            analytics.profileTabSwitch("contacts");
           }}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "stats"
+          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "contacts"
             ? "border-b-2 border-blue-500 text-blue-400"
             : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
-          {t("profile.tabs.stats", "Stats & Achievements")}
+          {t("profile.tabs.contacts", "Contacts")}
         </button>
         <button
           onClick={() => {
@@ -239,15 +239,15 @@ export default function ProfilePage() {
         </button>
         <button
           onClick={() => {
-            setActiveTab("contacts");
-            analytics.profileTabSwitch("contacts");
+            setActiveTab("stats");
+            analytics.profileTabSwitch("stats");
           }}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "contacts"
+          className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "stats"
             ? "border-b-2 border-blue-500 text-blue-400"
             : "text-zinc-400 hover:text-zinc-200"
             }`}
         >
-          {t("profile.tabs.contacts", "Contacts")}
+          {t("profile.tabs.stats", "Stats & Achievements")}
         </button>
       </div>
 
@@ -435,58 +435,71 @@ export default function ProfilePage() {
                       {t(provider.description)}
                     </p>
                   </div>
-                  {provider.id === "telegram" && telegramBotUsername ? (
-                    <TelegramLoginButton
-                      botUsername={telegramBotUsername}
-                      authUrl={telegramAuthUrl}
-                      masked
-                    >
-                      <span className="rounded border border-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300">
-                        {isLinked
-                          ? t("profile.relink", "Reconnect")
-                          : t("profile.connect", "Connect")}
-                      </span>
-                    </TelegramLoginButton>
-                  ) : (
-                    <button
-                      onClick={() => handleLink(provider.id)}
-                      className="rounded border border-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300 transition hover:bg-blue-500/10"
-                    >
-                      {isLinked
-                        ? t("profile.relink", "Reconnect")
-                        : t("profile.connect", "Connect")}
-                    </button>
+                  {isLinked && (
+                    provider.id === "telegram" && telegramBotUsername ? (
+                      <TelegramLoginButton
+                        botUsername={telegramBotUsername}
+                        authUrl={telegramAuthUrl}
+                        masked
+                      >
+                        <span className="rounded border border-zinc-600 px-3 py-1 text-xs font-medium text-zinc-400 transition hover:border-zinc-500 hover:text-zinc-300">
+                          {t("profile.relink", "Reconnect")}
+                        </span>
+                      </TelegramLoginButton>
+                    ) : (
+                      <button
+                        onClick={() => handleLink(provider.id)}
+                        className="rounded border border-zinc-600 px-3 py-1 text-xs font-medium text-zinc-400 transition hover:border-zinc-500 hover:text-zinc-300"
+                      >
+                        {t("profile.relink", "Reconnect")}
+                      </button>
+                    )
                   )}
                 </div>
 
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">
-                  {t("profile.contact_label", "Contact for ads")}
-                </label>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                  <input
-                    disabled={!isLinked}
-                    value={values[provider.id]}
-                    onChange={(e) =>
-                      setValues((prev) => ({ ...prev, [provider.id]: e.target.value }))
-                    }
-                    placeholder={t(provider.placeholderKey)}
-                    className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 hover:bg-zinc-900/70 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                  <button
-                    onClick={() => handleSave(provider.id)}
-                    disabled={!isLinked}
-                    className="rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:opacity-50"
-                  >
-                    {t("profile.save", "Save")}
-                  </button>
-                </div>
-                {!isLinked && (
-                  <p className="mt-2 text-xs text-zinc-500">
-                    {t(
-                      "profile.link_required",
-                      "Connect the account first to set up the contact."
+                {isLinked ? (
+                  <>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                      {t("profile.contact_label", "Contact for ads")}
+                    </label>
+                    <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                      <input
+                        value={values[provider.id]}
+                        onChange={(e) =>
+                          setValues((prev) => ({ ...prev, [provider.id]: e.target.value }))
+                        }
+                        placeholder={t(provider.placeholderKey)}
+                        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 hover:bg-zinc-900/70"
+                      />
+                      <button
+                        onClick={() => handleSave(provider.id)}
+                        className="rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                      >
+                        {t("profile.save", "Save")}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-2">
+                    {provider.id === "telegram" && telegramBotUsername ? (
+                      <TelegramLoginButton
+                        botUsername={telegramBotUsername}
+                        authUrl={telegramAuthUrl}
+                        masked
+                      >
+                        <span className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500">
+                          {t("profile.connect", "Connect")} {provider.title}
+                        </span>
+                      </TelegramLoginButton>
+                    ) : (
+                      <button
+                        onClick={() => handleLink(provider.id)}
+                        className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
+                      >
+                        {t("profile.connect", "Connect")} {provider.title}
+                      </button>
                     )}
-                  </p>
+                  </div>
                 )}
               </div>
             );

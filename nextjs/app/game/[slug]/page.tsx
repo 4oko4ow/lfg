@@ -1,18 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { SLUG_TO_FALLBACK_NAME } from "@/lib/constants/games";
+import { SLUG_TO_FALLBACK_NAME, GAME_SLUGS } from "@/lib/constants/games";
 import { getGameSeo } from "@/lib/seo";
 import { GameFeedClient } from "./GameFeedClient";
+import { GamePageContent } from "@/components/GamePageContent";
 
-// Top 10 games for static generation (Phase 1)
-const TOP_GAME_SLUGS = [
-  "repo", "dota2", "cs2", "rust", "fortnite",
-  "minecraft", "valorant", "apex", "tarkov", "peak"
-] as const;
-
-// Pre-render these pages at build time
+// Pre-render all game pages at build time
 export function generateStaticParams() {
-  return TOP_GAME_SLUGS.map((slug) => ({ slug }));
+  return GAME_SLUGS.map((slug) => ({ slug }));
 }
 
 // SEO metadata for each game
@@ -32,7 +27,6 @@ export async function generateMetadata({
       siteName: "FindParty",
       locale: "ru_RU",
       type: "website",
-      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     },
     alternates: {
       canonical: `https://findparty.online/game/${slug}`,
@@ -55,5 +49,10 @@ export default async function GamePage({
 
   const gameName = SLUG_TO_FALLBACK_NAME[slug as keyof typeof SLUG_TO_FALLBACK_NAME];
 
-  return <GameFeedClient slug={slug} gameName={gameName} />;
+  return (
+    <>
+      <GameFeedClient slug={slug} gameName={gameName} />
+      <GamePageContent slug={slug} />
+    </>
+  );
 }
