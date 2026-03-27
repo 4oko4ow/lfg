@@ -101,6 +101,44 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 			}
 			UpdatePartyJoined(payload.ID, userID)
 
+			// Send system notification when authenticated user joins a party
+			if userID != "" {
+				db := GetDB()
+				if db != nil {
+					var displayName string
+					db.QueryRow(`SELECT COALESCE(display_name, 'Player') FROM auth_users WHERE id = $1`, userID).Scan(&displayName)
+
+					var game string
+					db.QueryRow(`SELECT game FROM parties WHERE id = $1`, payload.ID).Scan(&game)
+
+					sysMsgID := "sys-" + generateID()
+					sysText := "🎮 " + displayName + " → " + game
+
+					var msgID string
+					var createdAt time.Time
+					err := db.QueryRow(`
+						INSERT INTO chat_messages (user_id, user_display_name, message, client_msg_id, created_at)
+						VALUES (NULL, 'system', $1, $2, NOW())
+						RETURNING id, created_at
+					`, sysText, sysMsgID).Scan(&msgID, &createdAt)
+					if err != nil {
+						log.Printf("join_party system msg DB error: %v", err)
+					} else {
+						Broadcast(Message{
+							Type: "chat_message",
+							Payload: ChatMessagePayload{
+								ID:              msgID,
+								UserID:          "",
+								UserDisplayName: "system",
+								Message:         sysText,
+								ClientMsgID:     sysMsgID,
+								CreatedAt:       createdAt,
+							},
+						})
+					}
+				}
+			}
+
 		case "heartbeat":
 			// опционально: обработка, если нужна (например, log/пинг)
 

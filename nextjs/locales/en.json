@@ -340,7 +340,13 @@
       "create_first": "Create Your First Party",
       "create_new": "Create New Party",
       "delete_confirm": "Are you sure you want to delete this party?",
-      "deleted": "Party deleted"
+      "deleted": "Party deleted",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "updated": "Party updated",
+      "edit_goal": "Description",
+      "edit_slots": "Slots"
     }
   },
   "feedback.label": "Something not working?",

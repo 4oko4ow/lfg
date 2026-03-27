@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import toast from "react-hot-toast";
 import { connectWS, onMessage, socket, sendJoinParty } from "@/lib/ws/client";
 import PartyCard from "@/components/PartyCard";
 import PartyCardSkeleton from "@/components/PartyCardSkeleton";
@@ -376,10 +377,21 @@ export function PartyFeedPageContent() {
       }
     }
 
+    const contacts = party.contacts ?? [];
+
+    if (contacts.length === 1) {
+      analytics.joinClick(party.game, party.id);
+      analytics.contactCopied(party.id, contacts[0].type);
+      navigator.clipboard.writeText(contacts[0].handle).catch(() => {});
+      sendJoinParty(party.id);
+      toast.success(t("ui.copied"), { duration: 5000 });
+      return;
+    }
+
     analytics.joinClick(party.game, party.id);
     analytics.contactModalOpened(party.game);
     setContactPartyId(party.id);
-    setContactModal(party.contacts ?? []);
+    setContactModal(contacts);
   };
 
   const handleJoinClick = (party: Party) => {

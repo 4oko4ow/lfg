@@ -40,17 +40,28 @@ type Achievement struct {
 	UnlockedAt time.Time `json:"unlocked_at"`
 }
 
+// PublicParty is a simplified party struct for public profile display
+type PublicParty struct {
+	ID        string `json:"id"`
+	Game      string `json:"game"`
+	Goal      string `json:"goal"`
+	Slots     int    `json:"slots"`
+	Joined    int    `json:"joined"`
+	CreatedAt string `json:"created_at"`
+}
+
 // PublicProfile is the public profile data returned for any user
 type PublicProfile struct {
-	UserID         string   `json:"user_id"`
-	DisplayName    string   `json:"display_name"`
-	AvatarURL      string   `json:"avatar_url,omitempty"`
-	Level          int      `json:"level"`
-	TotalXP        int      `json:"total_xp"`
-	PartiesCreated int      `json:"parties_created"`
-	PartiesJoined  int      `json:"parties_joined"`
-	CurrentStreak  int      `json:"current_streak"`
-	Achievements   []string `json:"achievements"` // just the types
+	UserID         string        `json:"user_id"`
+	DisplayName    string        `json:"display_name"`
+	AvatarURL      string        `json:"avatar_url,omitempty"`
+	Level          int           `json:"level"`
+	TotalXP        int           `json:"total_xp"`
+	PartiesCreated int           `json:"parties_created"`
+	PartiesJoined  int           `json:"parties_joined"`
+	CurrentStreak  int           `json:"current_streak"`
+	Achievements   []string      `json:"achievements"` // just the types
+	Parties        []PublicParty `json:"parties"`
 }
 
 func (h *UserStatsHandler) GetStats(w http.ResponseWriter, r *http.Request) {
@@ -249,6 +260,7 @@ func (h *UserStatsHandler) getPublicProfile(userID string) (*PublicProfile, erro
 		UserID:       userID,
 		Level:        1,
 		Achievements: []string{},
+		Parties:      []PublicParty{},
 	}
 
 	// Get user info from auth_users
@@ -290,6 +302,29 @@ func (h *UserStatsHandler) getPublicProfile(userID string) (*PublicProfile, erro
 			var achType string
 			if err := rows.Scan(&achType); err == nil {
 				profile.Achievements = append(profile.Achievements, achType)
+			}
+		}
+	}
+
+	// Get active parties
+	partyRows, err := h.db.Query(`
+		SELECT id, game, goal, slots, joined, created_at
+		FROM parties
+		WHERE user_id = $1 AND (expires_at IS NULL OR expires_at > NOW())
+		ORDER BY created_at DESC
+		LIMIT 5
+	`, userID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	if partyRows != nil {
+		defer partyRows.Close()
+		for partyRows.Next() {
+			var p PublicParty
+			var createdAt time.Time
+			if err := partyRows.Scan(&p.ID, &p.Game, &p.Goal, &p.Slots, &p.Joined, &createdAt); err == nil {
+				p.CreatedAt = createdAt.Format(time.RFC3339)
+				profile.Parties = append(profile.Parties, p)
 			}
 		}
 	}

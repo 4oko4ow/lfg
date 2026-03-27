@@ -308,7 +308,19 @@ const Chat = ({
                 <p className="text-[10px] sm:text-xs text-zinc-600 mt-1">Be the first to say something!</p>
               </div>
             ) : (
-              messages.map((msg) => (
+              messages.map((msg) => {
+                const isSystem = msg.user_display_name === "system" || (!msg.user_id && !msg.optimistic);
+                if (isSystem) {
+                  return (
+                    <div
+                      key={msg.id || msg.client_msg_id}
+                      className="text-center py-0.5"
+                    >
+                      <span className="text-zinc-500 text-xs italic">{msg.message}</span>
+                    </div>
+                  );
+                }
+                return (
                 <div
                   key={msg.id || msg.client_msg_id}
                   className={`group rounded-lg p-2.5 sm:p-3 transition-all duration-200 ${msg.optimistic ? "opacity-70 italic bg-zinc-800/20" : "bg-zinc-800/30 hover:bg-zinc-800/40 border border-zinc-700/30"}`}
@@ -333,7 +345,8 @@ const Chat = ({
                   </div>
                   <div className="text-zinc-200 break-words text-xs sm:text-sm leading-relaxed">{msg.message}</div>
                 </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>
