@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -223,16 +222,12 @@ func (h *UserStatsHandler) UnlockAchievement(userID, achievementType, achievemen
 // GetPublicProfile returns the public profile for any user by ID
 func (h *UserStatsHandler) GetPublicProfile(w http.ResponseWriter, r *http.Request) {
 	// Extract user_id from URL path: /api/users/{user_id}/profile
-	path := r.URL.Path
-	// Expected format: /api/users/USER_ID/profile
-	var userID string
-	_, err := fmt.Sscanf(path, "/api/users/%s/profile", &userID)
-	if err != nil || userID == "" {
+	path := strings.TrimPrefix(r.URL.Path, "/api/users/")
+	userID := strings.TrimSuffix(path, "/profile")
+	if userID == "" || userID == path {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	// Remove trailing "/profile" if it got included
-	userID = strings.TrimSuffix(userID, "/profile")
 
 	profile, err := h.getPublicProfile(userID)
 	if err != nil {
