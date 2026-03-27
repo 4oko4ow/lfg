@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { analytics } from "../utils/analytics";
 import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
@@ -305,9 +306,19 @@ const Chat = ({
                   className={`group rounded-lg p-2.5 sm:p-3 transition-all duration-200 ${msg.optimistic ? "opacity-70 italic bg-zinc-800/20" : "bg-zinc-800/30 hover:bg-zinc-800/40 border border-zinc-700/30"}`}
                 >
                   <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
-                    <span className="text-blue-400 font-semibold text-[10px] sm:text-xs bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent truncate">
-                      {displayName(msg)}
-                    </span>
+                    {msg.user_id ? (
+                      <Link
+                        to={`/profile/${msg.user_id}`}
+                        className="text-blue-400 font-semibold text-[10px] sm:text-xs hover:text-blue-300 transition-colors truncate"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {displayName(msg)}
+                      </Link>
+                    ) : (
+                      <span className="text-blue-400 font-semibold text-[10px] sm:text-xs truncate">
+                        {displayName(msg)}
+                      </span>
+                    )}
                     <span className="text-zinc-500 text-[9px] sm:text-[10px] whitespace-nowrap font-medium flex-shrink-0">
                       {timeFmt.format(new Date(msg.created_at))}
                     </span>
