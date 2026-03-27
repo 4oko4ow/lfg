@@ -421,10 +421,20 @@ export function PartyFeedPageContent() {
   return (
     <>
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
+        {/* Create party button */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={() => setCreatePartyModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
+          >
+            <Sparkles className="h-4 w-4" />
+            {t("hero.create_party")}
+          </button>
+        </div>
+
         {/* Game Filter Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 flex-1">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {/* "All" button - always first */}
             <button
               onClick={() => setFilter(ALL_LABEL)}
@@ -586,13 +596,6 @@ export function PartyFeedPageContent() {
             )}
           </div>
 
-          <button
-            onClick={() => setCreatePartyModalOpen(true)}
-            className="flex-shrink-0 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
-          >
-            <Sparkles className="h-4 w-4" />
-            {t("hero.create_party")}
-          </button>
           </div>
         </div>
 
