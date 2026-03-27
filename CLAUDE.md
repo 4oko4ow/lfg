@@ -100,6 +100,21 @@ WebSocket message types:
 - Connection pooling configured for PgBouncer (`prefer_simple_protocol`)
 - Key tables: `parties`, `auth_users`, `sessions`, `chat_messages`, `party_members`
 
+## Changelog
+
+The changelog page (`/changelog`) is a static Next.js page at `nextjs/app/changelog/page.tsx`. To add a new entry, prepend an object to the `ENTRIES` array:
+
+```ts
+{
+  date: "YYYY-MM-DD",
+  items: [
+    "Описание изменения",
+  ],
+},
+```
+
+No database or CMS involved - it's plain static HTML rendered at build time.
+
 ## No tests
 
 There are no test files or test configuration in this project. TypeScript strict mode and ESLint serve as the primary code quality tools.
