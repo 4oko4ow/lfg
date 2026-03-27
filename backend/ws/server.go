@@ -71,15 +71,16 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
                         }
 
                         p := &Party{
-                                ID:        generateID(),
-                                Game:      payload.Game,
-                                Goal:      payload.Goal,
-                                Slots:     payload.Slots,
-                                Joined:    1,
-                                CreatedAt: time.Now(),
-                                ExpiresAt: payload.ExpiresAt,
-                                Contacts:  payload.Contacts,
-                                UserID:    userID,
+                                ID:          generateID(),
+                                Game:        payload.Game,
+                                Goal:        payload.Goal,
+                                Slots:       payload.Slots,
+                                Joined:      1,
+                                CreatedAt:   time.Now(),
+                                ExpiresAt:   payload.ExpiresAt,
+                                ScheduledAt: payload.ScheduledAt,
+                                Contacts:    payload.Contacts,
+                                UserID:      userID,
                         }
 
 			AddParty(p, true)

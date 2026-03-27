@@ -68,8 +68,8 @@ func SavePartyToDatabase(p *Party) error {
 
 	// Try INSERT first, then UPDATE on conflict
 	query := `
-		INSERT INTO parties (id, game, goal, slots, joined, created_at, expires_at, contacts, pinned, user_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO parties (id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		ON CONFLICT (id) DO UPDATE SET
 			game = EXCLUDED.game,
 			goal = EXCLUDED.goal,
@@ -77,6 +77,7 @@ func SavePartyToDatabase(p *Party) error {
 			joined = EXCLUDED.joined,
 			created_at = EXCLUDED.created_at,
 			expires_at = EXCLUDED.expires_at,
+			scheduled_at = EXCLUDED.scheduled_at,
 			contacts = EXCLUDED.contacts,
 			pinned = EXCLUDED.pinned,
 			user_id = EXCLUDED.user_id
@@ -90,6 +91,7 @@ func SavePartyToDatabase(p *Party) error {
 		p.Joined,
 		p.CreatedAt,
 		p.ExpiresAt,
+		p.ScheduledAt,
 		string(contactsJSON),
 		p.Pinned,
 		p.UserID,
@@ -105,7 +107,7 @@ func SavePartyToDatabase(p *Party) error {
 }
 
 func LoadPartiesFromDatabase() []*Party {
-	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, contacts, pinned, user_id FROM parties ORDER BY created_at DESC`
+	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id FROM parties ORDER BY created_at DESC`
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Printf("Error loading parties from database: %v", err)
@@ -124,6 +126,7 @@ func LoadPartiesFromDatabase() []*Party {
 		var pinned sql.NullBool
 		var createdAt time.Time
 		var expiresAt sql.NullTime
+		var scheduledAt sql.NullTime
 		var userID sql.NullString
 
 		err := rows.Scan(
@@ -134,6 +137,7 @@ func LoadPartiesFromDatabase() []*Party {
 			&p.Joined,
 			&createdAt,
 			&expiresAt,
+			&scheduledAt,
 			&contactsJSON,
 			&pinned,
 			&userID,
@@ -144,7 +148,7 @@ func LoadPartiesFromDatabase() []*Party {
 		}
 
 		p.CreatedAt = createdAt
-		
+
 		// Check if party has expired
 		if expiresAt.Valid {
 			if expiresAt.Time.After(now) {
@@ -153,6 +157,10 @@ func LoadPartiesFromDatabase() []*Party {
 				// Skip expired parties
 				continue
 			}
+		}
+
+		if scheduledAt.Valid {
+			p.ScheduledAt = &scheduledAt.Time
 		}
 
 		// Filter out old parties based on frontend rules

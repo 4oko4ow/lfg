@@ -24,14 +24,15 @@ func NewPartiesHandler(db *sql.DB, sessionManager *auth.SessionManager) *Parties
 }
 
 type PartyResponse struct {
-	ID        string          `json:"id"`
-	Game      string          `json:"game"`
-	Goal      string          `json:"goal"`
-	Slots     int             `json:"slots"`
-	Joined    int             `json:"joined"`
-	CreatedAt time.Time       `json:"created_at"`
-	Contacts  json.RawMessage `json:"contacts,omitempty"`
-	Pinned    bool            `json:"pinned"`
+	ID          string          `json:"id"`
+	Game        string          `json:"game"`
+	Goal        string          `json:"goal"`
+	Slots       int             `json:"slots"`
+	Joined      int             `json:"joined"`
+	CreatedAt   time.Time       `json:"created_at"`
+	ScheduledAt *time.Time      `json:"scheduled_at,omitempty"`
+	Contacts    json.RawMessage `json:"contacts,omitempty"`
+	Pinned      bool            `json:"pinned"`
 }
 
 func (h *PartiesHandler) GetUserParties(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +43,7 @@ func (h *PartiesHandler) GetUserParties(w http.ResponseWriter, r *http.Request) 
 	}
 
 	rows, err := h.db.Query(`
-		SELECT id, game, goal, slots, joined, created_at, contacts, pinned
+		SELECT id, game, goal, slots, joined, created_at, scheduled_at, contacts, pinned
 		FROM parties
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -60,6 +61,7 @@ func (h *PartiesHandler) GetUserParties(w http.ResponseWriter, r *http.Request) 
 		var contactsJSON sql.NullString
 		var pinned sql.NullBool
 		var createdAt time.Time
+		var scheduledAt sql.NullTime
 
 		err := rows.Scan(
 			&p.ID,
@@ -68,6 +70,7 @@ func (h *PartiesHandler) GetUserParties(w http.ResponseWriter, r *http.Request) 
 			&p.Slots,
 			&p.Joined,
 			&createdAt,
+			&scheduledAt,
 			&contactsJSON,
 			&pinned,
 		)
@@ -78,6 +81,9 @@ func (h *PartiesHandler) GetUserParties(w http.ResponseWriter, r *http.Request) 
 
 		p.CreatedAt = createdAt
 		p.Pinned = pinned.Valid && pinned.Bool
+		if scheduledAt.Valid {
+			p.ScheduledAt = &scheduledAt.Time
+		}
 		if contactsJSON.Valid && contactsJSON.String != "" {
 			p.Contacts = json.RawMessage(contactsJSON.String)
 		}
