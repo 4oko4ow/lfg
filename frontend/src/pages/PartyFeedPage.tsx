@@ -650,8 +650,6 @@ function PartyFeedPage() {
               </div>
             )}
           </div>
-
-          </div>
         </div>
 
         {loading && parties.length === 0 ? (
