@@ -43,13 +43,35 @@ export type Achievement = {
   unlocked_at: string;
 };
 
+export type ChatMessage = {
+  id: string;
+  user_id: string;
+  user_display_name: string;
+  message: string;
+  client_msg_id?: string;
+  created_at: string;
+};
+
+export type PublicProfile = {
+  user_id: string;
+  display_name: string;
+  avatar_url: string;
+  level: number;
+  total_xp: number;
+  parties_created: number;
+  parties_joined: number;
+  current_streak: number;
+  achievements: string[];
+};
+
 export type Message =
   | { type: "initial_state"; payload: Party[] }
   | { type: "new_party"; payload: Party }
   | { type: "party_update"; payload: Party }
   | { type: "party_remove"; payload: { id: string } }
   | { type: "online_count"; payload: number }
-  | { type: "join_party"; payload: { id: string } };
+  | { type: "join_party"; payload: { id: string } }
+  | { type: "chat_message"; payload: ChatMessage };
 
 export type OutgoingMessage =
   | {
@@ -69,5 +91,12 @@ export type OutgoingMessage =
       };
     }
   | {
-      type: "heartbeat"; 
+      type: "heartbeat";
+    }
+  | {
+      type: "send_chat";
+      payload: {
+        message: string;
+        client_msg_id: string;
+      };
     };

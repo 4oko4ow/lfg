@@ -5,6 +5,7 @@ import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/s
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./modals/LoginModal";
+import { onMessage, sendChatMessage } from "../ws/client";
 
 const buildBackendUrl = (path: string): string => {
   const rawBackendBaseUrl = (import.meta.env.VITE_BACKEND_URL ?? "").trim();
@@ -48,24 +49,29 @@ const Chat = ({
   useEffect(() => {
     fetchMessages();
 
-    // Трекинг открытия чата
     if (!hasTrackedOpen.current) {
       analytics.chatOpened();
       hasTrackedOpen.current = true;
     }
 
-    // Poll for new messages every 10 seconds (reduced from 2s to prevent constant reloading)
-    // Only poll when chat is visible and not collapsed
-    const pollInterval = setInterval(() => {
-      if (!isCollapsed) {
-        fetchMessages();
+    const unsubscribe = onMessage((msg) => {
+      if (msg.type === "chat_message") {
+        setMessages((prev) => {
+          // Replace optimistic message with confirmed one
+          const withoutOptimistic = prev.filter(
+            (m) => !(m.optimistic && m.client_msg_id === msg.payload.client_msg_id)
+          );
+          // Avoid duplicates
+          if (withoutOptimistic.some((m: any) => m.id === msg.payload.id)) {
+            return prev;
+          }
+          return [...withoutOptimistic, msg.payload];
+        });
       }
-    }, 10000);
+    });
 
-    return () => {
-      clearInterval(pollInterval);
-    };
-  }, [isCollapsed]);
+    return unsubscribe;
+  }, []);
 
   // Draggable functionality for desktop
   useEffect(() => {
@@ -181,52 +187,28 @@ const Chat = ({
 
   const sendMessage = async () => {
     if (!profile) return;
-    
     const trimmed = input.trim();
     if (!trimmed) return;
 
     const client_msg_id = `msg-${Date.now()}-${Math.random()}`;
 
-    const optimisticMessage = {
-      id: client_msg_id,
-      client_msg_id,
-      user_id: profile.id,
-      user_display_name: profile.displayName,
-      message: trimmed,
-      created_at: new Date().toISOString(),
-      optimistic: true,
-    };
-
-    setMessages((prev) => [...prev, optimisticMessage]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: client_msg_id,
+        client_msg_id,
+        user_id: profile.id,
+        user_display_name: profile.displayName,
+        message: trimmed,
+        created_at: new Date().toISOString(),
+        optimistic: true,
+      } as any,
+    ]);
     setInput("");
-    scrollToBottom();
 
-    try {
-      const response = await fetch(buildBackendUrl("/api/chat/messages/create"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          user_id: profile.id,
-          user_display_name: profile.displayName,
-          message: trimmed,
-          client_msg_id,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Chat send error:", response.status);
-      } else {
-        analytics.chatMessageSent();
-        // Refresh messages after a short delay to get the server-generated ID
-        setTimeout(() => {
-          fetchMessages();
-        }, 500);
-      }
-    } catch (error) {
-      console.error("Chat send error:", error);
+    const sent = sendChatMessage({ message: trimmed, client_msg_id });
+    if (sent) {
+      analytics.chatMessageSent();
     }
   };
 

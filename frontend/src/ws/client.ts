@@ -50,8 +50,21 @@ export function connectWS() {
   };
 }
 
-export function onMessage(cb: (msg: Message) => void) {
+export function onMessage(cb: (msg: Message) => void): () => void {
   listeners.push(cb);
+  return () => {
+    const idx = listeners.indexOf(cb);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
+}
+
+export function sendChatMessage(payload: { message: string; client_msg_id: string }): boolean {
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    console.error("WebSocket not open, cannot send chat message");
+    return false;
+  }
+  socket.send(JSON.stringify({ type: "send_chat", payload }));
+  return true;
 }
 
 export function sendCreateParty(payload: {
