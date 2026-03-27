@@ -18,6 +18,7 @@ import {
   Users,
   Gamepad2,
   Trash2,
+  Pencil,
   Flame,
   Star,
   Award,
@@ -76,6 +77,9 @@ export default function ProfilePage() {
   const [userParties, setUserParties] = useState<Party[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [activeTab, setActiveTab] = useState<"contacts" | "parties" | "stats">("contacts");
+  const [editingPartyId, setEditingPartyId] = useState<string | null>(null);
+  const [editGoal, setEditGoal] = useState("");
+  const [editSlots, setEditSlots] = useState(2);
 
   useEffect(() => {
     setValues({
@@ -155,6 +159,37 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error("Error deleting party:", error);
+      toast.error(t("toasts.error", "Something went wrong"));
+    }
+  };
+
+  const handleEditParty = (party: Party) => {
+    setEditingPartyId(party.id);
+    setEditGoal(party.goal);
+    setEditSlots(party.slots);
+  };
+
+  const handleSaveParty = async (partyId: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/parties/update`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: partyId, goal: editGoal, slots: editSlots }),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setUserParties((prev) =>
+          prev.map((p) => (p.id === partyId ? { ...p, ...updated } : p))
+        );
+        setEditingPartyId(null);
+        toast.success(t("profile.parties.updated", "Party updated"));
+      } else {
+        toast.error(t("toasts.error", "Something went wrong"));
+      }
+    } catch (error) {
+      console.error("Error updating party:", error);
       toast.error(t("toasts.error", "Something went wrong"));
     }
   };
@@ -410,7 +445,56 @@ export default function ProfilePage() {
                       <Trash2 className="h-4 w-4" />
                       {t("ui.delete", "Delete")}
                     </button>
+                    <button
+                      onClick={() => editingPartyId === party.id ? setEditingPartyId(null) : handleEditParty(party)}
+                      className="flex items-center gap-2 rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-700"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {t("profile.parties.edit", "Edit")}
+                    </button>
                   </div>
+                  {editingPartyId === party.id && (
+                    <div className="rounded-xl border border-zinc-700 bg-zinc-800/50 p-4 mt-2">
+                      <div className="mb-3">
+                        <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                          {t("profile.parties.edit_goal", "Description")}
+                        </label>
+                        <textarea
+                          value={editGoal}
+                          onChange={(e) => setEditGoal(e.target.value)}
+                          rows={3}
+                          className="w-full rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-3 py-2 text-sm text-white placeholder:text-zinc-500 transition-colors hover:border-zinc-600 focus:outline-none focus:border-zinc-500"
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                          {t("profile.parties.edit_slots", "Slots")}
+                        </label>
+                        <input
+                          type="number"
+                          value={editSlots}
+                          onChange={(e) => setEditSlots(Number(e.target.value))}
+                          min={2}
+                          max={10}
+                          className="w-24 rounded-lg border border-zinc-700/50 bg-zinc-900/50 px-3 py-2 text-sm text-white transition-colors hover:border-zinc-600 focus:outline-none focus:border-zinc-500"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleSaveParty(party.id)}
+                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+                        >
+                          {t("profile.parties.save", "Save")}
+                        </button>
+                        <button
+                          onClick={() => setEditingPartyId(null)}
+                          className="rounded-lg border border-zinc-600 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-700"
+                        >
+                          {t("profile.parties.cancel", "Cancel")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
