@@ -11,17 +11,17 @@ import {
 } from "lucide-react";
 
 import { connectWS, onMessage, socket, sendJoinParty } from "@/lib/ws/client";
-// import PartyCard from "@/components/PartyCard";
-// import PartyCardSkeleton from "@/components/PartyCardSkeleton";
+import PartyCard from "@/components/PartyCard";
+import PartyCardSkeleton from "@/components/PartyCardSkeleton";
 import type { ContactMethod, Message, Party } from "@/lib/types";
-// import FeedbackButton from "@/components/FeedbackButton";
+import FeedbackButton from "@/components/FeedbackButton";
 import { analytics } from "@/lib/utils/analytics";
-// import ContactModal from "@/components/ContactModal";
-// import Chat from "@/components/Chat";
-// import ChatDrawer from "@/components/ChatDrawer";
-// import SuggestGameModal from "@/components/modals/SuggestGameModal";
-// import CreatePartyModal from "@/components/modals/CreatePartyModal";
-// import LoginModal from "@/components/modals/LoginModal";
+import ContactModal from "@/components/ContactModal";
+import Chat from "@/components/Chat";
+import ChatDrawer from "@/components/ChatDrawer";
+import SuggestGameModal from "@/components/modals/SuggestGameModal";
+import CreatePartyModal from "@/components/modals/CreatePartyModal";
+import LoginModal from "@/components/modals/LoginModal";
 import { useOnlineCount } from "@/components/providers/OnlineCountProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -424,24 +424,6 @@ export function GameFeedClient({ slug, gameName }: Props) {
     analytics.joinFullPartyAttempt(party.game, party.id);
   };
 
-  // Suppress unused variable warnings for state used by commented-out components
-  void chatOpen;
-  void setChatOpen;
-  void suggestModalOpen;
-  void setSuggestModalOpen;
-  void createPartyModalOpen;
-  void setCreatePartyModalOpen;
-  void loginModalOpen;
-  void setLoginModalOpen;
-  void loginModalGame;
-  void handleLoginModalClose;
-  void handleFullPartyClick;
-  void contactModal;
-  void contactPartyId;
-  void handleCloseModal;
-  void onlineCount;
-  void slug;
-
   return (
     <>
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
@@ -639,15 +621,31 @@ export function GameFeedClient({ slug, gameName }: Props) {
         {loading && parties.length === 0 ? (
           <div className="space-y-4 max-w-screen-md mx-auto">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="animate-pulse h-32 rounded-xl bg-zinc-800/50"
-                style={{ animationDelay: `${i * 100}ms` }}
-              />
+              <div key={i} className="animate-fadeIn" style={{ animationDelay: `${i * 100}ms` }}>
+                <PartyCardSkeleton />
+              </div>
+            ))}
+          </div>
+        ) : loading && parties.length > 0 ? (
+          <div className="space-y-4 max-w-screen-md mx-auto">
+            {filteredParties.map((party, index) => (
+              <div key={party.id} className="animate-fadeIn" style={{ animationDelay: `${index * 30}ms` }}>
+                <PartyCard
+                  party={party}
+                  onContactClick={() => handleContactClick(party)}
+                  onJoinClick={() => handleJoinClick(party)}
+                  onFullClick={() => handleFullPartyClick(party)}
+                />
+              </div>
+            ))}
+            {[1, 2].map((i) => (
+              <div key={`skeleton-${i}`} className="animate-fadeIn opacity-50" style={{ animationDelay: `${(filteredParties.length + i) * 100}ms` }}>
+                <PartyCardSkeleton />
+              </div>
             ))}
           </div>
         ) : filteredParties.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-zinc-700/50 bg-gradient-to-br from-zinc-900/40 to-zinc-950/40 backdrop-blur-sm p-12 text-center max-w-2xl mx-auto">
+          <div className="rounded-xl border border-dashed border-zinc-700/50 bg-gradient-to-br from-zinc-900/40 to-zinc-950/40 backdrop-blur-sm p-12 text-center animate-fadeIn max-w-2xl mx-auto">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 mb-6 border border-zinc-700/50">
               <Search className="h-10 w-10 text-zinc-500" />
             </div>
@@ -664,42 +662,65 @@ export function GameFeedClient({ slug, gameName }: Props) {
           </div>
         ) : (
           <div className="space-y-4 max-w-2xl mx-auto">
-            {filteredParties.map((party) => (
-              <div
-                key={party.id}
-                className="rounded-xl border border-zinc-700/50 bg-zinc-900/50 p-4 text-sm text-zinc-300"
-              >
-                <div className="font-semibold text-white">{party.game}</div>
-                <div className="mt-1 text-zinc-400">
-                  {party.joined}/{party.slots} slots
-                </div>
+            {filteredParties.map((party, index) => (
+              <div key={party.id} className="animate-fadeIn" style={{ animationDelay: `${index * 30}ms` }}>
+                <PartyCard
+                  party={party}
+                  onContactClick={() => handleContactClick(party)}
+                  onJoinClick={() => handleJoinClick(party)}
+                  onFullClick={() => handleFullPartyClick(party)}
+                />
               </div>
             ))}
           </div>
         )}
 
-        {/* Mobile chat button */}
-        {isMobile && (
-          <button
-            onClick={() => setChatOpen(true)}
-            className="fixed bottom-6 left-6 sm:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-xl shadow-blue-500/50 transition-all duration-300 hover:scale-110 active:scale-95 z-50 border border-blue-400/30"
-            aria-label={t("chat.title")}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-md"></div>
-            <MessageCircle className="h-6 w-6 relative" />
-          </button>
+        <FeedbackButton />
+        {suggestModalOpen && (
+          <SuggestGameModal onClose={() => setSuggestModalOpen(false)} />
         )}
-
-        <button
-          onClick={() => setSuggestModalOpen(true)}
-          className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-600 via-pink-500 to-rose-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xl shadow-pink-500/50 transition-all duration-300 hover:scale-105 active:scale-95 z-50 border border-pink-400/30"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-md"></div>
-          <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 relative" />
-          <span className="hidden sm:inline relative">{t("hero.suggest_game")}</span>
-          <span className="sm:hidden relative">{t("hero.suggest_game_short")}</span>
-        </button>
+        {createPartyModalOpen && (
+          <CreatePartyModal onClose={() => setCreatePartyModalOpen(false)} parties={parties} />
+        )}
+        {loginModalOpen && (
+          <LoginModal onClose={handleLoginModalClose} game={loginModalGame} />
+        )}
       </main>
+
+      {contactModal && (
+        <ContactModal
+          contacts={contactModal}
+          partyId={contactPartyId}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {isMobile ? (
+        chatOpen && <ChatDrawer onClose={() => setChatOpen(false)} />
+      ) : (
+        <Chat onlineCount={onlineCount} />
+      )}
+
+      {isMobile && (
+        <button
+          onClick={() => setChatOpen(true)}
+          className="fixed bottom-6 left-6 sm:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-xl shadow-blue-500/50 z-50 animate-fadeIn border border-blue-400/30"
+          aria-label={t("chat.title")}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-md"></div>
+          <MessageCircle className="h-6 w-6 relative" />
+        </button>
+      )}
+
+      <button
+        onClick={() => setSuggestModalOpen(true)}
+        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-600 via-pink-500 to-rose-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xl shadow-pink-500/50 z-50 animate-fadeIn border border-pink-400/30"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-md"></div>
+        <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 relative" />
+        <span className="hidden sm:inline relative">{t("hero.suggest_game")}</span>
+        <span className="sm:hidden relative">{t("hero.suggest_game_short")}</span>
+      </button>
     </>
   );
 }
