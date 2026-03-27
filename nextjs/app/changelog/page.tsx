@@ -7,25 +7,25 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-03-27",
     items: [
-      "Chat messages now require authentication — no more impersonation",
-      "Chat moved to WebSocket for instant delivery (no more polling)",
-      "Public profile pages at /profile/:userId",
-      "Profile links in chat nicknames",
-      "This changelog page",
+      "Отправка сообщений в чат теперь требует авторизации",
+      "Чат переведён на WebSocket — сообщения приходят мгновенно",
+      "Публичные страницы профилей по адресу /profile/:userId",
+      "Ники в чате теперь ведут на профиль игрока",
+      "Эта страница с историей изменений",
     ],
   },
 ];
 
 export const metadata = {
-  title: "Changelog — FindParty",
-  description: "What's new in FindParty",
+  title: "Изменения — FindParty",
+  description: "Что нового в FindParty",
 };
 
 export default function ChangelogPage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 pt-20 pb-16">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-8 text-white">What&apos;s new</h1>
+        <h1 className="text-2xl font-bold mb-8 text-white">Что нового</h1>
         <div className="space-y-10">
           {ENTRIES.map((entry) => (
             <div key={entry.date}>
