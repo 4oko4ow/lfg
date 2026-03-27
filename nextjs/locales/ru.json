@@ -1,0 +1,548 @@
+{
+  "app": {
+    "name": "FindParty",
+    "tagline": "Быстрый поиск тиммейтов. Без регистрации."
+  },
+  "nav": {
+    "home": "Главная",
+    "create": "Создать",
+    "chat": "Чат",
+    "faq": "FAQ"
+  },
+  "home": {
+    "title": "Поиск тиммейтов"
+  },
+  "banner": {
+    "welcome": "Сайт только запустился — добро пожаловать!"
+  },
+  "suggest_game": {
+    "title": "Предложить игру",
+    "thanks": "Спасибо! Мы учтём твоё предложение.",
+    "placeholder": "Введи название игры",
+    "submit": "Отправить",
+    "cta": "Хочешь чтобы здесь появилась твоя игра?"
+  },
+  "common": {
+    "close": "Закрыть",
+    "saving": "Сохранение…"
+  },
+  "hero": {
+    "title": "Найди команду для игры",
+    "subtitle": "Вступай в готовые пати или создай своё объявление",
+    "online": "Онлайн: {{count}}",
+    "online_short": "онлайн",
+    "suggest_game": "Нет нужной игры?",
+    "suggest_game_short": "Игра?",
+    "create_party": "Создать объявление"
+  },
+  "ui": {
+    "language": "Язык",
+    "english": "English",
+    "russian": "Русский",
+    "create_party": "Создать пати",
+    "join_party": "Вступить",
+    "copy_contact": "Скопировать контакт",
+    "copied": "Скопировано",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "report": "Пожаловаться",
+    "close": "Закрыть",
+    "back": "Назад",
+    "search_placeholder": "Поиск игр…",
+    "loading": "Загружаем объявления..."
+  },
+  "filters": {
+    "all_games": "Все",
+    "game": "Игра",
+    "region": "Регион",
+    "modes": "Режимы",
+    "only_new": "Только новые",
+    "almost_full": "Почти заполнено",
+    "with_voice": "С войсом",
+    "without_voice": "Без войса",
+    "empty": "Пока нет объявлений. Стань первым и создай своё!",
+    "empty_hint": "Создай своё объявление выше 👆",
+    "title": "Фильтр по играм",
+    "more": "Ещё",
+    "search_games": "Поиск игр...",
+    "no_games_found": "Игры не найдены",
+    "sort": {
+      "label": "Сортировка",
+      "new": "Сначала новые",
+      "popular": "Популярные",
+      "slots": "По слотам"
+    }
+  },
+  "party": {
+    "slots": "слотов",
+    "slots_label": "{{joined}}/{{slots}} слотов",
+    "pinned": "Закреплено",
+    "new": "Только что создано",
+    "joined": "вступило",
+    "full": "Заполнено",
+    "almost_full": "Почти заполнено",
+    "contact": "Контакт",
+    "description": "Описание",
+    "created": "Создано",
+    "copy_contact_to_join": "Скопируй контакт, чтобы вступить в пати",
+    "preferred": "Основной",
+    "expires_in": "Истекает через"
+  },
+  "form": {
+    "title": "Создать пати",
+    "cta": "Создать пати",
+    "update_cta": "Сохранить изменения",
+    "contact_methods": "Выберите, какие контакты показать",
+    "login_required": "Для создания пати необходимо войти в систему.",
+    "no_contacts": "У вас ещё нет контактов. Настройте их в профиле.",
+    "no_contacts_required": "Для создания пати нужно добавить хотя бы один контакт в профиле.",
+    "select_contact_required": "Пожалуйста, выберите хотя бы один способ связи для отображения в объявлении.",
+    "go_to_profile": "Перейти в профиль",
+    "preferred_contact": "Предпочтительный способ связи",
+    "preferred_contact_hint": "Этот контакт будет отображаться первым в объявлении",
+    "labels": {
+      "game": "Игра",
+      "slots": "Слоты",
+      "contact": "Контакт",
+      "description": "Описание",
+      "voice": "Голосовой чат"
+    },
+    "placeholders": {
+      "contact": "Ссылка или ник в Discord/Telegram/Steam/VK",
+      "description": "Например: «Дуо для ранкеда сегодня вечером, EU серверы»"
+    },
+    "voice": {
+      "yes": "С войсом",
+      "no": "Без войса"
+    },
+    "validation": {
+      "game_required": "Выбери игру",
+      "slots_required": "Укажи число слотов (2–10)",
+      "contact_required": "Укажи контакт",
+      "description_required": "Коротко опиши цель (10–200 символов)"
+    },
+    "popular_games": "Популярные",
+    "by_ads_count": "по количеству объявлений",
+    "other_games": "Другие игры",
+    "select_game": "Выберите игру",
+    "search_games": "Поиск игр...",
+    "no_games_found": "Игры не найдены",
+    "expiration": {
+      "label": "Автоматически скрыть через",
+      "hours": "ч",
+      "hours_short": "ч",
+      "day": "1 день",
+      "days": "дня",
+      "custom_hours": "Кастомное количество часов",
+      "hint": "Объявление автоматически скроется через указанное время"
+    }
+  },
+  "auth": {
+    "loading": "Загрузка...",
+    "error": "Не удалось авторизоваться",
+    "success": "Вы вошли",
+    "steam_conflict": "Этот Steam-аккаунт уже привязан к другой учетной записи",
+    "discord_conflict": "Этот Discord-аккаунт уже привязан к другой учетной записи",
+    "telegram_conflict": "Этот Telegram-аккаунт уже привязан к другой учетной записи",
+    "sign_in_prompt": "Войти через:",
+    "sign_in": "Войти",
+    "sign_in_title": "Вход",
+    "sign_in_with_steam": "Войти через Steam",
+    "sign_in_with_discord": "Войти через Discord",
+    "sign_in_with_telegram": "Войти через Telegram",
+    "choose_provider": "Выберите способ входа:",
+    "sign_out": "Выйти"
+  },
+  "contact": {
+    "title": "Контакты",
+    "opened": "Открываем контакт",
+    "open": "Открыть",
+    "no_methods": "Контакты не указаны",
+    "add_to_discord": "Добавить в Discord",
+    "discord_tooltip": "Username скопирован. Вставь в Discord → Add Friend",
+    "add_friend_steam": "Добавить в друзья",
+    "open_profile_steam": "Открыть профиль",
+    "methods": {
+      "steam": "Steam",
+      "discord": "Discord",
+      "telegram": "Telegram"
+    }
+  },
+  "chat": {
+    "title": "Чат",
+    "placeholder": "Напиши сообщение…",
+    "send": "Отправить",
+    "empty": "Сообщений пока нет",
+    "online": "Сейчас онлайн",
+    "login_required": "Войдите, чтобы писать в чат",
+    "collapse": "Свернуть чат",
+    "expand": "Развернуть чат"
+  },
+  "empty": {
+    "parties": "Активных пати нет. Будь первым!"
+  },
+  "loading": {
+    "parties": "Загрузка пати..."
+  },
+  "timeago": {
+    "seconds": "{{count}} сек назад",
+    "minute": "минуту назад",
+    "minutes": "{{count}} мин назад",
+    "hour": "час назад",
+    "hours": "{{count}} ч назад",
+    "days_hours": "{{d}}дн {{h}}ч назад",
+    "days_short": "дн",
+    "hours_short": "ч",
+    "minutes_short": "мин"
+  },
+  "modals": {
+    "contact_title": "Вступить в пати",
+    "contact_desc": "Скопируй контакт и напиши хосту.",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "close": "Закрыть"
+  },
+  "toasts": {
+    "created": "Пати создано",
+    "deleted": "Пати удалено",
+    "updated": "Сохранено",
+    "error": "Что-то пошло не так"
+  },
+  "errors": {
+    "required": "Это обязательное поле",
+    "network": "Сетевая ошибка. Попробуй ещё раз"
+  },
+  "survey": {
+    "nojoin_title": "Почему не вступил?",
+    "dismiss": "Больше не показывать",
+    "reasons": [
+      "Не нашёл подходящую игру",
+      "Боюсь писать незнакомым",
+      "Слишком мало пати",
+      "Не понял, что дальше делать",
+      "Просто смотрю / тестирую"
+    ],
+    "reasons.0": "Не нашёл подходящую игру",
+    "reasons.1": "Боюсь писать незнакомым",
+    "reasons.2": "Слишком мало пати",
+    "reasons.3": "Не понял, что дальше делать",
+    "reasons.4": "Просто смотрю / тестирую",
+    "submit": "Отправить"
+  },
+  "meta": {
+    "home": {
+      "title": "Поиск тиммейтов — FindParty",
+      "description": "Найди пати для Valorant, Fortnite, Apex, CS2, Dota 2 и других. Без регистрации."
+    },
+    "game": {
+      "title": "{{game}} — поиск тиммейтов (LFG)",
+      "description": "Ищешь тиммейтов в {{game}}? Создай или вступи в пати, фильтруй по режиму и региону и находи идеальную команду."
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Найди свою игровую команду",
+      "subtitle": "Общайся с игроками, вступай в пати и улучшай свой игровой опыт. Без регистрации."
+    },
+    "cta": {
+      "browse": "Смотреть пати",
+      "create": "Создать своё первое пати"
+    },
+    "stats": {
+      "online": "Онлайн сейчас",
+      "parties": "Активных пати",
+      "growing": "Растём быстро",
+      "parties_created": "Пати создано",
+      "people_joined": "Людей вступило",
+      "parties_filled": "Пати заполнено"
+    },
+    "features": {
+      "title": "Почему FindParty?",
+      "fast": {
+        "title": "Молниеносно",
+        "desc": "Найди или создай пати за секунды. Без долгих регистраций и сложных форм."
+      },
+      "gamified": {
+        "title": "Геймификация",
+        "desc": "Зарабатывай XP, открывай достижения и поднимайся в рейтинге, играя и создавая пати."
+      },
+      "community": {
+        "title": "Активное сообщество",
+        "desc": "Присоединяйся к чату, общайся с игроками и строй свою игровую сеть."
+      }
+    },
+    "cta_section": {
+      "title": "Готов найти свою команду?",
+      "subtitle": "Присоединяйся к тысячам игроков, которые находят идеальных партнёров.",
+      "button": "Начать сейчас"
+    }
+  },
+  "profile": {
+    "link": "Профиль",
+    "anonymous": "Игрок",
+    "title": "Ваш профиль",
+    "description": "Подключите сервисы и выберите, что показывать в объявлениях.",
+    "steam_description": "Привяжите Steam, чтобы делиться профилем.",
+    "discord_description": "Подключите Discord, чтобы игроки писали вам по нику или ссылке.",
+    "telegram_description": "Добавьте Telegram, чтобы делиться своим @",
+    "relink": "Переподключить",
+    "connect": "Подключить",
+    "contact_label": "Контакт для объявлений",
+    "save": "Сохранить",
+    "link_required": "Сначала подключите аккаунт, затем укажите контакт.",
+    "saved": "Сохранено",
+    "placeholders": {
+      "steam": "https://steamcommunity.com/id/username",
+      "discord": "username или @username",
+      "telegram": "@username"
+    },
+    "tabs": {
+      "stats": "Статистика и достижения",
+      "parties": "Мои пати",
+      "contacts": "Контакты"
+    },
+    "stats": {
+      "created": "Создано",
+      "joined": "Вступило",
+      "xp": "Всего XP",
+      "level": "Уровень",
+      "current_streak": "Текущая серия",
+      "longest_streak": "Самая длинная серия",
+      "days": "дней",
+      "no_stats": "Статистики пока нет. Создай своё первое пати, чтобы начать!",
+      "create_first": "Создать первое пати"
+    },
+    "achievements": {
+      "title": "Достижения"
+    },
+    "parties": {
+      "title": "Мои пати",
+      "empty": "Ты ещё не создал ни одного пати.",
+      "create_first": "Создать первое пати",
+      "create_new": "Создать новое пати",
+      "delete_confirm": "Ты уверен, что хочешь удалить это пати?",
+      "deleted": "Пати удалено"
+    }
+  },
+  "feedback": {
+    "label": "Что-то не работает?",
+    "label_short": "Обратная связь"
+  },
+  "games": {
+    "abioticfactor": {
+      "name": "Abiotic Factor"
+    },
+    "repo": {
+      "name": "R.E.P.O"
+    },
+    "dota2": {
+      "name": "Dota 2"
+    },
+    "cs2": {
+      "name": "CS2"
+    },
+    "peak": {
+      "name": "PEAK"
+    },
+    "pubg": {
+      "name": "PUBG"
+    },
+    "rust": {
+      "name": "Rust"
+    },
+    "minecraft": {
+      "name": "Minecraft"
+    },
+    "tarkov": {
+      "name": "Tarkov"
+    },
+    "fortnite": {
+      "name": "Fortnite"
+    },
+    "roblox": {
+      "name": "Roblox"
+    },
+    "valorant": {
+      "name": "Valorant"
+    },
+    "apex": {
+      "name": "Apex"
+    },
+    "thefinals": {
+      "name": "The Finals"
+    },
+    "marvelrivals": {
+      "name": "Marvel Rivals"
+    },
+    "deeprockgalactic": {
+      "name": "Deep Rock Galactic"
+    },
+    "baldursgate3": {
+      "name": "Baldurs Gate 3"
+    },
+    "lethalcompany": {
+      "name": "Lethal Company"
+    },
+    "arcraiders": {
+      "name": "Arc Raiders"
+    },
+    "lol": {
+      "name": "League of Legends"
+    },
+    "overwatch2": {
+      "name": "Overwatch 2"
+    },
+    "warzone": {
+      "name": "Call of Duty: Warzone"
+    },
+    "r6siege": {
+      "name": "Rainbow Six Siege"
+    },
+    "rocketleague": {
+      "name": "Rocket League"
+    },
+    "amongus": {
+      "name": "Among Us"
+    },
+    "phasmophobia": {
+      "name": "Phasmophobia"
+    },
+    "seaofthieves": {
+      "name": "Sea of Thieves"
+    },
+    "deadbydaylight": {
+      "name": "Dead by Daylight"
+    },
+    "wow": {
+      "name": "World of Warcraft"
+    },
+    "ffxiv": {
+      "name": "Final Fantasy XIV"
+    },
+    "genshin": {
+      "name": "Genshin Impact"
+    },
+    "honkaistarrail": {
+      "name": "Honkai: Star Rail"
+    },
+    "palworld": {
+      "name": "Palworld"
+    },
+    "helldivers2": {
+      "name": "Helldivers 2"
+    },
+    "destiny2": {
+      "name": "Destiny 2"
+    },
+    "warframe": {
+      "name": "Warframe"
+    },
+    "pathofexile": {
+      "name": "Path of Exile"
+    },
+    "diablo4": {
+      "name": "Diablo 4"
+    },
+    "lostark": {
+      "name": "Lost Ark"
+    },
+    "newworld": {
+      "name": "New World"
+    },
+    "guildwars2": {
+      "name": "Guild Wars 2"
+    },
+    "eso": {
+      "name": "Elder Scrolls Online"
+    },
+    "fallguys": {
+      "name": "Fall Guys"
+    },
+    "huntshowdown": {
+      "name": "Hunt: Showdown"
+    },
+    "tf2": {
+      "name": "Team Fortress 2"
+    },
+    "codmw3": {
+      "name": "Call of Duty: Modern Warfare III"
+    },
+    "bf2042": {
+      "name": "Battlefield 2042"
+    },
+    "haloinfinite": {
+      "name": "Halo Infinite"
+    },
+    "rvthereyet": {
+      "name": "RV There Yet?"
+    },
+    "cuphead": {
+      "name": "Cuphead"
+    },
+    "projectzomboid": {
+      "name": "Project Zomboid"
+    },
+    "brawlstars": {
+      "name": "Brawl Stars"
+    },
+    "mobilelegends": {
+      "name": "Mobile Legends"
+    },
+    "wewerehere": {
+      "name": "We Were Here"
+    },
+    "plateup": {
+      "name": "Plate Up"
+    },
+    "stalcraft": {
+      "name": "Stalcraft"
+    },
+    "contentwarning": {
+      "name": "Content Warning"
+    },
+    "satisfactory": {
+      "name": "Satisfactory"
+    },
+    "thebreakin": {
+      "name": "The Break-In"
+    },
+    "scpsecretlaboratory": {
+      "name": "SCP: Secret Laboratory"
+    },
+    "worldoftanks": {
+      "name": "World of Tanks"
+    },
+    "worldoftanksblitz": {
+      "name": "World of Tanks Blitz"
+    },
+    "drivebeyondhorizons": {
+      "name": "Drive Beyond Horizons"
+    },
+    "beamngdrive": {
+      "name": "BeamNG Drive"
+    },
+    "7daystodie": {
+      "name": "7 Days to Die"
+    },
+    "magearena": {
+      "name": "Mage Arena"
+    },
+    "barotrauma": {
+      "name": "Barotrauma"
+    },
+    "nomansky": {
+      "name": "No Man's Sky"
+    },
+    "dontstarvetogether": {
+      "name": "Don't Starve Together"
+    },
+    "readyornot": {
+      "name": "Ready or Not"
+    },
+    "standoff2": {
+      "name": "Standoff 2"
+    }
+  }
+}

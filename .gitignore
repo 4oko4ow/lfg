@@ -33,3 +33,8 @@ npm-debug.log*
 *.tmp
 *.temp
 CLEANUP_SUMMARY.md
+
+# Next.js
+nextjs/.next/
+nextjs/.env*.local
+nextjs/node_modules/
