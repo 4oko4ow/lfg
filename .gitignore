@@ -39,3 +39,6 @@ nextjs/.next/
 nextjs/.env*.local
 nextjs/node_modules/
 .vercel
+
+# Legacy frontend
+frontend/
