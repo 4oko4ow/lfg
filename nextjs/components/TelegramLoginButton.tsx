@@ -44,7 +44,7 @@ export default function TelegramLoginButton({ botUsername, authUrl, masked, chil
 
   if (masked) {
     return (
-      <div className="relative inline-block">
+      <div className="relative block w-full">
         {/* Visible custom button — not interactive, just decorative */}
         <div className="pointer-events-none">{children}</div>
         {/* Invisible widget iframe stretched over the button — captures the click */}
