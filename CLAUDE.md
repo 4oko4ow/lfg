@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LFG (FindParty) is a platform for finding gaming teammates. Users create or join parties, chat in real-time, and authenticate via Discord, Steam, or Telegram.
 
-- **Frontend:** React 19 + TypeScript + Vite, deployed on Vercel
+- **Frontend:** Next.js (App Router) + TypeScript, deployed on Vercel from `nextjs/`
 - **Backend:** Go 1.24, Dockerized with Traefik reverse proxy
 - **Database:** PostgreSQL (no ORM, raw SQL with `database/sql`)
 - **Real-time:** Gorilla WebSocket
@@ -18,14 +18,13 @@ Vercel project name: `lfg` (deploy from `nextjs/` directory with `cd nextjs && v
 
 ## Commands
 
-### Frontend (`cd frontend`)
+### Frontend (`cd nextjs`)
 
 ```bash
 npm install          # install deps
-npm run dev          # dev server at http://localhost:5173
-npm run build        # tsc -b && vite build
+npm run dev          # dev server at http://localhost:3000
+npm run build        # next build
 npm run lint         # eslint
-npm run preview      # preview production build
 ```
 
 ### Backend (`cd backend`)
@@ -53,15 +52,15 @@ cp .env.example .env   # then fill in required values
 
 Required vars: `DATABASE_URL`, `AUTH_JWT_SECRET`, `FRONTEND_URL`, `BACKEND_URL`, `DISCORD_CLIENT_ID/SECRET`, `STEAM_WEB_API_KEY`, `TELEGRAM_BOT_TOKEN/ID`.
 
-Frontend env var: `VITE_BACKEND_URL` (baked into Vite build).
+Frontend env var: `NEXT_PUBLIC_BACKEND_URL` (used in Next.js).
 
 ## Architecture
 
 ### Request flow
 
 ```
-Browser → Vite (dev) / Vercel (prod)
-        → React SPA (React Router v7)
+Browser → Next.js (dev) / Vercel (prod)
+        → Next.js App Router
         → Go backend (HTTP REST + WebSocket)
         → PostgreSQL
 ```
@@ -70,20 +69,21 @@ Auth uses JWT-signed HTTP-only cookies. Frontend always passes `credentials: "in
 
 ### Real-time (WebSocket)
 
-The backend keeps an in-memory party cache synchronized with the database. All connected clients receive broadcasts for party create/update/delete and online count changes. The frontend (`/frontend/src/ws/`) maintains the WebSocket connection and dispatches messages to `PartyFeedPage`.
+The backend keeps an in-memory party cache synchronized with the database. All connected clients receive broadcasts for party create/update/delete, online count changes, and chat messages. The frontend (`/nextjs/hooks/`) maintains the WebSocket connection.
 
-WebSocket message types are defined in `/frontend/src/types.ts`:
-- Inbound: `initial_state`, `new_party`, `party_update`, `party_remove`, `online_count`, `join_party`
-- Outbound: `create_party`, `join_party`, `heartbeat`
+WebSocket message types:
+- Inbound: `initial_state`, `new_party`, `party_update`, `party_remove`, `online_count`, `join_party`, `chat_message`
+- Outbound: `create_party`, `join_party`, `heartbeat`, `send_chat`
 
-### Frontend structure
+### Frontend structure (`nextjs/`)
 
-- `src/pages/` - Route-level components (one per route)
-- `src/components/` - Reusable UI components
-- `src/context/AuthContext.tsx` - Global auth state via `useAuth()` hook
-- `src/context/OnlineCountContext.tsx` - Real-time user count
-- `src/locales/` - i18next translation files (multi-language)
-- `src/utils/analytics.ts` - Event tracking
+- `app/` - Next.js App Router pages (one directory per route)
+- `components/` - Reusable UI components
+- `components/providers/AuthProvider.tsx` - Global auth state via `useAuth()` hook
+- `components/providers/OnlineCountProvider.tsx` - Real-time user count
+- `hooks/` - Custom React hooks
+- `lib/` - Utilities, analytics, constants
+- `locales/` - i18next translation files (multi-language)
 
 ### Backend structure
 
