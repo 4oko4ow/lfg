@@ -1,16 +1,22 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { sendCreateParty } from "@/lib/ws/client";
-import { UserGroupIcon, BoltIcon } from "@heroicons/react/24/outline";
-import { Search, ChevronDown } from "lucide-react";
+import { BoltIcon } from "@heroicons/react/24/outline";
+import { Search, ChevronDown, Plus, Minus, Gamepad2, MessageCircle, Send } from "lucide-react";
 import { analytics } from "@/lib/utils/analytics";
 import { getGames, type GameSlug } from "@/lib/constants/games";
 import { useAuth } from "@/components/providers/AuthProvider";
 import type { ContactHandle, ContactMethodType, Party } from "@/lib/types";
 import { contactHandleToMethod } from "@/lib/utils/contactHelpers";
 import LoginModal from "@/components/modals/LoginModal";
+
+const CONTACT_ICONS: Partial<Record<ContactMethodType, React.ReactNode>> = {
+    steam: <Gamepad2 className="h-3.5 w-3.5" />,
+    discord: <MessageCircle className="h-3.5 w-3.5" />,
+    telegram: <Send className="h-3.5 w-3.5" />,
+};
 
 export default function CreatePartyForm({
     parties = [],
@@ -20,9 +26,8 @@ export default function CreatePartyForm({
     onSuccess?: () => void;
 }) {
     const { t } = useTranslation();
-    const tt = useCallback((key: string, opts?: { defaultValue?: string }) => t(key, opts), [t]);
 
-    const games = useMemo(() => getGames(tt), [tt]);
+    const games = useMemo(() => getGames(t), [t]);
     const [game, setGame] = useState<GameSlug>(games[0]?.slug ?? "abioticfactor");
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
@@ -35,6 +40,10 @@ export default function CreatePartyForm({
     const [gameSearchQuery, setGameSearchQuery] = useState("");
     const otherGamesRef = useRef<HTMLDivElement>(null);
     const formStartTracked = useRef(false);
+
+    // Sync refs during render - no useEffect needed
+    goalRef.current = goal;
+    gameRef.current = game;
 
     const effectiveContactHandles = useMemo((): Partial<Record<ContactMethodType, ContactHandle>> => {
         const handles: Partial<Record<ContactMethodType, ContactHandle>> = { ...contactHandles };
@@ -62,9 +71,6 @@ export default function CreatePartyForm({
         [effectiveContactHandles]
     );
 
-    useEffect(() => { goalRef.current = goal; }, [goal]);
-    useEffect(() => { gameRef.current = game; }, [game]);
-
     useEffect(() => {
         return () => {
             if (goalRef.current.trim()) {
@@ -77,7 +83,8 @@ export default function CreatePartyForm({
         if (!profile || formStartTracked.current) return;
         formStartTracked.current = true;
         analytics.createPartyStart(game);
-    }, [profile, game]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile]); // intentionally exclude game - only track once on first show
 
     useEffect(() => {
         if (!profile) return;
@@ -130,8 +137,7 @@ export default function CreatePartyForm({
     useEffect(() => {
         if (!showOtherGames) return;
         const handleClickOutside = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (otherGamesRef.current && !otherGamesRef.current.contains(target)) {
+            if (otherGamesRef.current && !otherGamesRef.current.contains(e.target as HTMLElement)) {
                 setShowOtherGames(false);
                 setGameSearchQuery("");
             }
@@ -161,119 +167,112 @@ export default function CreatePartyForm({
 
     if (!profile) {
         return (
-            <div className="space-y-4 text-center py-4">
+            <div className="space-y-4 text-center py-6">
                 <div className="relative mx-auto w-fit">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />
                     <BoltIcon className="h-10 w-10 text-blue-400 relative mx-auto" />
                 </div>
-                <p className="text-white font-semibold text-lg">{t("form.title")}</p>
-                <p className="text-sm text-zinc-400">{t("form.login_required")}</p>
+                <div>
+                    <p className="text-white font-semibold">{t("form.title")}</p>
+                    <p className="text-sm text-zinc-500 mt-1">{t("form.login_required")}</p>
+                </div>
                 <button
                     type="button"
                     onClick={() => setShowLoginModal(true)}
-                    className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 shadow-md"
+                    className="rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-2.5 text-sm font-semibold text-white"
                 >
                     {t("auth.sign_in")}
                 </button>
-                {showLoginModal && (
-                    <LoginModal onClose={() => setShowLoginModal(false)} />
-                )}
+                {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
             </div>
         );
     }
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Game selection */}
-            <div className="space-y-3">
-                <label className="block text-sm font-semibold text-zinc-300 mb-2">
-                    {t("form.labels.game")}
-                </label>
+    const selectedInOther = games.find(
+        (g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug)
+    );
+    const canSubmit = availableMethods.length > 0 && goal.trim().length > 0;
 
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Game selection */}
+            <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    {t("form.labels.game")}
+                </p>
+
+                {/* Popular game chips */}
                 {popularGames.length > 0 && (
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">
-                                {t("form.popular_games")}
-                            </span>
-                            {popularGames.some((g) => gameCounts[g.slug.toLowerCase()] > 0) && (
-                                <span className="text-xs text-zinc-500">{t("form.by_ads_count")}</span>
-                            )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {popularGames.map((g) => {
-                                const count = gameCounts[g.slug.toLowerCase()] || 0;
-                                const isSelected = game === g.slug;
-                                return (
-                                    <button
-                                        key={g.slug}
-                                        type="button"
-                                        onClick={() => {
-                                            setGame(g.slug);
-                                            setShowOtherGames(false);
-                                            setGameSearchQuery("");
-                                        }}
-                                        className={`relative group rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${isSelected
-                                            ? "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/40 border border-blue-400/50"
-                                            : "bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700/80 border border-zinc-700/50 hover:border-zinc-600/70"
-                                            }`}
-                                    >
-                                        {isSelected && (
-                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur-sm" />
-                                        )}
-                                        <span className="relative flex items-center gap-2">
-                                            {g.name}
-                                            {count > 0 && (
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected ? "bg-white/20 text-white" : "bg-zinc-700/50 text-zinc-400"}`}>
-                                                    {count}
-                                                </span>
-                                            )}
+                    <div className="flex flex-wrap gap-1.5">
+                        {popularGames.map((g) => {
+                            const count = gameCounts[g.slug.toLowerCase()] || 0;
+                            const isSelected = game === g.slug;
+                            return (
+                                <button
+                                    key={g.slug}
+                                    type="button"
+                                    onClick={() => {
+                                        setGame(g.slug);
+                                        setShowOtherGames(false);
+                                        setGameSearchQuery("");
+                                    }}
+                                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold border transition-all ${
+                                        isSelected
+                                            ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/25"
+                                            : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                    }`}
+                                >
+                                    {g.name}
+                                    {count > 0 && (
+                                        <span className={`font-mono text-[10px] tabular-nums ${isSelected ? "text-blue-200" : "text-zinc-600"}`}>
+                                            {count}
                                         </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
 
+                {/* Other games dropdown */}
                 {otherGames.length > 0 && (
-                    <div className="space-y-2" ref={otherGamesRef}>
-                        <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">
-                            {t("form.other_games")}
-                        </span>
+                    <div ref={otherGamesRef}>
                         {!showOtherGames ? (
                             <button
                                 type="button"
                                 onClick={() => { setShowOtherGames(true); setGameSearchQuery(""); }}
-                                className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-2 pr-10 text-sm text-white transition-all duration-200 hover:border-zinc-600/70 text-left flex items-center justify-between"
+                                className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 py-0.5"
                             >
-                                <span>
-                                    {games.find((g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug))?.name || t("form.select_game")}
-                                </span>
-                                <ChevronDown className="h-4 w-4 text-zinc-500" />
+                                <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                                {selectedInOther
+                                    ? <span className="text-blue-400 font-semibold">{selectedInOther.name}</span>
+                                    : <span>{t("form.other_games")}</span>
+                                }
                             </button>
                         ) : (
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-600 pointer-events-none" />
                                     <input
                                         type="text"
                                         value={gameSearchQuery}
                                         onChange={(e) => setGameSearchQuery(e.target.value)}
                                         placeholder={t("form.search_games")}
-                                        className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50"
+                                        className="w-full pl-9 pr-8 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20"
                                         autoFocus
                                     />
                                     <button
                                         type="button"
                                         onClick={() => { setShowOtherGames(false); setGameSearchQuery(""); }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400"
+                                        aria-label={t("ui.close")}
                                     >
-                                        <ChevronDown className="h-4 w-4 rotate-180" />
+                                        <ChevronDown className="h-3.5 w-3.5 rotate-180" />
                                     </button>
                                 </div>
                                 {filteredOtherGames.length > 0 ? (
-                                    <div className="max-h-48 overflow-y-auto rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 p-2 space-y-1">
+                                    <div className="max-h-44 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900 p-1 space-y-0.5">
                                         {filteredOtherGames.map((g) => {
                                             const isSelected = game === g.slug;
                                             return (
@@ -281,10 +280,11 @@ export default function CreatePartyForm({
                                                     key={g.slug}
                                                     type="button"
                                                     onClick={() => { setGame(g.slug); setShowOtherGames(false); setGameSearchQuery(""); }}
-                                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSelected
-                                                        ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 border border-blue-500/30"
-                                                        : "text-zinc-300 hover:bg-zinc-800/60 hover:text-white"
-                                                        }`}
+                                                    className={`w-full text-left px-3 py-1.5 rounded-md text-xs font-medium ${
+                                                        isSelected
+                                                            ? "bg-blue-600/15 text-blue-300"
+                                                            : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                                                    }`}
                                                 >
                                                     {g.name}
                                                 </button>
@@ -292,9 +292,7 @@ export default function CreatePartyForm({
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 p-4 text-center">
-                                        <p className="text-sm text-zinc-500">{t("form.no_games_found")}</p>
-                                    </div>
+                                    <p className="text-xs text-zinc-600 px-1 py-2">{t("form.no_games_found")}</p>
                                 )}
                             </div>
                         )}
@@ -302,75 +300,95 @@ export default function CreatePartyForm({
                 )}
             </div>
 
-            {/* Description + Slots in a row */}
-            <div className="flex gap-3 items-end">
-                <div className="flex-1">
-                    <label className="block text-sm font-semibold text-zinc-300 mb-1.5">
-                        {t("form.labels.description")}
-                    </label>
-                    <input
-                        type="text"
-                        placeholder={t("form.placeholders.description")}
-                        required
-                        value={goal}
-                        onChange={(e) => setGoal(e.target.value)}
-                        className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-2 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
-                    />
-                </div>
-                <div className="w-24 shrink-0">
-                    <label className="block text-sm font-semibold text-zinc-300 mb-1.5">
-                        {t("form.labels.slots")}
-                    </label>
-                    <div className="relative">
-                        <input
-                            type="number"
-                            value={slots}
-                            min={2}
-                            max={10}
-                            onChange={(e) => setSlots(parseInt(e.target.value || "0", 10))}
-                            className="w-full rounded-lg border-2 border-zinc-700/50 bg-zinc-900/50 px-4 py-2 pl-9 text-sm text-white transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-900/70"
-                        />
-                        <UserGroupIcon className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    </div>
+            {/* Description */}
+            <div className="space-y-2">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    {t("form.labels.description")}
+                </label>
+                <input
+                    type="text"
+                    placeholder={t("form.placeholders.description")}
+                    required
+                    value={goal}
+                    onChange={(e) => setGoal(e.target.value)}
+                    className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 hover:border-zinc-700 focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20"
+                />
+            </div>
+
+            {/* Slots stepper */}
+            <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    {t("form.labels.slots")}
+                </span>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => setSlots((s) => Math.max(2, s - 1))}
+                        disabled={slots <= 2}
+                        className="h-7 w-7 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white hover:border-zinc-700 disabled:opacity-25 disabled:cursor-not-allowed"
+                        aria-label="Decrease slots"
+                    >
+                        <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="font-mono text-sm text-white w-5 text-center tabular-nums select-none">
+                        {slots}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setSlots((s) => Math.min(10, s + 1))}
+                        disabled={slots >= 10}
+                        className="h-7 w-7 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white hover:border-zinc-700 disabled:opacity-25 disabled:cursor-not-allowed"
+                        aria-label="Increase slots"
+                    >
+                        <Plus className="h-3 w-3" />
+                    </button>
                 </div>
             </div>
 
-            {/* Contact info - read-only display */}
+            {/* Contact info */}
             {availableMethods.length > 0 ? (
-                <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/30 px-3 py-2.5 flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-zinc-500">{t("form.contact_methods")}</span>
-                    {availableMethods.map((method) => (
-                        <span
-                            key={method}
-                            className="text-xs px-2 py-0.5 rounded-full bg-zinc-700/60 text-zinc-300 font-medium"
-                        >
-                            {method.charAt(0).toUpperCase() + method.slice(1)}: {effectiveContactHandles[method]?.handle}
-                        </span>
-                    ))}
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 shrink-0">
+                        {t("form.contact_methods")}
+                    </span>
+                    <div className="flex gap-1.5 flex-wrap">
+                        {availableMethods.map((method) => (
+                            <span
+                                key={method}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 font-medium"
+                            >
+                                {CONTACT_ICONS[method]}
+                                {effectiveContactHandles[method]?.handle}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             ) : (
-                <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3">
-                    <p className="text-xs text-yellow-200">
+                <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-3 py-2.5">
+                    <p className="text-xs text-yellow-300/80 leading-relaxed">
                         {t("form.no_contacts_required", "You need to add at least one contact in your profile to create a party.")}{" "}
-                        <a href="/profile" className="underline text-yellow-300">
+                        <a
+                            href="/profile"
+                            className="text-yellow-300 underline underline-offset-2 hover:text-yellow-200"
+                        >
                             {t("form.go_to_profile")}
                         </a>
                     </p>
                 </div>
             )}
 
+            {/* Submit */}
             <button
                 type="submit"
-                disabled={availableMethods.length === 0 || !goal.trim()}
-                className={`w-full rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 ${availableMethods.length === 0 || !goal.trim()
-                    ? "bg-zinc-700 cursor-not-allowed opacity-50"
-                    : "bg-gradient-to-r from-blue-600 via-blue-500 to-purple-500 hover:from-blue-500 hover:via-blue-400 hover:to-purple-400 hover:shadow-lg hover:shadow-blue-500/40 border border-blue-400/30"
-                    }`}
+                disabled={!canSubmit}
+                className={`w-full rounded-lg py-2.5 text-sm font-bold text-white flex items-center justify-center gap-2 ${
+                    canSubmit
+                        ? "bg-blue-600 hover:bg-blue-500"
+                        : "bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
+                }`}
             >
-                <span className="flex items-center justify-center gap-2">
-                    {availableMethods.length > 0 && goal.trim() && <BoltIcon className="h-4 w-4" />}
-                    {t("form.cta")}
-                </span>
+                {canSubmit && <BoltIcon className="h-4 w-4" />}
+                {t("form.cta")}
             </button>
         </form>
     );

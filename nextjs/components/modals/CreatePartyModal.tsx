@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { XMarkIcon } from "@heroicons/react/24/solid";
@@ -16,6 +16,7 @@ export default function CreatePartyModal({
   parties?: Party[];
 }) {
   const { t } = useTranslation();
+  const titleId = useId();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -30,32 +31,34 @@ export default function CreatePartyModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] animate-fadeIn p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[9999] flex items-start justify-center p-4 pt-[8vh] overflow-y-auto animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="bg-zinc-900/95 backdrop-blur-md p-6 rounded-xl w-full max-w-2xl text-white shadow-2xl border border-zinc-700/50 animate-slideIn my-auto max-h-[90vh] overflow-y-auto"
+        className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-lg text-white shadow-2xl shadow-black/60 mb-8 animate-slideIn"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/60">
+          <h2 id={titleId} className="text-sm font-semibold text-white">
             {t("form.title")}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white transition-colors p-1"
+            className="text-zinc-500 hover:text-white p-1 rounded-md hover:bg-zinc-800"
             aria-label={t("ui.close")}
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="max-h-[calc(90vh-100px)] overflow-y-auto">
-          <CreatePartyForm
-            parties={parties}
-            onSuccess={onClose}
-          />
+        {/* Body */}
+        <div className="px-5 py-5">
+          <CreatePartyForm parties={parties} onSuccess={onClose} />
         </div>
       </div>
     </div>
