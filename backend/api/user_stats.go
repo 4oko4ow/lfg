@@ -265,11 +265,11 @@ func (h *UserStatsHandler) getPublicProfile(userID string) (*PublicProfile, erro
 
 	// Get user info from auth_users
 	row := h.db.QueryRow(`
-		SELECT COALESCE(display_name, ''), COALESCE(avatar_url, '')
+		SELECT COALESCE(display_name, '')
 		FROM auth_users
 		WHERE id = $1
 	`, userID)
-	err := row.Scan(&profile.DisplayName, &profile.AvatarURL)
+	err := row.Scan(&profile.DisplayName)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
