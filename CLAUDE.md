@@ -14,6 +14,8 @@ LFG (FindParty) is a platform for finding gaming teammates. Users create or join
 
 Live: https://findparty.online | API: https://lfg.findparty.online
 
+Vercel project name: `lfg` (deploy from `nextjs/` directory with `cd nextjs && vercel --prod`)
+
 ## Commands
 
 ### Frontend (`cd frontend`)

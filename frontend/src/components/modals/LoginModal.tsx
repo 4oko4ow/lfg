@@ -94,7 +94,17 @@ export default function LoginModal({ onClose, game }: { onClose: () => void; gam
             <TelegramLoginButton
               botUsername={telegramBotUsername}
               authUrl={telegramAuthUrl}
-            />
+              masked
+            >
+              <button
+                type="button"
+                className="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white border-0 rounded-lg px-6 py-3.5 font-semibold transition-all duration-200 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+              >
+                <span className="text-lg font-bold">
+                  {t("auth.sign_in_with_telegram", "Sign in with Telegram")}
+                </span>
+              </button>
+            </TelegramLoginButton>
           )}
           {PROVIDERS.map((provider) => (
             <button
