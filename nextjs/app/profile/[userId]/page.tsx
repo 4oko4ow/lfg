@@ -6,6 +6,15 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Trophy, Users, Flame, Zap } from "lucide-react";
 
+interface PublicParty {
+  id: string;
+  game: string;
+  goal: string;
+  slots: number;
+  joined: number;
+  created_at: string;
+}
+
 interface PublicProfile {
   display_name: string;
   avatar_url?: string;
@@ -14,6 +23,7 @@ interface PublicProfile {
   parties_created: number;
   parties_joined: number;
   current_streak: number;
+  parties?: PublicParty[];
 }
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080").replace(/\/$/, "");
@@ -122,6 +132,30 @@ export default function PublicProfilePage() {
             </div>
           ))}
         </div>
+
+        {profile.parties && profile.parties.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">
+              {t("profile.active_parties", "Активные пати")}
+            </h2>
+            <div className="flex flex-col gap-2">
+              {profile.parties.map((party) => (
+                <div
+                  key={party.id}
+                  className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{party.game}</p>
+                    <p className="text-xs text-zinc-500 truncate">{party.goal}</p>
+                  </div>
+                  <div className="shrink-0 text-xs text-zinc-400 bg-zinc-800 rounded-lg px-2 py-1">
+                    {party.joined}/{party.slots}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
