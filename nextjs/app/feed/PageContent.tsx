@@ -314,7 +314,7 @@ export function PartyFeedPageContent() {
     const getPriority = (p: Party) => {
       if (p.pinned) return 100;
       const createdAgoMin = (now - new Date(p.created_at).getTime()) / 60000;
-      if (createdAgoMin < 60) return 50;
+      if (createdAgoMin < 1440) return 50;
       if (p.joined === p.slots - 1 && p.slots > 2) return 10;
       if (p.joined >= p.slots) return -10;
       return 0;
