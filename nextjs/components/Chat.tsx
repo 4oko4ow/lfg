@@ -38,8 +38,6 @@ const Chat = ({
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (isMobile) return false;
@@ -67,59 +65,6 @@ const Chat = ({
       clearInterval(pollInterval);
     };
   }, [isCollapsed]);
-
-  useEffect(() => {
-    if (isMobile || !chatRef.current) return;
-
-    const chatElement = chatRef.current;
-    let currentIsDragging = false;
-    let currentDragOffset = { x: 0, y: 0 };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const header = target.closest('[data-drag-handle]');
-      if (!header || target.tagName === 'BUTTON') return;
-
-      e.preventDefault();
-      currentIsDragging = true;
-      setIsDragging(true);
-      const rect = chatElement.getBoundingClientRect();
-      currentDragOffset = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!currentIsDragging) return;
-
-      const newX = e.clientX - currentDragOffset.x;
-      const newY = e.clientY - currentDragOffset.y;
-
-      const maxX = window.innerWidth - chatElement.offsetWidth;
-      const maxY = window.innerHeight - chatElement.offsetHeight;
-
-      setPosition({
-        x: Math.max(0, Math.min(newX, maxX)),
-        y: Math.max(0, Math.min(newY, maxY)),
-      });
-    };
-
-    const handleMouseUp = () => {
-      currentIsDragging = false;
-      setIsDragging(false);
-    };
-
-    chatElement.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      chatElement.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isMobile]);
 
   useEffect(() => {
     scrollToBottom();
@@ -239,23 +184,13 @@ const Chat = ({
       ref={chatRef}
       className={
         isMobile
-          ? "fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 overflow-hidden"
+          ? "fixed inset-0 z-50 flex flex-col bg-zinc-950 overflow-hidden"
           : isCollapsed
-          ? `fixed w-72 sm:w-80 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
-          : `fixed w-72 sm:w-80 h-80 sm:h-96 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
-      }
-      style={
-        !isMobile && position.x !== 0 && position.y !== 0
-          ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto', transform: 'none' }
-          : !isMobile
-          ? { right: '1rem', bottom: '1rem' }
-          : {}
+          ? "fixed right-4 bottom-4 w-72 sm:w-80 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-40 backdrop-blur-sm"
+          : "fixed right-4 bottom-4 w-72 sm:w-80 h-80 sm:h-96 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-40 backdrop-blur-sm"
       }
     >
-      <div
-        data-drag-handle
-        className={`bg-zinc-800/90 p-3 text-sm font-semibold border-b border-zinc-700/60 flex items-center justify-between backdrop-blur-sm ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
-      >
+      <div className="bg-zinc-800/90 p-3 text-sm font-semibold border-b border-zinc-700/60 flex items-center justify-between backdrop-blur-sm">
         <div className="flex items-center gap-2 sm:gap-2.5">
           <span className="text-white font-bold">{t("chat.title", "Chat")}</span>
           <div className="relative">
@@ -298,7 +233,7 @@ const Chat = ({
 
       {!isCollapsed && (
         <>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 text-sm">
             {messages.length === 0 ? (
               <div className="text-zinc-500 text-center py-6 sm:py-8">
                 <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800/50 mb-3 border border-zinc-700/50">
