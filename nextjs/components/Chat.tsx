@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { analytics } from "@/lib/utils/analytics";
-import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon, ChevronDownIcon, ChevronUpIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import LoginModal from "@/components/modals/LoginModal";
@@ -241,20 +241,20 @@ const Chat = ({
         isMobile
           ? "fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 overflow-hidden"
           : isCollapsed
-          ? `fixed w-72 sm:w-80 bg-gradient-to-br from-zinc-900/95 to-zinc-950/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
-          : `fixed w-72 sm:w-80 h-80 sm:h-96 bg-gradient-to-br from-zinc-900/95 to-zinc-950/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
+          ? `fixed w-72 sm:w-80 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
+          : `fixed w-72 sm:w-80 h-80 sm:h-96 bg-zinc-900/95 border border-zinc-700/60 rounded-xl flex flex-col shadow-2xl shadow-zinc-900/50 overflow-hidden z-50 backdrop-blur-sm ${isDragging ? 'cursor-grabbing' : 'cursor-default'}`
       }
       style={
         !isMobile && position.x !== 0 && position.y !== 0
           ? { left: `${position.x}px`, top: `${position.y}px`, right: 'auto', bottom: 'auto', transform: 'none' }
           : !isMobile
-          ? { right: '1rem', top: '50%', transform: 'translateY(-50%)' }
+          ? { right: '1rem', bottom: '1rem' }
           : {}
       }
     >
       <div
         data-drag-handle
-        className={`bg-gradient-to-r from-zinc-800/90 to-zinc-900/90 p-3 text-sm font-semibold border-b border-zinc-700/60 flex items-center justify-between backdrop-blur-sm ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        className={`bg-zinc-800/90 p-3 text-sm font-semibold border-b border-zinc-700/60 flex items-center justify-between backdrop-blur-sm ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
       >
         <div className="flex items-center gap-2 sm:gap-2.5">
           <span className="text-white font-bold">{t("chat.title", "Chat")}</span>
@@ -298,7 +298,7 @@ const Chat = ({
 
       {!isCollapsed && (
         <>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm bg-gradient-to-b from-zinc-950/50 to-transparent">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
             {messages.length === 0 ? (
               <div className="text-zinc-500 text-center py-6 sm:py-8">
                 <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800/50 mb-3 border border-zinc-700/50">
@@ -308,7 +308,7 @@ const Chat = ({
                 <p className="text-[10px] sm:text-xs text-zinc-600 mt-1">Be the first to say something!</p>
               </div>
             ) : (
-              messages.map((msg) => {
+              messages.map((msg, index) => {
                 const isSystem = msg.user_display_name === "system" || (!msg.user_id && !msg.optimistic);
                 if (isSystem) {
                   return (
@@ -320,30 +320,46 @@ const Chat = ({
                     </div>
                   );
                 }
+                const prev = messages[index - 1];
+                const prevIsSystem = prev && (prev.user_display_name === "system" || (!prev.user_id && !prev.optimistic));
+                const isFirstInGroup =
+                  !prev ||
+                  prevIsSystem ||
+                  prev.user_id !== msg.user_id ||
+                  new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime() > 5 * 60 * 1000;
                 return (
                 <div
                   key={msg.id || msg.client_msg_id}
-                  className={`group rounded-lg p-2.5 sm:p-3 transition-all duration-200 ${msg.optimistic ? "opacity-70 italic bg-zinc-800/20" : "bg-zinc-800/30 hover:bg-zinc-800/40 border border-zinc-700/30"}`}
+                  className={`group rounded-lg p-2.5 sm:p-3 transition-all duration-200 ${isFirstInGroup ? "mt-3" : "mt-0.5"} ${msg.optimistic ? "opacity-70 italic bg-zinc-800/20" : "bg-zinc-800/30 hover:bg-zinc-800/40 border border-zinc-700/30"}`}
                 >
-                  <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
-                    {msg.user_id ? (
-                      <Link
-                        href={`/profile/${msg.user_id}`}
-                        className="text-blue-400 font-semibold text-[10px] sm:text-xs hover:text-blue-300 transition-colors truncate"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {displayName(msg)}
-                      </Link>
-                    ) : (
-                      <span className="text-blue-400 font-semibold text-[10px] sm:text-xs truncate">
-                        {displayName(msg)}
+                  {isFirstInGroup && (
+                    <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
+                      {msg.user_id ? (
+                        <Link
+                          href={`/profile/${msg.user_id}`}
+                          className="text-blue-400 font-semibold text-[10px] sm:text-xs hover:text-blue-300 transition-colors truncate"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {displayName(msg)}
+                        </Link>
+                      ) : (
+                        <span className="text-blue-400 font-semibold text-[10px] sm:text-xs truncate">
+                          {displayName(msg)}
+                        </span>
+                      )}
+                      <span className="text-zinc-500 text-[9px] sm:text-[10px] whitespace-nowrap font-medium flex-shrink-0">
+                        {timeFmt.format(new Date(msg.created_at))}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-end">
+                    <div className="text-zinc-200 break-words text-xs sm:text-sm leading-relaxed flex-1">{msg.message}</div>
+                    {!isFirstInGroup && (
+                      <span className="text-zinc-600 text-[9px] opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                        {timeFmt.format(new Date(msg.created_at))}
                       </span>
                     )}
-                    <span className="text-zinc-500 text-[9px] sm:text-[10px] whitespace-nowrap font-medium flex-shrink-0">
-                      {timeFmt.format(new Date(msg.created_at))}
-                    </span>
                   </div>
-                  <div className="text-zinc-200 break-words text-xs sm:text-sm leading-relaxed">{msg.message}</div>
                 </div>
                 );
               })
@@ -351,7 +367,7 @@ const Chat = ({
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t border-zinc-700/60 bg-gradient-to-b from-zinc-950 to-zinc-900/95 backdrop-blur-sm">
+          <div className="p-4 border-t border-zinc-700/60 bg-zinc-900 backdrop-blur-sm">
             {!profile ? (
               <div className="text-center py-2 sm:py-3">
                 <p className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3 font-medium">
@@ -369,17 +385,28 @@ const Chat = ({
                 )}
               </div>
             ) : (
-              <input
-                className="w-full text-sm p-3 bg-zinc-800/60 border border-zinc-700/50 text-white rounded-lg transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-800/80 placeholder:text-zinc-500"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder={t("chat.placeholder", "Write a message…")}
-                autoFocus={isMobile}
-                onFocus={scrollToBottom}
-                inputMode="text"
-                autoComplete="off"
-              />
+              <div className="flex items-center">
+                <input
+                  className="flex-1 text-sm p-3 bg-zinc-800/60 border border-zinc-700/50 text-white rounded-lg transition-all duration-200 hover:border-zinc-600/70 focus:border-blue-500/50 focus:bg-zinc-800/80 placeholder:text-zinc-500"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  placeholder={t("chat.placeholder", "Write a message…")}
+                  autoFocus={isMobile}
+                  onFocus={scrollToBottom}
+                  inputMode="text"
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  onClick={sendMessage}
+                  disabled={!input.trim()}
+                  className="bg-blue-600 hover:bg-blue-500 text-white rounded-lg p-2.5 ml-2 transition-colors flex-shrink-0 disabled:opacity-40"
+                  aria-label={t("chat.send", "Send")}
+                >
+                  <PaperAirplaneIcon className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </>
