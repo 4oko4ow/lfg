@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 import Header from "@/components/Header";
@@ -43,6 +44,12 @@ export default function RootLayout({
       lang="ru"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
+      <Script
+        defer
+        src="https://analytics.findparty.online/script.js"
+        data-website-id="298f427c-56ef-4732-9a45-ff7f39423558"
+        strategy="afterInteractive"
+      />
       <body className="bg-zinc-950 text-white antialiased">
         <Providers>
           <Header />
