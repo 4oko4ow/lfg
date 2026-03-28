@@ -115,6 +115,28 @@ The changelog page (`/changelog`) is a static Next.js page at `nextjs/app/change
 
 No database or CMS involved - it's plain static HTML rendered at build time.
 
+### When to update the changelog
+
+**Before every push**, check if any committed changes are significant enough to mention. Update the changelog if the changes include:
+
+- New features visible to users (new UI elements, new pages, new flows)
+- Meaningful UX improvements (behaviour changes, interaction changes, performance wins)
+- Bug fixes that users would notice
+
+**Skip the changelog for:**
+
+- Refactors with no visible effect
+- Code style or linting fixes
+- Internal tooling or config changes
+- Backend-only changes with no user-facing impact
+
+**Rules for writing entries:**
+
+- Write in Russian, from the user's perspective ("Чат: кнопка отправки — больше не нужно жать Enter")
+- One entry per deploy date — group all changes from that date into a single `ENTRIES` item
+- Keep items short (one sentence), explain the benefit not the implementation
+- Never mention technical details (file names, function names, DB columns)
+
 ## No tests
 
 There are no test files or test configuration in this project. TypeScript strict mode and ESLint serve as the primary code quality tools.
