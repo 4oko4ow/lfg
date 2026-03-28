@@ -330,7 +330,7 @@ export function PartyFeedPageContent() {
       new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime()
     );
 
-    return [...active, ...scheduled];
+    return [...scheduled, ...active];
   }, [parties, filter, ALL_LABEL, games]);
 
   useEffect(() => {
