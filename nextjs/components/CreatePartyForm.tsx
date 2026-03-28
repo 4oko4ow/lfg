@@ -28,7 +28,8 @@ export default function CreatePartyForm({
     const { t } = useTranslation();
 
     const games = useMemo(() => getGames(t), [t]);
-    const [game, setGame] = useState<GameSlug>(games[0]?.slug ?? "abioticfactor");
+    const [game, setGame] = useState<string>(games[0]?.slug ?? "abioticfactor");
+    const [isCustomGame, setIsCustomGame] = useState(false);
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
     const [scheduleOption, setScheduleOption] = useState<'now' | 'in_2h' | 'tonight' | 'tomorrow'>('now');
@@ -130,10 +131,10 @@ export default function CreatePartyForm({
     }, [otherGames, gameSearchQuery]);
 
     useEffect(() => {
-        if (!games.find((g) => g.slug === game)) {
+        if (!isCustomGame && !games.find((g) => g.slug === game)) {
             setGame(games[0]?.slug ?? "abioticfactor");
         }
-    }, [games, game]);
+    }, [games, game, isCustomGame]);
 
     useEffect(() => {
         if (!showOtherGames) return;
@@ -210,9 +211,9 @@ export default function CreatePartyForm({
         );
     }
 
-    const selectedInOther = games.find(
-        (g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug)
-    );
+    const selectedInOther = isCustomGame
+        ? { name: game }
+        : games.find((g) => g.slug === game && !popularGames.some((pg) => pg.slug === g.slug));
     const canSubmit = availableMethods.length > 0 && goal.trim().length > 0;
 
     return (
@@ -236,6 +237,7 @@ export default function CreatePartyForm({
                                     type="button"
                                     onClick={() => {
                                         setGame(g.slug);
+                                        setIsCustomGame(false);
                                         setShowOtherGames(false);
                                         setGameSearchQuery("");
                                     }}
@@ -301,7 +303,7 @@ export default function CreatePartyForm({
                                                 <button
                                                     key={g.slug}
                                                     type="button"
-                                                    onClick={() => { setGame(g.slug); setShowOtherGames(false); setGameSearchQuery(""); }}
+                                                    onClick={() => { setGame(g.slug); setIsCustomGame(false); setShowOtherGames(false); setGameSearchQuery(""); }}
                                                     className={`w-full text-left px-3 py-1.5 rounded-md text-xs font-medium ${
                                                         isSelected
                                                             ? "bg-blue-600/15 text-blue-300"
@@ -313,6 +315,20 @@ export default function CreatePartyForm({
                                             );
                                         })}
                                     </div>
+                                ) : gameSearchQuery.trim() ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setGame(gameSearchQuery.trim());
+                                            setIsCustomGame(true);
+                                            setShowOtherGames(false);
+                                            setGameSearchQuery("");
+                                        }}
+                                        className="w-full text-left px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-xs text-blue-400 hover:text-blue-300 hover:border-zinc-700 flex items-center gap-2"
+                                    >
+                                        <Plus className="h-3 w-3 shrink-0" />
+                                        {t("form.use_custom_game", { name: gameSearchQuery.trim() })}
+                                    </button>
                                 ) : (
                                     <p className="text-xs text-zinc-600 px-1 py-2">{t("form.no_games_found")}</p>
                                 )}

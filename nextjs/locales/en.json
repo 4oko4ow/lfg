@@ -128,6 +128,7 @@
     "select_game": "Select a game",
     "search_games": "Search games...",
     "no_games_found": "No games found",
+    "use_custom_game": "Create party for «{{name}}»",
     "expiration": {
       "label": "Auto-hide after",
       "hours": "h",

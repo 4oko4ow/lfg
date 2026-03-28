@@ -132,6 +132,7 @@
     "select_game": "Выберите игру",
     "search_games": "Поиск игр...",
     "no_games_found": "Игры не найдены",
+    "use_custom_game": "Создать пати для «{{name}}»",
     "expiration": {
       "label": "Автоматически скрыть через",
       "hours": "ч",
