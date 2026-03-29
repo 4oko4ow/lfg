@@ -25,6 +25,7 @@ type User struct {
 	ID               string    `json:"id"`
 	DisplayName      string    `json:"display_name"`
 	PreferredContact *Provider `json:"preferred_contact,omitempty"`
+	IsAdmin          bool      `json:"is_admin,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }

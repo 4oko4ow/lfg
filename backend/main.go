@@ -11,6 +11,7 @@ import (
 
 	"lfg/api"
 	"lfg/auth"
+	"lfg/notify"
 	"lfg/ws"
 )
 
@@ -95,6 +96,7 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
+	notify.Init()
 	ws.InitDB()
 
 	secret := os.Getenv("AUTH_JWT_SECRET")
@@ -163,6 +165,7 @@ func main() {
 		partiesHandler := api.NewPartiesHandler(db, sessionManager)
 		statsHandler := api.NewStatsHandler(db)
 		communityLeadsHandler := api.NewCommunityLeadsHandler(db)
+		adminHandler := api.NewAdminHandler(db, sessionManager)
 
 		mux.HandleFunc("/api/chat/messages", chatHandler.GetMessages)
 		mux.HandleFunc("/api/chat/messages/create", chatHandler.CreateMessage)
@@ -174,6 +177,8 @@ func main() {
 		mux.HandleFunc("/api/stats", statsHandler.GetStats)
 		mux.HandleFunc("/api/community-leads", communityLeadsHandler.CreateLead)
 		mux.HandleFunc("/api/users/", userStatsHandler.GetPublicProfile)
+		mux.HandleFunc("/api/admin/parties/delete", adminHandler.DeleteParty)
+		mux.HandleFunc("/api/admin/parties/hide", adminHandler.HideParty)
 	}
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {

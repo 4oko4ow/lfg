@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { ContactMethod, Party } from "@/lib/types";
+import { Trash2, EyeOff } from "lucide-react";
 import {
   UserGroupIcon,
   BoltIcon,
@@ -64,11 +65,15 @@ export default function PartyCard({
   onContactClick,
   onJoinClick,
   onFullClick,
+  onAdminDelete,
+  onAdminHide,
 }: {
   party: Party;
   onContactClick: () => void;
   onJoinClick: () => void;
   onFullClick?: () => void;
+  onAdminDelete?: () => void;
+  onAdminHide?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -240,9 +245,29 @@ const renderContacts = (contacts?: ContactMethod[]) => {
           )}
         </div>
 
-        <span className="text-xs font-medium text-zinc-400 whitespace-nowrap px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex-shrink-0">
-          {timeAgo(party.created_at, t)}
-        </span>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {onAdminHide && (
+            <button
+              onClick={onAdminHide}
+              title="Скрыть"
+              className="p-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-zinc-500 hover:text-yellow-400 hover:border-yellow-500/40 transition-colors"
+            >
+              <EyeOff className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {onAdminDelete && (
+            <button
+              onClick={onAdminDelete}
+              title="Удалить"
+              className="p-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-zinc-500 hover:text-red-400 hover:border-red-500/40 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <span className="text-xs font-medium text-zinc-400 whitespace-nowrap px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+            {timeAgo(party.created_at, t)}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-start gap-3 text-sm text-zinc-200 bg-zinc-900/30 rounded-lg p-4 border border-zinc-700/30">

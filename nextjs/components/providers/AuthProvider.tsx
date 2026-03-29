@@ -30,6 +30,7 @@ export type AuthProfile = {
   id: string;
   displayName: string;
   preferredContact: ContactMethodType | null;
+  isAdmin: boolean;
   identities: LinkedIdentity[];
 };
 
@@ -77,6 +78,7 @@ type RawProfile = {
     id: string;
     display_name: string;
     preferred_contact?: ContactMethodType | null;
+    is_admin?: boolean;
   };
   identities?: {
     provider: ContactMethodType;
@@ -118,6 +120,7 @@ function mapProfile(raw: RawProfile): {
       id: raw.user.id,
       displayName: raw.user.display_name,
       preferredContact: raw.user.preferred_contact ?? null,
+      isAdmin: raw.user.is_admin ?? false,
       identities,
     },
     contacts,

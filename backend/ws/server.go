@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"lfg/auth"
+	"lfg/notify"
 
 	"github.com/gorilla/websocket"
 )
@@ -88,6 +89,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 			AddParty(p, true)
 			Broadcast(Message{Type: "new_party", Payload: p})
+			notify.NewParty(p.Game, p.Goal, p.Slots, p.UserID)
 
 		case "join_party":
 			var payload JoinPartyPayload

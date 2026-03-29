@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"lfg/notify"
+
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
@@ -21,6 +23,7 @@ type dbUser struct {
 	ID               string
 	DisplayName      string
 	PreferredContact *string
+	IsAdmin          bool
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -140,6 +143,7 @@ func (s *DBStore) UpsertIdentity(linkUserID string, provider Provider, providerI
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
+		notify.NewUser(username, string(provider))
 	} else {
 		// Update existing user
 		if username != "" {
@@ -235,6 +239,7 @@ func (s *DBStore) GetProfile(userID string) (*Profile, error) {
 			ID:               user.ID,
 			DisplayName:      user.DisplayName,
 			PreferredContact: preferredContact,
+			IsAdmin:          user.IsAdmin,
 			CreatedAt:        user.CreatedAt,
 			UpdatedAt:        user.UpdatedAt,
 		},
@@ -311,9 +316,9 @@ func (s *DBStore) getUser(userID string) (*dbUser, error) {
 	var user dbUser
 	var preferredContact sql.NullString
 	err := s.db.QueryRow(
-		"SELECT id, display_name, preferred_contact, created_at, updated_at FROM auth_users WHERE id = $1",
+		"SELECT id, display_name, preferred_contact, is_admin, created_at, updated_at FROM auth_users WHERE id = $1",
 		userID,
-	).Scan(&user.ID, &user.DisplayName, &preferredContact, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.DisplayName, &preferredContact, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 
 	if err == sql.ErrNoRows {
 		return nil, nil

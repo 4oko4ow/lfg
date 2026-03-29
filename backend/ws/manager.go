@@ -102,6 +102,13 @@ func RemoveParty(id string) {
 	go RemovePartyFromDatabase(id)
 }
 
+// RemovePartyFromMemory удаляет партию только из памяти, не трогая базу данных.
+func RemovePartyFromMemory(id string) {
+	partyLock.Lock()
+	defer partyLock.Unlock()
+	delete(parties, id)
+}
+
 func UpdatePartyJoined(id string, userID string) error {
 	partyLock.Lock()
 

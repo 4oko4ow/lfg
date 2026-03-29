@@ -113,7 +113,7 @@ func SavePartyToDatabase(p *Party) error {
 }
 
 func LoadPartiesFromDatabase() []*Party {
-	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id, mic_required, age_range, skill_level FROM parties ORDER BY created_at DESC`
+	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id, mic_required, age_range, skill_level FROM parties WHERE hidden = FALSE ORDER BY created_at DESC`
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Printf("Error loading parties from database: %v", err)

@@ -443,6 +443,28 @@ export function PartyFeedPageContent() {
     analytics.joinFullPartyAttempt(party.game, party.id);
   };
 
+  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "").replace(/\/$/, "");
+
+  const handleAdminDelete = async (party: Party) => {
+    if (!confirm(`Удалить пати "${party.game}"?`)) return;
+    await fetch(`${backendUrl}/api/admin/parties/delete`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: party.id }),
+    });
+  };
+
+  const handleAdminHide = async (party: Party) => {
+    if (!confirm(`Скрыть пати "${party.game}"?`)) return;
+    await fetch(`${backendUrl}/api/admin/parties/hide`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: party.id }),
+    });
+  };
+
   return (
     <>
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-white">
@@ -647,6 +669,8 @@ export function PartyFeedPageContent() {
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
                   onFullClick={() => handleFullPartyClick(party)}
+                  onAdminDelete={profile?.isAdmin ? () => handleAdminDelete(party) : undefined}
+                  onAdminHide={profile?.isAdmin ? () => handleAdminHide(party) : undefined}
                 />
               </div>
             ))}
@@ -689,6 +713,8 @@ export function PartyFeedPageContent() {
                   onContactClick={() => handleContactClick(party)}
                   onJoinClick={() => handleJoinClick(party)}
                   onFullClick={() => handleFullPartyClick(party)}
+                  onAdminDelete={profile?.isAdmin ? () => handleAdminDelete(party) : undefined}
+                  onAdminHide={profile?.isAdmin ? () => handleAdminHide(party) : undefined}
                 />
               </div>
             ))}
