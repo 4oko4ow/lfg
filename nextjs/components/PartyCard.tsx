@@ -8,7 +8,7 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
-import { Timer } from "lucide-react";
+import { Timer, Mic, MicOff } from "lucide-react";
 import { Gamepad2, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getGameName } from "@/lib/constants/games";
@@ -218,12 +218,12 @@ const renderContacts = (contacts?: ContactMethod[]) => {
             <div className="flex flex-wrap gap-1.5">
               {party.mic_required === true && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium text-green-300/80 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/25">
-                  🎤 Mic
+                  <Mic className="w-3 h-3" /> Mic
                 </span>
               )}
               {party.mic_required === false && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 bg-zinc-800/30 px-2 py-0.5 rounded border border-zinc-700/40">
-                  🔇 No mic
+                  <MicOff className="w-3 h-3" /> No mic
                 </span>
               )}
               {party.age_range && (
