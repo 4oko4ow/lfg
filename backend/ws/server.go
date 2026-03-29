@@ -81,6 +81,9 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
                                 ScheduledAt: payload.ScheduledAt,
                                 Contacts:    payload.Contacts,
                                 UserID:      userID,
+                                MicRequired: payload.MicRequired,
+                                AgeRange:    payload.AgeRange,
+                                SkillLevel:  payload.SkillLevel,
                         }
 
 			AddParty(p, true)

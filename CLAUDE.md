@@ -102,7 +102,9 @@ WebSocket message types:
 
 ## Changelog
 
-The changelog page (`/changelog`) is a static Next.js page at `nextjs/app/changelog/page.tsx`. To add a new entry, prepend an object to the `ENTRIES` array:
+The changelog data lives in `nextjs/lib/changelog.ts` — the single source of truth. The page at `nextjs/app/changelog/page.tsx` imports `ENTRIES` from there.
+
+To add a new entry, prepend an object to the `ENTRIES` array in `nextjs/lib/changelog.ts`:
 
 ```ts
 {
@@ -112,6 +114,8 @@ The changelog page (`/changelog`) is a static Next.js page at `nextjs/app/change
   ],
 },
 ```
+
+`LATEST_CHANGELOG_DATE` is derived automatically from `ENTRIES[0].date` — no need to update it manually. The header shows a blue dot indicator next to "Changelog" for users who haven't seen the latest entry yet (tracked via `localStorage`).
 
 No database or CMS involved - it's plain static HTML rendered at build time.
 

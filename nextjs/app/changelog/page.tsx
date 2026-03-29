@@ -1,31 +1,5 @@
-type Entry = {
-  date: string;
-  items: string[];
-};
-
-const ENTRIES: Entry[] = [
-  {
-    date: "2026-03-28",
-    items: [
-      "Чат: кнопка отправки — больше не нужно жать Enter",
-      "Чат: несколько сообщений подряд от одного игрока теперь группируются — лента стала чище",
-      "Чат переехал в правый нижний угол экрана",
-      "Свежие пати теперь держатся в топе ленты весь день, а не только час",
-      "Можно написать название игры вручную, если не нашлась в списке",
-      "При вступлении в пати контакт автоматически копируется в буфер — не нужно лишних кликов",
-    ],
-  },
-  {
-    date: "2026-03-27",
-    items: [
-      "Отправка сообщений в чат теперь требует авторизации",
-      "Чат переведён на WebSocket — сообщения приходят мгновенно",
-      "Публичные страницы профилей по адресу /profile/:userId",
-      "Ники в чате теперь ведут на профиль игрока",
-      "Эта страница с историей изменений",
-    ],
-  },
-];
+import { ENTRIES } from "@/lib/changelog";
+import { MarkChangelogSeen } from "./MarkChangelogSeen";
 
 export const metadata = {
   title: "Изменения — FindParty",
@@ -35,6 +9,7 @@ export const metadata = {
 export default function ChangelogPage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 pt-20 pb-16">
+      <MarkChangelogSeen />
       <div className="max-w-2xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-8 text-white">Что нового</h1>
         <div className="space-y-10">

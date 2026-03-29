@@ -14,6 +14,9 @@ type Party struct {
 	Contacts    []ContactMethod `json:"contacts,omitempty"`
 	Pinned      bool            `json:"pinned"`
 	UserID      string          `json:"user_id,omitempty"`
+	MicRequired *bool           `json:"mic_required,omitempty"`
+	AgeRange    *string         `json:"age_range,omitempty"`
+	SkillLevel  *string         `json:"skill_level,omitempty"`
 }
 
 type ContactMethod struct {
@@ -35,6 +38,9 @@ type CreatePartyPayload struct {
 	ExpiresAt   *time.Time      `json:"expires_at,omitempty"`
 	ScheduledAt *time.Time      `json:"scheduled_at,omitempty"`
 	Contacts    []ContactMethod `json:"contacts,omitempty"`
+	MicRequired *bool           `json:"mic_required,omitempty"`
+	AgeRange    *string         `json:"age_range,omitempty"`
+	SkillLevel  *string         `json:"skill_level,omitempty"`
 }
 
 type JoinPartyPayload struct {

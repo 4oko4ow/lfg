@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useOnlineCount } from "@/components/providers/OnlineCountProvider";
 import LoginModal from "@/components/modals/LoginModal";
 import { analytics } from "@/lib/utils/analytics";
+import { LATEST_CHANGELOG_DATE, CHANGELOG_SEEN_KEY } from "@/lib/changelog";
 
 export default function Header() {
   const { t } = useTranslation();
@@ -17,6 +18,12 @@ export default function Header() {
   const { onlineCount } = useOnlineCount();
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [hasNewChangelog, setHasNewChangelog] = useState(false);
+
+  useEffect(() => {
+    const seen = localStorage.getItem(CHANGELOG_SEEN_KEY);
+    setHasNewChangelog(seen !== LATEST_CHANGELOG_DATE);
+  }, []);
 
   const profilePath = "/profile";
   const homePath = "/";
@@ -46,9 +53,12 @@ export default function Header() {
           </Link>
           <Link
             href="/changelog"
-            className="hidden sm:inline text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-200"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-200"
           >
             Changelog
+            {hasNewChangelog && (
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+            )}
           </Link>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 text-sm flex-shrink-0">

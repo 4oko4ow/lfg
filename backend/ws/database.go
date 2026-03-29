@@ -68,8 +68,8 @@ func SavePartyToDatabase(p *Party) error {
 
 	// Try INSERT first, then UPDATE on conflict
 	query := `
-		INSERT INTO parties (id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO parties (id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id, mic_required, age_range, skill_level)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 		ON CONFLICT (id) DO UPDATE SET
 			game = EXCLUDED.game,
 			goal = EXCLUDED.goal,
@@ -80,7 +80,10 @@ func SavePartyToDatabase(p *Party) error {
 			scheduled_at = EXCLUDED.scheduled_at,
 			contacts = EXCLUDED.contacts,
 			pinned = EXCLUDED.pinned,
-			user_id = EXCLUDED.user_id
+			user_id = EXCLUDED.user_id,
+			mic_required = EXCLUDED.mic_required,
+			age_range = EXCLUDED.age_range,
+			skill_level = EXCLUDED.skill_level
 	`
 
 	_, err = db.Exec(query,
@@ -95,6 +98,9 @@ func SavePartyToDatabase(p *Party) error {
 		string(contactsJSON),
 		p.Pinned,
 		p.UserID,
+		p.MicRequired,
+		p.AgeRange,
+		p.SkillLevel,
 	)
 
 	if err != nil {
@@ -107,7 +113,7 @@ func SavePartyToDatabase(p *Party) error {
 }
 
 func LoadPartiesFromDatabase() []*Party {
-	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id FROM parties ORDER BY created_at DESC`
+	query := `SELECT id, game, goal, slots, joined, created_at, expires_at, scheduled_at, contacts, pinned, user_id, mic_required, age_range, skill_level FROM parties ORDER BY created_at DESC`
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Printf("Error loading parties from database: %v", err)
@@ -128,6 +134,9 @@ func LoadPartiesFromDatabase() []*Party {
 		var expiresAt sql.NullTime
 		var scheduledAt sql.NullTime
 		var userID sql.NullString
+		var micRequired sql.NullBool
+		var ageRange sql.NullString
+		var skillLevel sql.NullString
 
 		err := rows.Scan(
 			&p.ID,
@@ -141,6 +150,9 @@ func LoadPartiesFromDatabase() []*Party {
 			&contactsJSON,
 			&pinned,
 			&userID,
+			&micRequired,
+			&ageRange,
+			&skillLevel,
 		)
 		if err != nil {
 			log.Printf("Error scanning party: %v", err)
@@ -180,6 +192,16 @@ func LoadPartiesFromDatabase() []*Party {
 		p.Pinned = pinned.Valid && pinned.Bool
 		if userID.Valid {
 			p.UserID = userID.String
+		}
+
+		if micRequired.Valid {
+			p.MicRequired = &micRequired.Bool
+		}
+		if ageRange.Valid {
+			p.AgeRange = &ageRange.String
+		}
+		if skillLevel.Valid {
+			p.SkillLevel = &skillLevel.String
 		}
 
 		// Parse contacts JSON if present

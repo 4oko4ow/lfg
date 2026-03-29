@@ -61,6 +61,9 @@ export function sendCreateParty(payload: {
   expires_at?: string;
   scheduled_at?: string;
   contacts?: ContactMethod[];
+  mic_required?: boolean;
+  age_range?: string;
+  skill_level?: string;
 }) {
   if (!socket) {
     console.error("❌ WebSocket not initialized. Cannot send create_party");

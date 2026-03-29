@@ -26,6 +26,9 @@ export type Party = {
   contacts?: ContactMethod[];
   pinned?: boolean;
   user_id?: string;
+  mic_required?: boolean;
+  age_range?: string;
+  skill_level?: string;
 };
 
 export type UserStats = {
@@ -62,6 +65,9 @@ export type OutgoingMessage =
         expires_at?: string;
         scheduled_at?: string;
         contacts?: ContactMethod[];
+        mic_required?: boolean;
+        age_range?: string;
+        skill_level?: string;
       };
     }
   | {

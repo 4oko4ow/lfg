@@ -33,6 +33,9 @@ export default function CreatePartyForm({
     const [goal, setGoal] = useState("");
     const [slots, setSlots] = useState(5);
     const [scheduleOption, setScheduleOption] = useState<'now' | 'in_2h' | 'tonight' | 'tomorrow'>('now');
+    const [micRequired, setMicRequired] = useState<boolean | undefined>(undefined);
+    const [ageRange, setAgeRange] = useState<string | undefined>(undefined);
+    const [skillLevel, setSkillLevel] = useState<string | undefined>(undefined);
     const { contactHandles, profile } = useAuth();
     const [showLoginModal, setShowLoginModal] = useState(false);
     const noContactsTracked = useRef(false);
@@ -183,8 +186,11 @@ export default function CreatePartyForm({
 
         if (contacts.length === 0) return;
 
-        sendCreateParty({ game, goal, slots, contacts, scheduled_at: getScheduledAt(scheduleOption) });
+        sendCreateParty({ game, goal, slots, contacts, scheduled_at: getScheduledAt(scheduleOption), mic_required: micRequired, age_range: ageRange, skill_level: skillLevel });
         setGoal("");
+        setMicRequired(undefined);
+        setAgeRange(undefined);
+        setSkillLevel(undefined);
         onSuccess?.();
     };
 
@@ -403,6 +409,72 @@ export default function CreatePartyForm({
                             {t(`form.schedule.${opt}`)}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            {/* Labels: mic, age, skill */}
+            <div className="space-y-3">
+                {/* Mic */}
+                <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">МИК</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                        {([{ value: true, label: "🎤 Нужен" }, { value: false, label: "🔇 Не нужен" }] as const).map(({ value, label }) => (
+                            <button
+                                key={String(value)}
+                                type="button"
+                                onClick={() => setMicRequired(micRequired === value ? undefined : value)}
+                                className={`rounded-md px-3 py-1.5 text-xs font-semibold border transition-all ${
+                                    micRequired === value
+                                        ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/25"
+                                        : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Age range */}
+                <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">ВОЗРАСТ</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                        {(["до 16", "16-18", "18-25", "25+"] as const).map((value) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setAgeRange(ageRange === value ? undefined : value)}
+                                className={`rounded-md px-3 py-1.5 text-xs font-semibold border transition-all ${
+                                    ageRange === value
+                                        ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/25"
+                                        : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                }`}
+                            >
+                                {value}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Skill level */}
+                <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">УРОВЕНЬ</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                        {([{ value: "beginner", label: "Новичок" }, { value: "medium", label: "Средний" }, { value: "pro", label: "Про" }] as const).map(({ value, label }) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setSkillLevel(skillLevel === value ? undefined : value)}
+                                className={`rounded-md px-3 py-1.5 text-xs font-semibold border transition-all ${
+                                    skillLevel === value
+                                        ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/25"
+                                        : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
