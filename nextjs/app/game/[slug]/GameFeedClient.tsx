@@ -183,7 +183,7 @@ export function GameFeedClient({ slug, gameName }: Props) {
 
     const fallbackTimeout = setTimeout(() => setLoading(false), 15000);
 
-    onMessage((msg: Message) => {
+    const unsubscribe = onMessage((msg: Message) => {
       switch (msg.type) {
         case "initial_state":
           setParties(msg.payload);
@@ -269,7 +269,10 @@ export function GameFeedClient({ slug, gameName }: Props) {
     });
     analytics.feedPageView(parties.length);
 
-    return () => clearTimeout(fallbackTimeout);
+    return () => {
+      clearTimeout(fallbackTimeout);
+      unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -50,8 +50,12 @@ export function connectWS() {
   };
 }
 
-export function onMessage(cb: (msg: Message) => void) {
+export function onMessage(cb: (msg: Message) => void): () => void {
   listeners.push(cb);
+  return () => {
+    const idx = listeners.indexOf(cb);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
 }
 
 export function sendCreateParty(payload: {

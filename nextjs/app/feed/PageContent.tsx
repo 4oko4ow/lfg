@@ -173,7 +173,7 @@ export function PartyFeedPageContent() {
 
     const fallbackTimeout = setTimeout(() => setLoading(false), 15000);
 
-    onMessage((msg: Message) => {
+    const unsubscribe = onMessage((msg: Message) => {
       switch (msg.type) {
         case "initial_state":
           setParties(msg.payload);
@@ -259,7 +259,10 @@ export function PartyFeedPageContent() {
     });
     analytics.feedPageView(parties.length);
 
-    return () => clearTimeout(fallbackTimeout);
+    return () => {
+      clearTimeout(fallbackTimeout);
+      unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
