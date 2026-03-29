@@ -212,29 +212,32 @@ const renderContacts = (contacts?: ContactMethod[]) => {
               </span>
             )}
 
-            {party.mic_required === true && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-200 bg-gradient-to-r from-green-500/20 to-green-600/20 px-3 py-1.5 rounded-lg border border-green-500/40 backdrop-blur-sm">
-                🎤 Mic
-              </span>
-            )}
-            {party.mic_required === false && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 bg-zinc-800/40 px-3 py-1.5 rounded-lg border border-zinc-700/50 backdrop-blur-sm">
-                🔇 Mic
-              </span>
-            )}
-
-            {party.age_range && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-200 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 px-3 py-1.5 rounded-lg border border-indigo-500/40 backdrop-blur-sm">
-                {party.age_range}
-              </span>
-            )}
-
-            {party.skill_level && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-200 bg-gradient-to-r from-violet-500/20 to-violet-600/20 px-3 py-1.5 rounded-lg border border-violet-500/40 backdrop-blur-sm">
-                {party.skill_level === "beginner" ? "Новичок" : party.skill_level === "medium" ? "Средний" : "Про"}
-              </span>
-            )}
           </div>
+
+          {(party.mic_required !== null && party.mic_required !== undefined || party.age_range || party.skill_level) && (
+            <div className="flex flex-wrap gap-1.5">
+              {party.mic_required === true && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-green-300/80 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/25">
+                  🎤 Mic
+                </span>
+              )}
+              {party.mic_required === false && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 bg-zinc-800/30 px-2 py-0.5 rounded border border-zinc-700/40">
+                  🔇 No mic
+                </span>
+              )}
+              {party.age_range && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300/80 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/25">
+                  {party.age_range}
+                </span>
+              )}
+              {party.skill_level && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-violet-300/80 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/25">
+                  {party.skill_level === "beginner" ? "Новичок" : party.skill_level === "medium" ? "Средний" : "Про"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <span className="text-xs font-medium text-zinc-400 whitespace-nowrap px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex-shrink-0">
