@@ -346,8 +346,9 @@ export default function CreatePartyForm({
 
             {/* Description */}
             <div className="space-y-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                     {t("form.labels.description")}
+                    <span className="text-blue-500 normal-case tracking-normal font-semibold">обяз.</span>
                 </label>
                 <input
                     type="text"
@@ -416,7 +417,7 @@ export default function CreatePartyForm({
             <div className="space-y-3">
                 {/* Mic */}
                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">МИК</p>
+                    <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">МИКРО <span className="normal-case tracking-normal font-semibold text-zinc-600">необяз.</span></p>
                     <div className="flex gap-1.5 flex-wrap">
                         {([{ value: true, label: "🎤 Нужен" }, { value: false, label: "🔇 Не нужен" }] as const).map(({ value, label }) => (
                             <button
@@ -437,7 +438,7 @@ export default function CreatePartyForm({
 
                 {/* Age range */}
                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">ВОЗРАСТ</p>
+                    <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">ВОЗРАСТ <span className="normal-case tracking-normal font-semibold text-zinc-600">необяз.</span></p>
                     <div className="flex gap-1.5 flex-wrap">
                         {(["до 16", "16-18", "18-25", "25+"] as const).map((value) => (
                             <button
@@ -458,7 +459,7 @@ export default function CreatePartyForm({
 
                 {/* Skill level */}
                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">УРОВЕНЬ</p>
+                    <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">УРОВЕНЬ <span className="normal-case tracking-normal font-semibold text-zinc-600">необяз.</span></p>
                     <div className="flex gap-1.5 flex-wrap">
                         {([{ value: "beginner", label: "Новичок" }, { value: "medium", label: "Средний" }, { value: "pro", label: "Про" }] as const).map(({ value, label }) => (
                             <button
@@ -480,10 +481,10 @@ export default function CreatePartyForm({
 
             {/* Contact info */}
             {availableMethods.length > 0 ? (
-                <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 shrink-0">
-                        {t("form.contact_methods")}
-                    </span>
+                <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        Контакты
+                    </p>
                     <div className="flex gap-1.5 flex-wrap">
                         {availableMethods.map((method) => (
                             <span

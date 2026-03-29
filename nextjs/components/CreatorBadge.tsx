@@ -62,6 +62,13 @@ export default function CreatorBadge({ userId }: CreatorBadgeProps) {
       onClick={handleClick}
     >
       <div className="flex items-center gap-1.5 rounded-lg bg-zinc-800/50 px-2 py-1 text-xs cursor-pointer hover:bg-zinc-700/50 transition-colors">
+        {/* Name */}
+        <span className="text-zinc-300 font-medium">
+          {profile.display_name}
+        </span>
+
+        <span className="text-zinc-600">·</span>
+
         {/* Level */}
         <span className={`font-semibold ${levelColor}`}>
           Lv.{profile.level}
