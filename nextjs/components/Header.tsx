@@ -57,7 +57,10 @@ export default function Header() {
           >
             Changelog
             {hasNewChangelog && (
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+              <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+              </span>
             )}
           </Link>
         </div>
